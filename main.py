@@ -14,7 +14,7 @@ if __name__ == "__main__":
     reviews, review_parts = load_csv("datasets/AWARE_Comprehensive.csv")
 
     print(f"Loaded {len(reviews)} reviews from the dataset.")
-    print(f"Loaded {len(review_parts)} review parts from the dataset.")
+    print(f"Loaded {len(review_parts)} sentences from the dataset.")
 
     inputs = tokenize(reviews, "distilbert-base-uncased-finetuned-sst-2-english")
 
@@ -27,8 +27,7 @@ if __name__ == "__main__":
         predictions.append(inference(tokens, "distilbert-base-uncased-finetuned-sst-2-english").item())
         true_labels.append([1 if review.rating >= 4 else 0])
 
-    print(predictions)
-
-    print(accuracy_score(true_labels, predictions))
-    print(classification_report(true_labels, predictions))
+    with open("results/pre_fine_tuned_distilBERT.txt", "w", encoding="utf-8") as f:
+        f.write(f"Accuracy: {accuracy_score(true_labels, predictions)}\n")
+        f.write(f"Classification report: {classification_report(true_labels, predictions)}\n")
 

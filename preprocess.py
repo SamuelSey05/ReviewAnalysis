@@ -1,8 +1,9 @@
 import csv
+from typing import Tuple
 
 from review import Review, Sentence
 
-def load_csv(file_path) -> list[Review]:
+def load_csv(file_path) -> Tuple[list[Review], list[Sentence]]:
     """Load a csv file and return its contents as a list of dictionaries.
     
     Args:

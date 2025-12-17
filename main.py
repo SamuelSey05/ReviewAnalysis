@@ -46,7 +46,7 @@ if __name__ == "__main__":
     for i in tqdm(range(len(inputs["input_ids"])), desc="Running inference"):
         predictions.append(inference({key: inputs[key][i] for key in inputs}, model_name).item())
 
-    with open("results/pre_fine_tuned_distilBERT.txt", "w", encoding="utf-8") as f:
+    with open("results/custom_fine_tuned_distilBERT.txt", "w", encoding="utf-8") as f:
         f.write(f"Accuracy: {accuracy_score(true_labels, predictions)}\n")
         f.write(f"Classification report: {classification_report(true_labels, predictions)}\n")
 

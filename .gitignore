@@ -208,5 +208,6 @@ __marimo__/
 
 datasets/
 training_results/
+models/
 
 .DS_Store

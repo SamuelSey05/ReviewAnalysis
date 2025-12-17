@@ -1,9 +1,8 @@
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification
 from datasets import Dataset
 from transformers import TrainingArguments, Trainer
 
 def fine_tune_model(tokenised_dataset: Dataset, model_name: str):
-    tokeniser = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
 
     train_test_dataset = tokenised_dataset.train_test_split(test_size=0.2)

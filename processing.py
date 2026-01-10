@@ -1,4 +1,4 @@
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoModel, AutoTokenizer, AutoModelForSequenceClassification
 from tqdm import tqdm
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import numpy as np
@@ -25,20 +25,43 @@ def tokenize(reviews: list[Review], model_name: str):
 
     return {"input_ids": input_ids, "attention_mask": attention_masks}
 
+def get_word_embeddings(inputs: dict[str, list[int]], model_name: str, batch_size: int = 64):
+    model = AutoModel.from_pretrained(model_name)
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+    model.to(device)
+    embeddings = []
+
+    print("Generating word embeddings...")
+
+    with torch.no_grad():
+        for i in tqdm(range(0, len(inputs["input_ids"]), batch_size), desc="Generating embeddings"):
+            batch_input_ids = torch.tensor(inputs["input_ids"][i:i+batch_size]).to(device)
+            batch_attention_masks = torch.tensor(inputs["attention_mask"][i:i+batch_size]).to(device)
+            embeddings.append(model(input_ids=batch_input_ids, attention_mask=batch_attention_masks).last_hidden_state.cpu())
+
+    return torch.cat(embeddings, dim=0)
     
-def inference(inputs, model_name: str):
+    
+def inference(embeddings, model_name: str, batch_size: int = 64):
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=3)
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+    model.to(device)
+    model.eval()
+    predictions = []
 
-    # Ensure inputs are in tensor format
-    input_ids = torch.tensor(inputs["input_ids"]).unsqueeze(0)
-    attention_mask = torch.tensor(inputs["attention_mask"]).unsqueeze(0)
+    print("Running inference...")
 
-    outputs = model(input_ids=input_ids, attention_mask=attention_mask)
-    logits = outputs.logits
+    with torch.no_grad():
+        for i in tqdm(range(0, len(embeddings), batch_size), desc="Running inference"):
+            batch_embeddings = embeddings[i:i+batch_size].to(device)
+            # These stpes replicate the process done when classifying with DistilBERT from embedding to prediction
+            x = model.pre_classifier(batch_embeddings[:, 0, :])
+            x = torch.relu(x)
+            x = model.dropout(x)
+            logits = model.classifier(x)
+            predictions.append(torch.argmax(logits, dim=-1))
 
-    predictions = torch.argmax(logits, dim=-1)
-
-    return predictions
+    return torch.cat(predictions, dim=0)
 
 def wordwise_sentiment_analysis(review: Review):
     analyser = SentimentIntensityAnalyzer()

@@ -1,9 +1,8 @@
-from tqdm import tqdm
 from sklearn.metrics import accuracy_score, classification_report
 from datasets import Dataset
 
 from preprocess import load_csv
-from processing import tokenize, inference, wordwise_sentiment_analysis
+from processing import get_word_embeddings, tokenize, inference, wordwise_sentiment_analysis
 from fine_tuning import fine_tune_model
 from arguements import get_args
 
@@ -29,8 +28,8 @@ if __name__ == "__main__":
 
     true_labels = [2 if combined_ratings[i] >= 7.5 else (1 if combined_ratings[i] >= 4 else 0) for i in range(len(combined_ratings))]
 
-    inputs = tokenize(reviews, model_name)
-    print(f"Tokenised {len(inputs)} texts.")
+    inputs = tokenize(reviews, "distilbert-base-uncased")
+    print(f"Tokenised {len(inputs['input_ids'])} texts.")
 
     tokenised_dataset = Dataset.from_dict({"input_ids": inputs["input_ids"], "attention_mask": inputs["attention_mask"], "label": true_labels})
 
@@ -39,7 +38,9 @@ if __name__ == "__main__":
         model = fine_tune_model(tokenised_dataset, model_name)
         model_name = "./models/fine_tuned_model"
 
-    predictions = [inference({key: inputs[key][i] for key in inputs}, model_name).item() for i in tqdm(range(len(inputs["input_ids"])), desc="Running inference")]
+    word_embeddings = get_word_embeddings(inputs, model_name)
+
+    predictions = inference(word_embeddings, model_name).tolist()
 
     with open(f"results/{args.results}.txt", "w", encoding="utf-8") as f:
         f.write(f"Accuracy: {accuracy_score(true_labels, predictions)}\n")

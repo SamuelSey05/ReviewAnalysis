@@ -15,6 +15,12 @@ def get_args():
         help="Name of the results file to save the output."
     )
 
+    argparser.add_argument(
+        "--is_sentiment",
+        action="store_true",
+        help="Whether to perform sentiment analysis or aspect extraction."
+    )
+
     args = argparser.parse_args()
 
     return args

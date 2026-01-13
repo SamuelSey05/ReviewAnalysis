@@ -7,7 +7,7 @@ from review import Review
 
 import torch
 
-def tokenize(reviews: list[Review], model_name: str):
+def tokenize(reviews: list[Review], model_name: str) -> dict[str, list[int]]:
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     input_ids = []
     attention_masks = []
@@ -25,9 +25,8 @@ def tokenize(reviews: list[Review], model_name: str):
 
     return {"input_ids": input_ids, "attention_mask": attention_masks}
 
-def get_word_embeddings(inputs: dict[str, list[int]], model_name: str, batch_size: int = 64):
+def get_word_embeddings(inputs: dict[str, list[int]], model_name: str, device: torch.device, batch_size: int = 32) -> torch.Tensor:
     model = AutoModel.from_pretrained(model_name)
-    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
     model.to(device)
     embeddings = []
 
@@ -42,14 +41,11 @@ def get_word_embeddings(inputs: dict[str, list[int]], model_name: str, batch_siz
     return torch.cat(embeddings, dim=0)
     
     
-def inference(embeddings, model_name: str, batch_size: int = 64):
+def sentiment_inference(embeddings, model_name: str, device: torch.device, batch_size: int = 64):
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=3)
-    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
     model.to(device)
     model.eval()
     predictions = []
-
-    print("Running inference...")
 
     with torch.no_grad():
         for i in tqdm(range(0, len(embeddings), batch_size), desc="Running inference"):

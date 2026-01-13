@@ -1,0 +1,35 @@
+Aspect Accuracy: 0.22317637067094462
+Aspect Classification report:
+               precision    recall  f1-score   support
+
+           0       0.07      0.10      0.08        71
+           1       0.10      0.69      0.18       357
+           2       0.34      0.51      0.41       836
+           3       0.17      0.01      0.02      1186
+           4       0.14      0.05      0.07       918
+           5       0.27      0.60      0.37       909
+           6       0.37      0.02      0.04      2968
+           7       0.04      0.10      0.06       127
+           8       0.12      0.16      0.14       598
+           9       0.04      0.12      0.06        80
+          10       0.19      0.52      0.28       392
+          11       0.38      0.33      0.35      2155
+
+    accuracy                           0.22     10597
+   macro avg       0.19      0.27      0.17     10597
+weighted avg       0.28      0.22      0.18     10597
+
+
+Sentiment Accuracy: 0.8713786920826649
+Sentiment Classification report:
+               precision    recall  f1-score   support
+
+           0       0.80      0.80      0.80      1568
+           1       0.85      0.88      0.86      4835
+           2       0.93      0.89      0.91      4194
+
+    accuracy                           0.87     10597
+   macro avg       0.86      0.86      0.86     10597
+weighted avg       0.87      0.87      0.87     10597
+
+

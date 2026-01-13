@@ -3,7 +3,7 @@ from typing import Tuple
 
 from review import Review, Sentence
 
-def load_csv(file_path) -> Tuple[list[Review], list[Sentence]]:
+def load_csv(file_path) -> Tuple[dict[str, Review], list[Sentence]]:
     """Load a csv file and return its contents as a list of dictionaries.
     
     Args:
@@ -24,4 +24,4 @@ def load_csv(file_path) -> Tuple[list[Review], list[Sentence]]:
             if review.is_opinion:
                 review_parts.append(Sentence.from_review_and_dict(review, row))
 
-    return list(data.values()), review_parts
+    return data, review_parts

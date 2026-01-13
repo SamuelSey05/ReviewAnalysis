@@ -19,7 +19,7 @@ class Review:
             title=data.get("title"),
             review=data.get("review"),
             rating=int(data.get("rating")),
-            is_opinion=bool(data.get("is_opinion"))
+            is_opinion=data.get("is_opinion")=="TRUE"
         )
 
 class Sentence:

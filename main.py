@@ -1,11 +1,12 @@
+import logging
 from typing import Counter
 
 import torch
 from sklearn.metrics import accuracy_score, classification_report
-from tqdm import tqdm
+from transformers import AutoModelForSequenceClassification, PreTrainedModel
 
 from arguements import get_args
-from aspect_based import AspectExtractor
+from aspect_based import AspectSentimentExtractor
 from datasets import Dataset
 from fine_tuning import fine_tune_model
 from preprocess import load_csv
@@ -15,13 +16,116 @@ from processing import (
     tokenize,
     wordwise_sentiment_analysis,
 )
-from trainer import train_aspect_extractor
+from trainer import train_aspect_sentiment_extractor
+
+logger = logging.getLogger(__name__)
 
 DISTILBERT_BASE = "distilbert-base-uncased"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+FINE_TUNED_MODEL_PATH = "./models/fine_tuned_model"
+BATCH_SIZE = 64
+POSITIVE_SENTIMENT_THRESHOLD = 7.5
+NEUTRAL_SENTIMENT_THRESHOLD = 4.0
+NUM_EPOCHS = 20
+DATASET_PATH = "datasets/AWARE_Comprehensive.csv"
+
+def write_to_results_file(
+    filename: str,
+    true_tags: list,
+    predicted_tags: list,
+    label: str,
+    mode: str = "w"
+) -> None:
+    """write accuracy and classification reports for model tags using true tags
+
+    Args:
+        filename (str): name of results file 
+        true_tags (list): list of true tags
+        predicted_tags (list): model predicted tags
+        label (str): label for the results section
+        mode (str, optional): file write mode. Defaults to "w".
+    """
+    with open(filename, mode, encoding="utf-8") as f:
+        f.write(f"{label} Accuracy: {accuracy_score(true_tags, predicted_tags)}\n")
+        f.write(f"{label} Classification report:\n {classification_report(true_tags, predicted_tags)}\n\n")
+
+def prepare_aspect_dataset(
+        sentences: list, 
+        review_ids: list[str], 
+        review_inputs: dict, 
+        true_sentiments: list[int]
+        ) -> tuple[Dataset, list[str], torch.Tensor, dict[str, int]]:
+    # Sort aspects to have consistent indexing
+    aspects = sorted(set([sentence.category for sentence in sentences]))
+    aspect_to_idx = {aspect: idx for idx, aspect in enumerate(aspects)}
+
+    review_id_to_idx = {review_id: idx for idx, review_id in enumerate(review_ids)}
+
+    # Calculate aspect weights to handle class imbalance
+    aspects_counter = Counter([sentence.category for sentence in sentences])
+    total_sentences = len(sentences)
+    aspect_weights = torch.tensor([total_sentences / (len(aspects) * aspects_counter[aspect]) for aspect in aspects], dtype=torch.float).to(DEVICE)
+    
+    # Make dataset on sentence by sentence basis
+    tokenised_sentence_dataset = Dataset.from_dict({
+        "input_ids": [review_inputs["input_ids"][review_id_to_idx[sentence.review.review_id]] for sentence in sentences],
+        "attention_mask": [review_inputs["attention_mask"][review_id_to_idx[sentence.review.review_id]] for sentence in sentences],
+        "aspect": [aspect_to_idx[sentence.category] for sentence in sentences],
+        "sentiment": [true_sentiments[review_id_to_idx[sentence.review.review_id]] for sentence in sentences]
+        })
+    
+    return tokenised_sentence_dataset, aspects, aspect_weights, review_id_to_idx
+
+def map_rating_to_sentiment(rating: float) -> int:
+    """maps from rating to sentiment class
+
+    Args:
+        rating (float): The rating value to be mapped. In range [1, 10].
+
+    Returns:
+        int: The corresponding sentiment class (0: Negative, 1: Neutral, 2: Positive).
+    """
+    if rating >= POSITIVE_SENTIMENT_THRESHOLD:
+        return 2  # Positive
+    elif rating >= NEUTRAL_SENTIMENT_THRESHOLD:
+        return 1  # Neutral
+    else:
+        return 0  # Negative
+    
+def run_sentiment_analysis(model_name: str) -> None:
+    """Run sentiment analysis on the dataset
+
+    Args:
+        model_name (str): Name or path of the pre-trained or fine-tuned model.
+    """
+    # Make dataset on review by review basis
+    tokenised_review_dataset = Dataset.from_dict({"input_ids": list(review_inputs["input_ids"]), "attention_mask": list(review_inputs["attention_mask"]), "sentiment": true_sentiments})
+
+    if args.fine_tune_model:
+        # Fine tune the model
+        logger.info("Fine tuning model")
+        model: PreTrainedModel = fine_tune_model(tokenised_dataset=tokenised_review_dataset, model_name=model_name, device=DEVICE, optimise_hyperparameters=args.optimize_hyperparameters)
+        # Fine-tuned model saved for future use
+        model_name = FINE_TUNED_MODEL_PATH
+    else:
+        # Load existing model
+        logger.info("Loading existing model")
+        model: PreTrainedModel = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=3).to(DEVICE)
+    
+    logger.info("Performing sentiment analysis...")
+    model.eval()
+    predictions = sentiment_inference(word_embeddings, model, DEVICE).tolist()
+
+    write_to_results_file(
+        results_path,
+        true_tags=true_sentiments,
+        predicted_tags=predictions,
+        label="Sentiment (Review-level)"
+    )
 
 if __name__ == "__main__":
     args = get_args()
+    results_path = f"results/{args.results}.txt"
 
     if args.model == "pre_fine_tuned_distilBERT":
         # Use pre-fine-tuned model from Hugging Face
@@ -33,85 +137,80 @@ if __name__ == "__main__":
         # Fine tune the base model
         model_name = DISTILBERT_BASE
 
-    reviews, sentences = load_csv("datasets/AWARE_Comprehensive.csv")
+    # Load dataset
+    reviews, sentences = load_csv(DATASET_PATH)
 
-    print(f"Loaded {len(reviews)} reviews from the dataset.")
-    print(f"Loaded {len(sentences)} sentences from the dataset.")
+    logger.info(f"Loaded {len(reviews)} reviews from the dataset.")
+    logger.info(f"Loaded {len(sentences)} sentences from the dataset.")
 
+    # Prepare true sentiments using combination of ratings and word-wise sentiment analysis
     combined_ratings = [review.rating + wordwise_sentiment_analysis(review) for review in reviews.values()]
 
-    true_sentiments = [2 if combined_ratings[i] >= 7.5 else (1 if combined_ratings[i] >= 4 else 0) for i in range(len(combined_ratings))]
+    # Map combined ratings to sentiment classes: 0 (negative), 1 (neutral), 2 (positive)
+    true_sentiments = [map_rating_to_sentiment(float(rating)) for rating in combined_ratings]
 
     review_ids = list(reviews.keys())
 
+    # Tokenise reviews and get word embeddings
     review_inputs = tokenize(list(reviews.values()), DISTILBERT_BASE)
-    print(f"Tokenised {len(review_inputs['input_ids'])} texts.")
+    logger.info(f"Tokenised {len(review_inputs['input_ids'])} texts.")
 
     word_embeddings = get_word_embeddings(review_inputs, model_name, DEVICE)
 
     if args.is_sentiment:
-        tokenised_review_dataset = Dataset.from_dict({"input_ids": list(review_inputs["input_ids"]), "attention_mask": list(review_inputs["attention_mask"]), "sentiment": true_sentiments})
-
-        if model_name == DISTILBERT_BASE:
-            print("Fine tuning model")
-            model = fine_tune_model(tokenised_review_dataset, DISTILBERT_BASE, optimise_hyperparameters=args.optimize_hyperparameters)
-            model_name = "./models/fine_tuned_model"
-        print("Performing sentiment analysis...")
-        predictions = sentiment_inference(word_embeddings, model_name, DEVICE).tolist()
-
-        with open(f"results/{args.results}.txt", "w", encoding="utf-8") as f:
-            f.write(f"Accuracy: {accuracy_score(true_sentiments, predictions)}\n")
-            f.write(f"Classification report:\n {classification_report(true_sentiments, predictions)}\n")
-    else: 
-        print("Performing aspect extraction...")
-
-        aspects = sorted(set([sentence.category for sentence in sentences]))
-        aspect_to_idx = {aspect: idx for idx, aspect in enumerate(aspects)}
-        review_id_to_idx = {review_id: idx for idx, review_id in enumerate(review_ids)}
-
-        aspects_counter = Counter([sentence.category for sentence in sentences])
-        total_sentences = len(sentences)
-
-        aspect_weights = torch.tensor([total_sentences / (len(aspects) * aspects_counter[aspect]) for aspect in aspects], dtype=torch.float).to(DEVICE)
+        # Performing sentiment analysis only
+        run_sentiment_analysis(model_name)
         
-        tokenised_sentence_dataset = Dataset.from_dict({
-            "input_ids": [review_inputs["input_ids"][review_id_to_idx[sentence.review.review_id]] for sentence in sentences],
-            "attention_mask": [review_inputs["attention_mask"][review_id_to_idx[sentence.review.review_id]] for sentence in sentences],
-            "aspect": [aspect_to_idx[sentence.category] for sentence in sentences],
-            "sentiment": [true_sentiments[review_id_to_idx[sentence.review.review_id]] for sentence in sentences]
-            })
+    else: 
+        if not sentences:
+            logger.error("No sentences found in dataset for aspect-based analysis.")
+            exit(1)
+
+        # Performing aspect extraction and sentiment analysis at sentence level
+        logger.info("Performing aspect extraction...")
+
+        tokenised_sentence_dataset, aspects, aspect_weights, review_id_to_idx = prepare_aspect_dataset(sentences=sentences, review_ids=review_ids, review_inputs=review_inputs, true_sentiments=true_sentiments)
         
         # Index of the sentence's review embedding in the word embeddings
         sentence_indices = [review_id_to_idx[sentence.review.review_id] for sentence in sentences]
 
-        aspect_extractor = AspectExtractor(model_name, num_aspects=len(aspects)).to(DEVICE)
+        aspect_sentiment_extractor = AspectSentimentExtractor(num_aspects=len(aspects)).to(DEVICE)
 
-        train_aspect_extractor(
-            model=aspect_extractor,
+        logger.info("Training aspect sentiment extractor...")
+        # Train output heads for aspect and sentiment classification
+        train_aspect_sentiment_extractor(
+            model=aspect_sentiment_extractor,
             dataset=tokenised_sentence_dataset,
             embeddings=word_embeddings,
             sentence_indices=sentence_indices,
-            optimiser=torch.optim.AdamW(aspect_extractor.parameters(), lr=5e-5),
             aspect_criterion=torch.nn.CrossEntropyLoss(weight=aspect_weights),
             sentiment_criterion=torch.nn.CrossEntropyLoss(),
             device=DEVICE,
-            num_epochs=20,
+            num_epochs=NUM_EPOCHS,
         )
 
-        aspect_extractor.eval()
-        aspect_predictions = []
-        sentiment_predictions = []
-        with torch.no_grad():
-            for i in tqdm(range(0, len(sentence_indices), 64), desc="Running inference"):
-                batch_indices = torch.tensor(sentence_indices[i:i+64], dtype=torch.long)
-                batch_embeddings = word_embeddings[batch_indices].to(DEVICE)
-                batch_attention_mask = torch.tensor(tokenised_sentence_dataset["attention_mask"][i:i+64]).to(DEVICE)
-                aspect_logits, sentiment_logits = aspect_extractor.forward(batch_embeddings, batch_attention_mask)
-                aspect_predictions.extend(torch.argmax(aspect_logits, dim=-1).cpu().tolist())
-                sentiment_predictions.extend(torch.argmax(sentiment_logits, dim=-1).cpu().tolist())
+        logger.info("Running aspect and sentiment inference...")
+        # Carry out inference with trained model
+        aspect_predictions, sentiment_predictions = aspect_sentiment_extractor.aspect_sentiment_inference(
+            embeddings=word_embeddings,
+            sentence_indices=sentence_indices,
+            attention_masks=tokenised_sentence_dataset["attention_mask"],
+            device=DEVICE,
+            batch_size=BATCH_SIZE
+        )
 
-        with open(f"results/{args.results}.txt", "w", encoding="utf-8") as f:
-            f.write(f"Aspect Accuracy: {accuracy_score(tokenised_sentence_dataset['aspect'], aspect_predictions)}\n")
-            f.write(f"Aspect Classification report:\n {classification_report(tokenised_sentence_dataset['aspect'], aspect_predictions)}\n\n")
-            f.write(f"Sentiment Accuracy: {accuracy_score(tokenised_sentence_dataset['sentiment'], sentiment_predictions)}\n")
-            f.write(f"Sentiment Classification report:\n {classification_report(tokenised_sentence_dataset['sentiment'], sentiment_predictions)}\n\n")
+        # Write results with accuracy and classification reports to file
+        write_to_results_file(
+            results_path,
+            true_tags=tokenised_sentence_dataset['aspect'],
+            predicted_tags=aspect_predictions,
+            label="Aspect (Sentence-level)",
+            mode="w"
+        )
+        write_to_results_file(
+            results_path,
+            true_tags=tokenised_sentence_dataset['sentiment'],
+            predicted_tags=sentiment_predictions,
+            label="Sentiment (Sentence-level)",
+            mode="a"
+        )

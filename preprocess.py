@@ -22,6 +22,7 @@ def load_csv(file_path) -> Tuple[dict[str, Review], list[Sentence]]:
             if review.review_id not in data:
                 data[review.review_id] = review
             if review.is_opinion:
+                # Sentences are only stored for reviews that contain opinions
                 review_parts.append(Sentence.from_review_and_dict(review, row))
 
     return data, review_parts

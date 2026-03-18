@@ -31,7 +31,7 @@ def scrape_release_notes(url):
 
         print(f"Found {len(releases)} release notes.")
 
-        with open("slack_release_notes.csv", mode="w", newline="", encoding="utf-8") as file:
+        with open("datasets/slack_release_notes.csv", mode="w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=["version", "date", "content"])
             writer.writeheader()
 

@@ -18,4 +18,4 @@ if __name__ == "__main__":
     app_id = 'com.Slack'
     df = get_reviews(app_id, num_reviews=1000)
     columns_to_save = ["reviewId", "content", "score", "at", "replyContent", "repliedAt"]
-    df.to_csv('slack_reviews.csv', columns=columns_to_save, index=False)
+    df.to_csv('datasets/slack_reviews.csv', columns=columns_to_save, index=False)

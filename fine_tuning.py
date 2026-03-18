@@ -5,8 +5,9 @@ from sklearn.metrics import accuracy_score
 import torch
 from transformers import AutoModelForSequenceClassification, PreTrainedModel, Trainer, TrainingArguments
 
-from datasets import Dataset, DatasetDict
-from main import FINE_TUNED_MODEL_PATH
+from datasets import Dataset
+
+from config import FINE_TUNED_MODEL_PATH
 
 logger = logging.getLogger(__name__)
 

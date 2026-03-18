@@ -1,7 +1,10 @@
 import csv
+import logging
 from typing import Tuple
 
 from review import Review, Sentence
+
+logger = logging.getLogger(__name__)
 
 def load_csv(file_path) -> Tuple[dict[str, Review], list[Sentence]]:
     """Load a csv file and return its contents as a list of dictionaries.
@@ -12,6 +15,7 @@ def load_csv(file_path) -> Tuple[dict[str, Review], list[Sentence]]:
     Returns:
         list[dict]: List of dictionaries for each row in the csv file."""
     
+    logger.info(f"Loading dataset from {file_path}...")
 
     with open(file_path, mode='r', encoding='utf-8') as file:
         csv_reader = csv.DictReader(file)

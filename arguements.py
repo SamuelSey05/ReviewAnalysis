@@ -38,6 +38,12 @@ def get_args() -> argparse.Namespace:
         help="Whether to optimize hyperparameters during fine-tuning."
     )
 
+    argparser.add_argument(
+        "--no_training",
+        action="store_true",
+        help="Whether to skip the training phase and directly run inference with the specified model."
+    )
+
     args = argparser.parse_args()
 
     return args

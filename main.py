@@ -7,6 +7,7 @@ from transformers import AutoModelForSequenceClassification, PreTrainedModel
 
 from arguements import get_args
 from aspect_based import AspectSentimentExtractor
+from config import DEVICE, DISTILBERT_BASE, FINE_TUNED_MODEL_PATH, NUM_EPOCHS, DATASET_PATH, BATCH_SIZE, POSITIVE_SENTIMENT_THRESHOLD, NEUTRAL_SENTIMENT_THRESHOLD
 from datasets import Dataset
 from fine_tuning import fine_tune_model
 from preprocess import load_csv
@@ -19,15 +20,6 @@ from processing import (
 from trainer import train_aspect_sentiment_extractor
 
 logger = logging.getLogger(__name__)
-
-DISTILBERT_BASE = "distilbert-base-uncased"
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-FINE_TUNED_MODEL_PATH = "./models/fine_tuned_model"
-BATCH_SIZE = 64
-POSITIVE_SENTIMENT_THRESHOLD = 7.5
-NEUTRAL_SENTIMENT_THRESHOLD = 4.0
-NUM_EPOCHS = 20
-DATASET_PATH = "datasets/AWARE_Comprehensive.csv"
 
 def write_to_results_file(
     filename: str,
@@ -92,38 +84,38 @@ def map_rating_to_sentiment(rating: float) -> int:
     else:
         return 0  # Negative
     
-def run_sentiment_analysis(model_name: str) -> None:
-    """Run sentiment analysis on the dataset
+# def run_sentiment_analysis(model_name: str, review_inputs: dict[str, list[int]], true_sentiments: list[int], word_embeddings, results_path, fine_tune_model_flag: bool, optimize_hyperparameter_flag: bool) -> None:
+#     """Run sentiment analysis on the dataset
 
-    Args:
-        model_name (str): Name or path of the pre-trained or fine-tuned model.
-    """
-    # Make dataset on review by review basis
-    tokenised_review_dataset = Dataset.from_dict({"input_ids": list(review_inputs["input_ids"]), "attention_mask": list(review_inputs["attention_mask"]), "sentiment": true_sentiments})
+#     Args:
+#         model_name (str): Name or path of the pre-trained or fine-tuned model.
+#     """
+#     # Make dataset on review by review basis
+#     tokenised_review_dataset = Dataset.from_dict({"input_ids": list(review_inputs["input_ids"]), "attention_mask": list(review_inputs["attention_mask"]), "sentiment": true_sentiments})
 
-    if args.fine_tune_model:
-        # Fine tune the model
-        logger.info("Fine tuning model")
-        model: PreTrainedModel = fine_tune_model(tokenised_dataset=tokenised_review_dataset, model_name=model_name, device=DEVICE, optimise_hyperparameters=args.optimize_hyperparameters)
-        # Fine-tuned model saved for future use
-        model_name = FINE_TUNED_MODEL_PATH
-    else:
-        # Load existing model
-        logger.info("Loading existing model")
-        model: PreTrainedModel = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=3).to(DEVICE)
+#     if fine_tune_model_flag:
+#         # Fine tune the model
+#         logger.info("Fine tuning model")
+#         model: PreTrainedModel = fine_tune_model(tokenised_dataset=tokenised_review_dataset, model_name=model_name, device=DEVICE, optimise_hyperparameters=optimize_hyperparameter_flag)
+#         # Fine-tuned model saved for future use
+#         model_name = FINE_TUNED_MODEL_PATH
+#     else:
+#         # Load existing model
+#         logger.info("Loading existing model")
+#         model: PreTrainedModel = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=3).to(DEVICE)
     
-    logger.info("Performing sentiment analysis...")
-    model.eval()
-    predictions = sentiment_inference(word_embeddings, model, DEVICE).tolist()
+#     logger.info("Performing sentiment analysis...")
+#     model.eval()
+#     predictions = sentiment_inference(word_embeddings, model, DEVICE).tolist()
 
-    write_to_results_file(
-        results_path,
-        true_tags=true_sentiments,
-        predicted_tags=predictions,
-        label="Sentiment (Review-level)"
-    )
+#     write_to_results_file(
+#         results_path,
+#         true_tags=true_sentiments,
+#         predicted_tags=predictions,
+#         label="Sentiment (Review-level)"
+#     )
 
-if __name__ == "__main__":
+def main() -> None:
     args = get_args()
     results_path = f"results/{args.results}.txt"
 
@@ -155,12 +147,10 @@ if __name__ == "__main__":
     review_inputs = tokenize(list(reviews.values()), DISTILBERT_BASE)
     logger.info(f"Tokenised {len(review_inputs['input_ids'])} texts.")
 
-    word_embeddings = get_word_embeddings(review_inputs, model_name, DEVICE)
-
     if args.is_sentiment:
         # Performing sentiment analysis only
-        run_sentiment_analysis(model_name)
-        
+        # run_sentiment_analysis(model_name)
+        pass
     else: 
         if not sentences:
             logger.error("No sentences found in dataset for aspect-based analysis.")
@@ -174,26 +164,29 @@ if __name__ == "__main__":
         # Index of the sentence's review embedding in the word embeddings
         sentence_indices = [review_id_to_idx[sentence.review.review_id] for sentence in sentences]
 
-        aspect_sentiment_extractor = AspectSentimentExtractor(num_aspects=len(aspects)).to(DEVICE)
+        aspect_sentiment_extractor = AspectSentimentExtractor(model_name, num_aspects=len(aspects)).to(DEVICE)
 
-        logger.info("Training aspect sentiment extractor...")
-        # Train output heads for aspect and sentiment classification
-        train_aspect_sentiment_extractor(
-            model=aspect_sentiment_extractor,
-            dataset=tokenised_sentence_dataset,
-            embeddings=word_embeddings,
-            sentence_indices=sentence_indices,
-            aspect_criterion=torch.nn.CrossEntropyLoss(weight=aspect_weights),
-            sentiment_criterion=torch.nn.CrossEntropyLoss(),
-            device=DEVICE,
-            num_epochs=NUM_EPOCHS,
-        )
+        if not args.no_training: 
+            logger.info("Training aspect sentiment extractor...")
+            # Train output heads for aspect and sentiment classification
+            train_aspect_sentiment_extractor(
+                model=aspect_sentiment_extractor,
+                dataset=tokenised_sentence_dataset,
+                aspect_criterion=torch.nn.CrossEntropyLoss(weight=aspect_weights),
+                sentiment_criterion=torch.nn.CrossEntropyLoss(),
+                device=DEVICE,
+                num_epochs=NUM_EPOCHS,
+            )
+            logger.info("Saving aspect sentiment extractor model...")
+            torch.save(aspect_sentiment_extractor.state_dict(), "./models/aspect_sentiment_extractor_4_layers.pth")
+        elif args.model == "aspect_sentiment_extractor":
+            logger.info("Loading aspect sentiment extractor model...")
+            aspect_sentiment_extractor.load_state_dict(torch.load("./models/aspect_sentiment_extractor.pth", map_location=DEVICE))
 
         logger.info("Running aspect and sentiment inference...")
         # Carry out inference with trained model
         aspect_predictions, sentiment_predictions = aspect_sentiment_extractor.aspect_sentiment_inference(
-            embeddings=word_embeddings,
-            sentence_indices=sentence_indices,
+            input_ids=tokenised_sentence_dataset["input_ids"],
             attention_masks=tokenised_sentence_dataset["attention_mask"],
             device=DEVICE,
             batch_size=BATCH_SIZE
@@ -214,3 +207,6 @@ if __name__ == "__main__":
             label="Sentiment (Sentence-level)",
             mode="a"
         )
+
+if __name__ == "__main__":
+    main()

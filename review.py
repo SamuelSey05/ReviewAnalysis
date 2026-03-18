@@ -76,8 +76,8 @@ class Sentence:
             sentence_id=data.get("sentence_id"),
             category=data.get("category"),
             term=data.get("term"),
-            from_word=int(data.get("from")),
-            to_word=int(data.get("to")),
+            from_word=int(data.get("from")) if data.get("from").isdigit() else None,
+            to_word=int(data.get("to")) if data.get("to").isdigit() else None,
             sentiment=data.get("sentiment")
         )
 

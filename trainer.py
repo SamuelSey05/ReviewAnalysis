@@ -8,8 +8,6 @@ from datasets import Dataset
 def train_aspect_sentiment_extractor(
         model: AspectSentimentExtractor, 
         dataset: Dataset, 
-        embeddings: torch.Tensor, 
-        sentence_indices: list[int], 
         aspect_criterion: torch.nn.Module, 
         sentiment_criterion: torch.nn.Module, 
         device: torch.device, 
@@ -34,34 +32,32 @@ def train_aspect_sentiment_extractor(
     model.train()
     
     tensor_dataset = torch.utils.data.TensorDataset(
-        torch.tensor(sentence_indices, dtype=torch.long),
+        torch.tensor(dataset["input_ids"]),
         torch.tensor(dataset["attention_mask"]),
         torch.tensor(dataset["aspect"]),
         torch.tensor(dataset["sentiment"])
     )
 
     # Use DataLoader for batching and shuffling
-    data_loader = torch.utils.data.DataLoader(tensor_dataset, batch_size=32, shuffle=True)
+    data_loader = torch.utils.data.DataLoader(tensor_dataset, batch_size=32, shuffle=True, num_workers=4, pin_memory=True)
 
     total_loss = 0.0
     for _ in tqdm(range(num_epochs), desc="Training Aspect Sentiment Extractor"):
         total_loss = 0.0
         for batch in tqdm(data_loader, desc="Batches", leave=False):
-            indices, attention_mask, aspects, sentiments = batch
-            # Look up embeddings and attention_masks on-the-fly
-            batch_embeddings = embeddings[indices].to(device)
+            input_ids, attention_mask, aspects, sentiments = batch
+            input_ids = input_ids.to(device)
             attention_mask = attention_mask.to(device)
-            # Move labels to device =
             aspects, sentiments = aspects.to(device), sentiments.to(device)
 
             # Reset gradients
             optimiser.zero_grad()
-            aspect_logits, sentiment_logits = model.forward(batch_embeddings, attention_mask)
+            aspect_logits, sentiment_logits = model.forward(input_ids, attention_mask)
 
             # Apply loss functions and backpropagate
             aspect_loss = aspect_criterion(aspect_logits, aspects)
             sentiment_loss = sentiment_criterion(sentiment_logits, sentiments)
-            loss = aspect_loss + sentiment_loss
+            loss = (aspect_loss * 0.8) + (sentiment_loss * 0.2)  # Weighted sum of aspect and sentiment losses
 
             loss.backward()
             optimiser.step()

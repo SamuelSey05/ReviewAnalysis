@@ -1,0 +1,35 @@
+Aspect (Sentence-level) Accuracy: 0.32386524488062657
+Aspect (Sentence-level) Classification report:
+               precision    recall  f1-score   support
+
+           0       0.08      1.00      0.16        71
+           1       0.32      1.00      0.48       357
+           2       0.47      0.64      0.54       836
+           3       0.38      0.03      0.06      1186
+           4       0.22      0.29      0.25       918
+           5       0.33      0.31      0.32       909
+           6       0.57      0.01      0.03      2968
+           7       0.12      0.81      0.22       127
+           8       0.27      0.43      0.33       598
+           9       0.15      0.94      0.26        80
+          10       0.43      0.76      0.54       392
+          11       0.48      0.52      0.50      2155
+
+    accuracy                           0.32     10597
+   macro avg       0.32      0.56      0.31     10597
+weighted avg       0.43      0.32      0.27     10597
+
+
+Sentiment (Sentence-level) Accuracy: 0.9997169010097198
+Sentiment (Sentence-level) Classification report:
+               precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00      1568
+           1       1.00      1.00      1.00      4835
+           2       1.00      1.00      1.00      4194
+
+    accuracy                           1.00     10597
+   macro avg       1.00      1.00      1.00     10597
+weighted avg       1.00      1.00      1.00     10597
+
+

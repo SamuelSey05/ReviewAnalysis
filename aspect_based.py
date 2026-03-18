@@ -11,7 +11,7 @@ class AspectSentimentExtractor(torch.nn.Module):
             num_aspects (int): Number of aspects to classify.
             num_sentiments (int, optional): Number of sentiment classes. Defaults to 3.
         """
-        super(AspectSentimentExtractor, self).__init__()
+        super().__init__()
 
         self.encoder = AutoModel.from_pretrained(model_name)
 

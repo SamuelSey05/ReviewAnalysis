@@ -13,7 +13,10 @@ def load_csv(file_path) -> Tuple[dict[str, Review], list[Sentence]]:
         file_path (str): Path to the csv file.
         
     Returns:
-        list[dict]: List of dictionaries for each row in the csv file."""
+        Tuple[dict[str, Review], list[Sentence]]: A tuple containing:
+            - A dictionary mapping review IDs to Review objects.
+            - A list of Sentence objects for rows marked as opinions.
+    """
     
     logger.info(f"Loading dataset from {file_path}...")
 

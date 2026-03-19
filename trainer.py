@@ -1,12 +1,11 @@
 import torch
 from tqdm import tqdm
 
-from aspect_based import AspectSentimentExtractor
 from datasets import Dataset
 
 
 def train_aspect_sentiment_extractor(
-        model: AspectSentimentExtractor, 
+    model: torch.nn.Module,
         dataset: Dataset, 
         aspect_criterion: torch.nn.Module, 
         sentiment_criterion: torch.nn.Module, 
@@ -16,7 +15,7 @@ def train_aspect_sentiment_extractor(
     """Train the AspectSentimentExtractor model on the given dataset and embeddings
 
     Args:
-        model (AspectSentimentExtractor): Model to train
+        model (torch.nn.Module): Model to train
         dataset (Dataset): Dataset to train the model on
         embeddings (torch.Tensor): Embeddings to use for training
         sentence_indices (list[int]): List of indices mapping each sentence to its review embedding in the embeddings tensor

@@ -3,17 +3,13 @@ from typing import Counter
 
 import torch
 from sklearn.metrics import accuracy_score, classification_report
-from transformers import AutoModelForSequenceClassification, PreTrainedModel
 
 from arguements import get_args
 from aspect_based import AspectSentimentExtractor
-from config import DEVICE, DISTILBERT_BASE, FINE_TUNED_MODEL_PATH, NUM_EPOCHS, DATASET_PATH, BATCH_SIZE, POSITIVE_SENTIMENT_THRESHOLD, NEUTRAL_SENTIMENT_THRESHOLD
+from config import DEVICE, DISTILBERT_BASE, NUM_EPOCHS, DATASET_PATH, BATCH_SIZE, POSITIVE_SENTIMENT_THRESHOLD, NEUTRAL_SENTIMENT_THRESHOLD
 from datasets import Dataset
-from fine_tuning import fine_tune_model
 from preprocess import load_csv
 from processing import (
-    get_word_embeddings,
-    sentiment_inference,
     tokenize,
     wordwise_sentiment_analysis,
 )
@@ -83,37 +79,6 @@ def map_rating_to_sentiment(rating: float) -> int:
         return 1  # Neutral
     else:
         return 0  # Negative
-    
-# def run_sentiment_analysis(model_name: str, review_inputs: dict[str, list[int]], true_sentiments: list[int], word_embeddings, results_path, fine_tune_model_flag: bool, optimize_hyperparameter_flag: bool) -> None:
-#     """Run sentiment analysis on the dataset
-
-#     Args:
-#         model_name (str): Name or path of the pre-trained or fine-tuned model.
-#     """
-#     # Make dataset on review by review basis
-#     tokenised_review_dataset = Dataset.from_dict({"input_ids": list(review_inputs["input_ids"]), "attention_mask": list(review_inputs["attention_mask"]), "sentiment": true_sentiments})
-
-#     if fine_tune_model_flag:
-#         # Fine tune the model
-#         logger.info("Fine tuning model")
-#         model: PreTrainedModel = fine_tune_model(tokenised_dataset=tokenised_review_dataset, model_name=model_name, device=DEVICE, optimise_hyperparameters=optimize_hyperparameter_flag)
-#         # Fine-tuned model saved for future use
-#         model_name = FINE_TUNED_MODEL_PATH
-#     else:
-#         # Load existing model
-#         logger.info("Loading existing model")
-#         model: PreTrainedModel = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=3).to(DEVICE)
-    
-#     logger.info("Performing sentiment analysis...")
-#     model.eval()
-#     predictions = sentiment_inference(word_embeddings, model, DEVICE).tolist()
-
-#     write_to_results_file(
-#         results_path,
-#         true_tags=true_sentiments,
-#         predicted_tags=predictions,
-#         label="Sentiment (Review-level)"
-#     )
 
 def main() -> None:
     args = get_args()

@@ -1,6 +1,7 @@
 import torch
 from datasets import Dataset
 
+from config import DEVICE
 from tests.helpers import use_deterministic_dataloader, weighted_dataset_loss
 from trainer import train_aspect_sentiment_extractor
 
@@ -57,7 +58,6 @@ def test_train_aspect_sentiment_extractor_updates_weights_and_improves_loss(monk
         dataset=dataset,
         aspect_criterion=aspect_loss,
         sentiment_criterion=sentiment_loss,
-        device=torch.device("cpu"),
         num_epochs=10,
     )  
 

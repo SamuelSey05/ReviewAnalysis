@@ -7,17 +7,16 @@ from transformers import AutoModelForSequenceClassification, PreTrainedModel, Tr
 
 from datasets import Dataset
 
-from config import FINE_TUNED_MODEL_PATH
+from config import DEVICE, FINE_TUNED_MODEL_PATH
 
 logger = logging.getLogger(__name__)
 
-def fine_tune_model(tokenised_dataset: Dataset, model_name: str, device: torch.device, optimise_hyperparameters: bool = False) -> PreTrainedModel:
+def fine_tune_model(tokenised_dataset: Dataset, model_name: str, optimise_hyperparameters: bool = False) -> PreTrainedModel:
     """Fine-tune a pre-trained model on a tokenized dataset.
 
     Args:
         tokenised_dataset (Dataset): The tokenized dataset for training and evaluation.
         model_name (str): The name or path of the pre-trained model.
-        device (torch.device): The device to run the model on.
         optimise_hyperparameters (bool, optional): Whether to perform hyperparameter optimization. Defaults to False.
 
     Returns:
@@ -35,7 +34,7 @@ def fine_tune_model(tokenised_dataset: Dataset, model_name: str, device: torch.d
             num_train_epochs = trial.suggest_int("num_train_epochs", 2, 5)
             weight_decay = trial.suggest_float("weight_decay", 0.0, 0.3)
 
-            model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=3).to(device)
+            model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=3).to(DEVICE)
 
             training_args = TrainingArguments(
                 output_dir="./training_results",
@@ -78,7 +77,7 @@ def fine_tune_model(tokenised_dataset: Dataset, model_name: str, device: torch.d
             "weight_decay": 0.295,
         }
 
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=3).to(device)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=3).to(DEVICE)
 
     training_args = TrainingArguments(
         output_dir="./training_results",

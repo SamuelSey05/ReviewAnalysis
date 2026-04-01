@@ -62,7 +62,6 @@ def test_full_integration(monkeypatch, tmp_path):
         aspect_criterion=aspect_criterion,
         sentiment_criterion=sentiment_criterion,
         num_epochs=10,
-        device=DEVICE,
     )
 
     after_aspect_weights = model.state_dict()["aspect_head.0.weight"].detach().clone()

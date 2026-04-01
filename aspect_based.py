@@ -2,6 +2,8 @@ import torch
 from tqdm import tqdm
 from transformers import AutoModel
 
+from config import DEVICE
+
 
 class AspectSentimentExtractor(torch.nn.Module):
     def __init__(self, model_name:str,  num_aspects: int, num_sentiments: int = 3) -> None: 
@@ -66,13 +68,12 @@ class AspectSentimentExtractor(torch.nn.Module):
         return aspect_logits, sentiment_logits
 
 
-    def aspect_sentiment_inference(self, input_ids: torch.Tensor, attention_masks: torch.Tensor, device: torch.device, batch_size: int = 64) -> tuple[list, list]:
+    def aspect_sentiment_inference(self, input_ids: torch.Tensor, attention_masks: torch.Tensor, batch_size: int = 64) -> tuple[list, list]:
         """Inference method for aspect and sentiment extraction.
 
         Args:
             input_ids (torch.Tensor): Token IDs tensor of shape (batch_size, seq_length).
             attention_masks (torch.Tensor): Attention mask tensor of shape (batch_size, seq_length).
-            device (torch.device): Device to run the inference on.
             batch_size (int, optional): Batch size for inference. Defaults to 64.
 
         Returns:
@@ -85,10 +86,10 @@ class AspectSentimentExtractor(torch.nn.Module):
         with torch.no_grad():
             # Run inference with attention masking in batches
             for i in tqdm(range(0, len(input_ids), batch_size), desc="Running inference"):
-                batch_input_ids = input_ids[i:i+batch_size].to(device)
+                batch_input_ids = input_ids[i:i+batch_size].to(DEVICE)
 
                 # Using an attention mask to ignore padding tokens
-                batch_attention_mask = attention_masks[i:i+batch_size].to(device)
+                batch_attention_mask = attention_masks[i:i+batch_size].to(DEVICE)
 
                 # Use forward to get logits
                 aspect_logits, sentiment_logits = self.forward(batch_input_ids, batch_attention_mask)

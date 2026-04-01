@@ -16,10 +16,11 @@ def use_deterministic_dataloader(monkeypatch) -> None:
 
 def weighted_dataset_loss(model, dataset, aspect_criterion, sentiment_criterion):
     device = next(model.parameters()).device
-    input_ids = dataset["input_ids"][:].to(device)
-    attention_mask = dataset["attention_mask"][:].to(device)
-    aspects = dataset["aspect"][:].to(device)
-    sentiments = dataset["sentiment"][:].to(device)
+    batch = dataset.with_format("torch")[:]
+    input_ids = batch["input_ids"].to(device=device, dtype=torch.long)
+    attention_mask = batch["attention_mask"].to(device=device, dtype=torch.long)
+    aspects = batch["aspect"].to(device=device, dtype=torch.long)
+    sentiments = batch["sentiment"].to(device=device, dtype=torch.long)
 
     model.eval()
     with torch.no_grad():

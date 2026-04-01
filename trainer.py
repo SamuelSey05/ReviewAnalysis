@@ -9,7 +9,6 @@ def train_aspect_sentiment_extractor(
     dataset: Dataset, 
     aspect_criterion: torch.nn.Module, 
     sentiment_criterion: torch.nn.Module, 
-    device: torch.device, 
     num_epochs: int = 3
     ) -> None:
     """Train the AspectSentimentExtractor model on the given dataset and embeddings
@@ -21,7 +20,6 @@ def train_aspect_sentiment_extractor(
         sentence_indices (list[int]): List of indices mapping each sentence to its review embedding in the embeddings tensor
         aspect_criterion (torch.nn.Module): Loss function to use for aspect classification
         sentiment_criterion (torch.nn.Module): Loss function to use for sentiment classification
-        device (torch.device): Device to carry out torch computations on
         num_epochs (int, optional): Number of epochs to train for. Defaults to 3.
     """
 
@@ -29,6 +27,9 @@ def train_aspect_sentiment_extractor(
     
     # Set model to training mode
     model.train()
+
+    # Device in unit tests is CPU but is GPU in main training loop
+    device = next(model.parameters()).device
 
     # Use DataLoader for batching and shuffling
     data_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4, pin_memory=True)

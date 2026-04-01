@@ -53,7 +53,6 @@ def main() -> None:
     aspect_predictions, sentiment_predictions = model.aspect_sentiment_inference(
         input_ids=inputs["input_ids"],
         attention_masks=inputs["attention_mask"],
-        device=DEVICE,
         batch_size=1,
     )
 

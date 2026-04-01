@@ -23,7 +23,7 @@ class AspectSentimentExtractor(torch.nn.Module):
             param.requires_grad = False
 
         # Unfreeze the last 2 layers of encoder parmaeters to be fine tuned
-        for layer in self.encoder.transformer.layer[-4:]:
+        for layer in self.encoder.transformer.layer[-2:]:
             for param in layer.parameters():
                 param.requires_grad = True
 
@@ -66,13 +66,12 @@ class AspectSentimentExtractor(torch.nn.Module):
         return aspect_logits, sentiment_logits
 
 
-    def aspect_sentiment_inference(self, input_ids: list, attention_masks: list, device: torch.device, batch_size: int = 64) -> tuple[list, list]:
+    def aspect_sentiment_inference(self, input_ids: torch.Tensor, attention_masks: torch.Tensor, device: torch.device, batch_size: int = 64) -> tuple[list, list]:
         """Inference method for aspect and sentiment extraction.
 
         Args:
-            embeddings (torch.Tensor): embeddings tensor of shape (batch_size, seq_length, hidden_size).
-            attention_mask (torch.Tensor): attention mask tensor of shape (batch_size, seq_length).
-            sentence_indices (list[int]): List of indices mapping sentences to their corresponding review embeddings.
+            input_ids (torch.Tensor): Token IDs tensor of shape (batch_size, seq_length).
+            attention_masks (torch.Tensor): Attention mask tensor of shape (batch_size, seq_length).
             device (torch.device): Device to run the inference on.
             batch_size (int, optional): Batch size for inference. Defaults to 64.
 
@@ -84,16 +83,12 @@ class AspectSentimentExtractor(torch.nn.Module):
 
         self.eval()
         with torch.no_grad():
-            # Convert to tensors if needed
-            input_ids_tensor = torch.tensor(input_ids) 
-            attention_masks_tensor = torch.tensor(attention_masks) 
-            
             # Run inference with attention masking in batches
             for i in tqdm(range(0, len(input_ids), batch_size), desc="Running inference"):
-                batch_input_ids = input_ids_tensor[i:i+batch_size].to(device)
+                batch_input_ids = input_ids[i:i+batch_size].to(device)
 
                 # Using an attention mask to ignore padding tokens
-                batch_attention_mask = attention_masks_tensor[i:i+batch_size].to(device)
+                batch_attention_mask = attention_masks[i:i+batch_size].to(device)
 
                 # Use forward to get logits
                 aspect_logits, sentiment_logits = self.forward(batch_input_ids, batch_attention_mask)

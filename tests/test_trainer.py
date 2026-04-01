@@ -27,25 +27,25 @@ def test_train_aspect_sentiment_extractor_updates_weights_and_improves_loss(monk
 
     model = DummyExtractor()
     dataset = Dataset.from_dict({
-        "input_ids": [
+        "input_ids": torch.tensor([
             [1, 1, 1],
             [1, 1, 0],
             [2, 2, 2],
             [2, 2, 0],
             [3, 3, 3],
             [3, 3, 0],
-        ],
-        "attention_mask": [
+        ], dtype=torch.long),
+        "attention_mask": torch.tensor([
             [1, 1, 1],
             [1, 1, 0],
             [1, 1, 1],
             [1, 1, 0],
             [1, 1, 1],
             [1, 1, 0],
-        ],
-        "aspect": [0, 0, 1, 1, 2, 2],
-        "sentiment": [0, 0, 1, 1, 2, 2],
-    })
+        ], dtype=torch.long),
+        "aspect": torch.tensor([0, 0, 1, 1, 2, 2], dtype=torch.long),
+        "sentiment": torch.tensor([0, 0, 1, 1, 2, 2], dtype=torch.long),
+    }).with_format("torch")
     aspect_loss = torch.nn.CrossEntropyLoss()
     sentiment_loss = torch.nn.CrossEntropyLoss()
 

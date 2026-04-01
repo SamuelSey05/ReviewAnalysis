@@ -40,7 +40,7 @@ def write_to_results_file(
 def prepare_aspect_dataset(
         sentences: list, 
         review_ids: list[str], 
-        review_inputs: dict, 
+        review_inputs: dict[str, torch.Tensor], 
         true_sentiments: list[int]
         ) -> tuple[Dataset, list[str], torch.Tensor, dict[str, int]]:
     # Sort aspects to have consistent indexing
@@ -61,6 +61,11 @@ def prepare_aspect_dataset(
         "aspect": [aspect_to_idx[sentence.category] for sentence in sentences],
         "sentiment": [true_sentiments[review_id_to_idx[sentence.review.review_id]] for sentence in sentences]
         })
+    
+    tokenised_sentence_dataset.set_format(
+        type="torch",
+        columns=["input_ids", "attention_mask", "aspect", "sentiment"],
+    )
     
     return tokenised_sentence_dataset, aspects, aspect_weights, review_id_to_idx
 
@@ -109,7 +114,7 @@ def main() -> None:
     review_ids = list(reviews.keys())
 
     # Tokenise reviews and get word embeddings
-    review_inputs = tokenize(list(reviews.values()), DISTILBERT_BASE)
+    review_inputs = tokenize([x.review for x in list(reviews.values())], DISTILBERT_BASE)
     logger.info(f"Tokenised {len(review_inputs['input_ids'])} texts.")
 
     if args.is_sentiment:

@@ -44,7 +44,7 @@ def main() -> None:
 
     review = build_review(review_text)
 
-    inputs = tokenize([review], DISTILBERT_BASE)
+    inputs = tokenize([review.review], DISTILBERT_BASE)
 
     model = AspectSentimentExtractor(DISTILBERT_BASE, num_aspects=len(ASPECT_LABELS)).to(DEVICE)
     model.load_state_dict(torch.load("./models/aspect_sentiment_extractor.pth", map_location=DEVICE))

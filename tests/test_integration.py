@@ -26,7 +26,7 @@ def test_full_integration(monkeypatch, tmp_path):
     assert len(sentences) == 1
 
     review_list = list(reviews.values())
-    review_inputs = tokenize(review_list, DISTILBERT_BASE)
+    review_inputs = tokenize([x.review for x in review_list], DISTILBERT_BASE)
     assert len(review_inputs["input_ids"]) == 2
     assert len(review_inputs["attention_mask"]) == 2
 

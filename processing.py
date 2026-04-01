@@ -13,7 +13,7 @@ from review import Review
 logger = logging.getLogger(__name__)
 
 
-def tokenize(reviews: list[Review], model_name: str) -> dict[str, list[int]]:
+def tokenize(reviews: list[str], model_name: str) -> dict[str, torch.Tensor]:
     """Convert from words to tokens
 
     Args:
@@ -21,33 +21,27 @@ def tokenize(reviews: list[Review], model_name: str) -> dict[str, list[int]]:
         model_name (str): name of model to use for tokenization
 
     Returns:
-        dict[str, list[int]]: Dictionary containing input IDs and attention masks for the tokenized reviews.
+        dict[str, torch.Tensor]: Dictionary containing input IDs and attention masks for the tokenized reviews.
     """
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    input_ids = []
-    attention_masks = []
+    tokens = tokenizer(
+        reviews,
+        truncation=True,
+        padding="max_length",
+        max_length=512,
+        return_tensors="pt",
+    )
 
-    for review in tqdm(reviews, desc="Tokenising texts"):
-        # Tokenize the review text with padding and truncation
-        tokens = tokenizer(
-            review.review,
-            truncation=True,
-            padding="max_length",
-            max_length=512,
-            return_tensors='pt'
-        )
+    return {
+        "input_ids": tokens["input_ids"],
+        "attention_mask": tokens["attention_mask"],
+    }
 
-        # Add the input IDs and attention masks to the respective lists
-        input_ids.append(tokens['input_ids'].squeeze(0).tolist())
-        attention_masks.append(tokens['attention_mask'].squeeze(0).tolist())
-
-    return {"input_ids": input_ids, "attention_mask": attention_masks}
-
-def get_word_embeddings(inputs: dict[str, list[int]], model_name: str, device: torch.device, batch_size: int = 32) -> torch.Tensor:
+def get_word_embeddings(inputs: dict[str, torch.Tensor], model_name: str, device: torch.device, batch_size: int = 32) -> torch.Tensor:
     """Generate word embeddings for the given inputs using the specified model.
 
     Args:
-        inputs (dict[str, list[int]]): List of tokenized inputs containing 'input_ids' and 'attention_mask'.
+        inputs (dict[str, torch.Tensor]): Tokenized inputs containing 'input_ids' and 'attention_mask'.
         model_name (str): Name or path of the pre-trained model to use for generating embeddings.
         device (torch.device): Device to run the model on (e.g., CPU, GPU).
         batch_size (int, optional): Batch size for processing inputs. Defaults to 32.
@@ -57,15 +51,17 @@ def get_word_embeddings(inputs: dict[str, list[int]], model_name: str, device: t
     """
     model = AutoModel.from_pretrained(model_name)
     model.to(device)
+    model.eval()
     embeddings = []
 
     logger.info("Generating word embeddings...")
 
     with torch.no_grad():
         # Process inputs in batches
-        for i in tqdm(range(0, len(inputs["input_ids"]), batch_size), desc="Generating embeddings"):
-            batch_input_ids = torch.tensor(inputs["input_ids"][i:i+batch_size]).to(device)
-            batch_attention_masks = torch.tensor(inputs["attention_mask"][i:i+batch_size]).to(device)
+        total = inputs["input_ids"].size(0)
+        for i in tqdm(range(0, total, batch_size), desc="Generating embeddings"):
+            batch_input_ids = inputs["input_ids"][i:i+batch_size].to(device)
+            batch_attention_masks = inputs["attention_mask"][i:i+batch_size].to(device)
             embeddings.append(model(input_ids=batch_input_ids, attention_mask=batch_attention_masks).last_hidden_state.cpu())
 
     # Concatenate across the batch dimension

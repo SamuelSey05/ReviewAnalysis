@@ -6,11 +6,11 @@ from datasets import Dataset
 
 def train_aspect_sentiment_extractor(
     model: torch.nn.Module,
-        dataset: Dataset, 
-        aspect_criterion: torch.nn.Module, 
-        sentiment_criterion: torch.nn.Module, 
-        device: torch.device, 
-        num_epochs: int = 3
+    dataset: Dataset, 
+    aspect_criterion: torch.nn.Module, 
+    sentiment_criterion: torch.nn.Module, 
+    device: torch.device, 
+    num_epochs: int = 3
     ) -> None:
     """Train the AspectSentimentExtractor model on the given dataset and embeddings
 
@@ -29,25 +29,18 @@ def train_aspect_sentiment_extractor(
     
     # Set model to training mode
     model.train()
-    
-    tensor_dataset = torch.utils.data.TensorDataset(
-        torch.tensor(dataset["input_ids"]),
-        torch.tensor(dataset["attention_mask"]),
-        torch.tensor(dataset["aspect"]),
-        torch.tensor(dataset["sentiment"])
-    )
 
     # Use DataLoader for batching and shuffling
-    data_loader = torch.utils.data.DataLoader(tensor_dataset, batch_size=32, shuffle=True, num_workers=4, pin_memory=True)
+    data_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4, pin_memory=True)
 
     total_loss = 0.0
     for _ in tqdm(range(num_epochs), desc="Training Aspect Sentiment Extractor"):
         total_loss = 0.0
         for batch in tqdm(data_loader, desc="Batches", leave=False):
-            input_ids, attention_mask, aspects, sentiments = batch
-            input_ids = input_ids.to(device)
-            attention_mask = attention_mask.to(device)
-            aspects, sentiments = aspects.to(device), sentiments.to(device)
+            input_ids = batch["input_ids"].to(device=device, dtype=torch.long)
+            attention_mask = batch["attention_mask"].to(device=device, dtype=torch.long)
+            aspects = batch["aspect"].to(device=device, dtype=torch.long)
+            sentiments = batch["sentiment"].to(device=device, dtype=torch.long)
 
             # Reset gradients
             optimiser.zero_grad()

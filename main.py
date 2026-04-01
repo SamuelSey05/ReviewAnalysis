@@ -158,7 +158,6 @@ def main() -> None:
         aspect_predictions, sentiment_predictions = aspect_sentiment_extractor.aspect_sentiment_inference(
             input_ids=tokenised_sentence_dataset["input_ids"],
             attention_masks=tokenised_sentence_dataset["attention_mask"],
-            device=DEVICE,
             batch_size=BATCH_SIZE
         )
 

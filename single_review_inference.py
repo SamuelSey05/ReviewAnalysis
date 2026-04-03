@@ -1,17 +1,21 @@
 import argparse
+import json
 import logging
+from pathlib import Path
 
 import torch
 
 from aspect_based import AspectSentimentExtractor
 from config import DEVICE, DISTILBERT_BASE
+from preprocess import load_aspect_labels
 from processing import tokenize
 from review import Review
 
 logger = logging.getLogger(__name__)
 
-SENTIMENT_LABELS = ["negatdive", "neutral", "positive"]
-ASPECT_LABELS = ['learnability', 'aesthetics', 'general', 'cost', 'efficiency', 'safety', 'enjoyability', 'security', 'compatibility', 'effectiveness', 'usability', 'reliability']
+SENTIMENT_LABELS = ["negative", "neutral", "positive"]
+
+ASPECT_LABELS = load_aspect_labels()
 
 def read_review_text(path: str) -> str:
     with open(path, "r", encoding="utf-8") as f:

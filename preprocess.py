@@ -1,5 +1,7 @@
 import csv
+import json
 import logging
+from pathlib import Path
 from typing import Tuple
 
 from review import Review, Sentence
@@ -33,3 +35,8 @@ def load_csv(file_path) -> Tuple[dict[str, Review], list[Sentence]]:
                 review_parts.append(Sentence.from_review_and_dict(review, row))
 
     return data, review_parts
+
+def load_aspect_labels(path: str = "./models/aspect_labels.json") -> list[str]:
+    labels_path = Path(path)
+    with open(labels_path, "r", encoding="utf-8") as f:
+        return json.load(f)

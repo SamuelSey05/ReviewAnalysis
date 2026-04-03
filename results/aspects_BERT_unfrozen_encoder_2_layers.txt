@@ -1,35 +1,35 @@
-Aspect (Sentence-level) Accuracy: 0.25025950740775693
+Aspect (Sentence-level) Accuracy: 0.22997074643767104
 Aspect (Sentence-level) Classification report:
                precision    recall  f1-score   support
 
-           0       0.03      0.28      0.06        71
-           1       0.15      0.83      0.26       357
-           2       0.42      0.64      0.51       836
-           3       0.23      0.02      0.03      1186
-           4       0.13      0.01      0.01       918
-           5       0.27      0.65      0.38       909
-           6       0.42      0.01      0.03      2968
-           7       0.07      0.14      0.09       127
-           8       0.12      0.24      0.16       598
-           9       0.11      0.35      0.17        80
-          10       0.28      0.70      0.40       392
-          11       0.41      0.31      0.35      2155
+           0       0.05      0.79      0.09        71
+           1       0.12      0.97      0.22       357
+           2       0.39      0.71      0.50       836
+           3       0.36      0.01      0.03      1186
+           4       0.19      0.04      0.07       918
+           5       0.30      0.25      0.27       909
+           6       0.51      0.01      0.02      2968
+           7       0.06      0.36      0.11       127
+           8       0.20      0.15      0.17       598
+           9       0.16      0.39      0.23        80
+          10       0.31      0.74      0.44       392
+          11       0.39      0.32      0.35      2155
 
-    accuracy                           0.25     10597
-   macro avg       0.22      0.35      0.20     10597
-weighted avg       0.32      0.25      0.19     10597
+    accuracy                           0.23     10597
+   macro avg       0.25      0.39      0.21     10597
+weighted avg       0.36      0.23      0.18     10597
 
 
-Sentiment (Sentence-level) Accuracy: 0.9935830895536473
+Sentiment (Sentence-level) Accuracy: 0.9430027366235727
 Sentiment (Sentence-level) Classification report:
                precision    recall  f1-score   support
 
-           0       0.99      1.00      1.00      1568
-           1       0.99      0.99      0.99      4835
-           2       0.99      0.99      0.99      4194
+           0       0.95      0.89      0.92      1568
+           1       0.91      0.97      0.94      4835
+           2       0.98      0.93      0.95      4194
 
-    accuracy                           0.99     10597
-   macro avg       0.99      0.99      0.99     10597
-weighted avg       0.99      0.99      0.99     10597
+    accuracy                           0.94     10597
+   macro avg       0.95      0.93      0.94     10597
+weighted avg       0.94      0.94      0.94     10597
 
 

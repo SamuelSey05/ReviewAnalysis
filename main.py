@@ -1,4 +1,5 @@
 import logging
+import json
 from typing import Counter
 
 import torch
@@ -130,6 +131,9 @@ def main() -> None:
         logger.info("Performing aspect extraction...")
 
         tokenised_sentence_dataset, aspects, aspect_weights, review_id_to_idx = prepare_aspect_dataset(sentences=sentences, review_ids=review_ids, review_inputs=review_inputs, true_sentiments=true_sentiments)
+
+        with open("./models/aspect_labels.json", "w", encoding="utf-8") as f:
+            json.dump(aspects, f, ensure_ascii=False, indent=2)
         
         # Index of the sentence's review embedding in the word embeddings
         sentence_indices = [review_id_to_idx[sentence.review.review_id] for sentence in sentences]
@@ -144,11 +148,10 @@ def main() -> None:
                 dataset=tokenised_sentence_dataset,
                 aspect_criterion=torch.nn.CrossEntropyLoss(weight=aspect_weights),
                 sentiment_criterion=torch.nn.CrossEntropyLoss(),
-                device=DEVICE,
                 num_epochs=NUM_EPOCHS,
             )
             logger.info("Saving aspect sentiment extractor model...")
-            torch.save(aspect_sentiment_extractor.state_dict(), "./models/aspect_sentiment_extractor_4_layers.pth")
+            torch.save(aspect_sentiment_extractor.state_dict(), "./models/aspect_sentiment_extractor_2_layers.pth")
         elif args.model == "aspect_sentiment_extractor":
             logger.info("Loading aspect sentiment extractor model...")
             aspect_sentiment_extractor.load_state_dict(torch.load("./models/aspect_sentiment_extractor.pth", map_location=DEVICE))

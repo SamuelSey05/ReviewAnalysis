@@ -10,4 +10,5 @@ pandas
 tensorboard
 google-play-scraper
 playwright
+ftfy
 pytest

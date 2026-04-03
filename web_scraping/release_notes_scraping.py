@@ -1,5 +1,6 @@
 import time
 import csv
+from ftfy import fix_text
 from playwright.sync_api import sync_playwright
 
 def scrape_release_notes(url):
@@ -36,10 +37,20 @@ def scrape_release_notes(url):
             writer.writeheader()
 
             for release in releases:
-                version = release.locator("h2").inner_text().strip()
+                version = fix_text(release.locator("h2").inner_text().strip())
 
-                date = release.locator("p").first.inner_text().strip()
-                content = release.inner_text().strip().replace(version, "").replace(date, "").replace("\n", "").replace("Bug fixes", "").replace("What's new", "").lower().strip()
+                date = fix_text(release.locator("p").first.inner_text().strip())
+                content = fix_text(
+                    release.inner_text()
+                    .strip()
+                    .replace(version, "")
+                    .replace(date, "")
+                    .replace("\n", "")
+                    .replace("Bug fixes", "")
+                    .replace("What's new", "")
+                    .lower()
+                    .strip()
+                )
 
                 writer.writerow({
                     "version": version.strip(),

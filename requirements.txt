@@ -11,4 +11,5 @@ tensorboard
 google-play-scraper
 playwright
 ftfy
+unidecode
 pytest

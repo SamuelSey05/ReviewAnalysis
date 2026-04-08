@@ -4,16 +4,16 @@ from itertools import product
 import json
 import logging
 import os
+import re
 
 import torch
 
-from aspect_based import AspectSentimentExtractor
-from config import DISTILBERT_BASE, DEVICE, BATCH_SIZE
+from aspect_based import AspectSentimentExtractor, pool_embeddings
+from config import DISTILBERT_BASE, DEVICE, BATCH_SIZE, OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING
 from preprocess import load_aspect_labels
 from processing import tokenize
 
 logger = logging.getLogger(__name__)
-
 
 def load_csv_rows(file_path: str) -> list[dict]:
     """Load CSV rows into a list of dictionaries."""
@@ -43,8 +43,10 @@ def encode_text(model: AspectSentimentExtractor, rows: list[dict], is_review: bo
             input_ids = inputs['input_ids'].to(DEVICE)
             attention_mask = inputs['attention_mask'].to(DEVICE)
 
-            # Get embeddings from the model's encoder
-            embeddings = model.encoder(input_ids=input_ids, attention_mask=attention_mask)
+            outputs = model.encoder(input_ids=input_ids, attention_mask=attention_mask)
+            embeddings = outputs.last_hidden_state
+
+            mean_pooled = pool_embeddings(embeddings, attention_mask)
 
             aspect, sentiment = model.aspect_sentiment_inference(
                 input_ids=input_ids,
@@ -54,7 +56,7 @@ def encode_text(model: AspectSentimentExtractor, rows: list[dict], is_review: bo
 
             for batch_idx, row in enumerate(batch_rows):
                 row['id'] = i + batch_idx
-                row['embedding'] = embeddings.last_hidden_state[batch_idx, 0, :].cpu().numpy()
+                row['embedding'] = mean_pooled[batch_idx].cpu().numpy()
                 row['aspect'] = aspect[batch_idx]
 
                 # Only add sentiment if the text is from reviews, not release notes
@@ -64,6 +66,9 @@ def encode_text(model: AspectSentimentExtractor, rows: list[dict], is_review: bo
                 data[i + batch_idx] = row
 
         return data
+    
+def extract_keyword_tokens(text: str) -> set[str]:
+    return set(re.findall(r"[a-z0-9']+", text.lower()))
 
 def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict]) -> list[tuple[dict, dict]]:
     """Filters (release note, review) pairs so the note comes after a negative review about the same aspect
@@ -77,20 +82,26 @@ def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict
     """
      
     # Filter to only negative reviews
-    review_data = {idx: data for idx, data in review_data.items() if data['sentiment'] == 0} 
-
-    all_pairs = list(product(release_note_data.values(), review_data.values()))
+    review_data = {idx: data for idx, data in review_data.items() if data['sentiment'] == 0}
 
     filtered_pairs = []
-    for note, review in all_pairs:
-        logger.debug(f"Release note (aspect: {note['aspect']}, date: {note['date']}), Review (aspect: {review['aspect']}, date: {review['at']})")
+    for note, review in product(release_note_data.values(), review_data.values()):
+        logger.debug(
+            f"Release note (aspect: {note['aspect']}, date: {note['date']}), "
+            f"Review (aspect: {review['aspect']}, date: {review['at']})"
+        )
 
-        if note['aspect'] == review['aspect']:
-            note_date = datetime.strptime(note['date'], "%d %B %Y").date()
-            review_date = datetime.strptime(review['at'], "%Y-%m-%d %H:%M:%S").date()
+        if note['aspect'] != review['aspect'] or not OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING.intersection(
+            extract_keyword_tokens(note['content']),
+            extract_keyword_tokens(review['content']),
+        ):
+            continue
 
-            if note_date > review_date:
-                filtered_pairs.append((note, review))
+        note_date = datetime.strptime(note['date'], "%d %B %Y").date()
+        review_date = datetime.strptime(review['at'], "%Y-%m-%d %H:%M:%S").date()
+
+        if note_date > review_date:
+            filtered_pairs.append((note, review))
 
     return filtered_pairs
 

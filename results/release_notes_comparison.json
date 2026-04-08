@@ -2,169 +2,169 @@
   "top_matches": [
     {
       "rank": 1,
-      "release_note_id": 19,
-      "review_id": 482,
-      "release_note": "(compatibility) We checked out some inconsistent behavior around checkboxes within the app. Having triple-checked the fix, we're now checking this bug off the list.",
-      "review": "(compatibility) I am forced to use this app for work.And the way the message come when you open the conversation, it doesn't show new messages.You have to swipe down and I am constantly missing updates. Because of this",
-      "similarity": 0.6245
+      "release_note_id": 18,
+      "review_id": 942,
+      "release_note": "(reliability) The /feedback command was broken, sending the bug report meant for Slack into whichever channel you happened to be viewing. It's now been fixed. /gif celebrate.",
+      "review": "(reliability) getting false notification with a 1 next to icon its not showing highlighted channel where the new message is i have to force stop app and reopen",
+      "similarity": 0.6545
     },
     {
       "rank": 2,
-      "release_note_id": 19,
-      "review_id": 620,
-      "release_note": "(compatibility) We checked out some inconsistent behavior around checkboxes within the app. Having triple-checked the fix, we're now checking this bug off the list.",
-      "review": "(compatibility) terrible ux, terrible integration with browser version. horrible searching, primitive use of ai",
-      "similarity": 0.5977
+      "release_note_id": 3,
+      "review_id": 942,
+      "release_note": "(reliability) Like a receipt for the wrong purchase, a media player notification was appearing in the drawer after tapping on an image in Slack. Weirder still, pressing play on the notification would begin playing audio or video from a separate file further back in the channel history. Talk about Stranger Things. Here's hoping we've seen the series finale of this bug.",
+      "review": "(reliability) getting false notification with a 1 next to icon its not showing highlighted channel where the new message is i have to force stop app and reopen",
+      "similarity": 0.429
     },
     {
       "rank": 3,
-      "release_note_id": 27,
-      "review_id": 858,
-      "release_note": "(reliability) \"Double, double toil and trouble / Vanishing emoji bubble / Found a bug and dumped the cache / This update will fix the crash.\" (If you were running into a crash when selecting an emoji reaction, updating the app should banish this spooky behavior. Happy Halloween!)",
-      "review": "(reliability) several bugs not fixed after multiple reports over three years and two Android phones",
-      "similarity": 0.5777
+      "release_note_id": 3,
+      "review_id": 350,
+      "release_note": "(reliability) Like a receipt for the wrong purchase, a media player notification was appearing in the drawer after tapping on an image in Slack. Weirder still, pressing play on the notification would begin playing audio or video from a separate file further back in the channel history. Talk about Stranger Things. Here's hoping we've seen the series finale of this bug.",
+      "review": "(reliability) Slack, a simple messaging app that tries to be so much more, but fails spectacularly at it all. It's bloated, slow, and includes features that are not executed well, leading to a generally frustrating experience every time I use it. Also, notification bubble does not clear after viewing messages.",
+      "similarity": 0.3863
     },
     {
       "rank": 4,
-      "release_note_id": 5,
-      "review_id": 938,
-      "release_note": "(reliability) Scrubbing through a video was scrubbing the progress bar clean off, making it impossible to go forward or back while the video was playing. Since we can't press \"rewind\" on this bug, allow us to \"fast-forward\" to a fix with this update.",
-      "review": "(reliability) the update is no longer compatible with my device, so can't use it.",
-      "similarity": 0.5698
+      "release_note_id": 13,
+      "review_id": 963,
+      "release_note": "(efficiency) Switching to a different workspace while on an active huddle meant you were unable to return to the workspace hosting the huddle. It was a very \"no ins-and-outs\" policy, like a concert that doesn't allow re-entry. The thing is, it wasn't a policy at all; it was just a bug. Come on back in -- the show's about to start.",
+      "review": "(efficiency) not able to take huddle calls using my Bluetooth headphones, its showing me Bluetooth is selected but sound is keep coming from loud speaker, this is literally unacceptable for you size of company.",
+      "similarity": 0.3569
     },
     {
       "rank": 5,
-      "release_note_id": 18,
-      "review_id": 774,
-      "release_note": "(reliability) The /feedback command was broken, sending the bug report meant for Slack into whichever channel you happened to be viewing. It's now been fixed. /gif celebrate.",
-      "review": "(reliability) app randomly stopped working and signed me out and google sso doesn't work",
-      "similarity": 0.5661
+      "release_note_id": 3,
+      "review_id": 920,
+      "release_note": "(reliability) Like a receipt for the wrong purchase, a media player notification was appearing in the drawer after tapping on an image in Slack. Weirder still, pressing play on the notification would begin playing audio or video from a separate file further back in the channel history. Talk about Stranger Things. Here's hoping we've seen the series finale of this bug.",
+      "review": "(reliability) after updating it don't send notification for mobile, if I open the slack then only I get messages. please fix soon. it's giving problem for work..why our company using this useless app",
+      "similarity": 0.3479
     },
     {
       "rank": 6,
-      "release_note_id": 18,
-      "review_id": 837,
-      "release_note": "(reliability) The /feedback command was broken, sending the bug report meant for Slack into whichever channel you happened to be viewing. It's now been fixed. /gif celebrate.",
-      "review": "(reliability) google sign it no longer works on the mobile app. reinstalled, doesn't work",
-      "similarity": 0.5611
+      "release_note_id": 3,
+      "review_id": 735,
+      "release_note": "(reliability) Like a receipt for the wrong purchase, a media player notification was appearing in the drawer after tapping on an image in Slack. Weirder still, pressing play on the notification would begin playing audio or video from a separate file further back in the channel history. Talk about Stranger Things. Here's hoping we've seen the series finale of this bug.",
+      "review": "(reliability) Notification issues in my phone readmi turbo 4 pro",
+      "similarity": 0.3438
     },
     {
       "rank": 7,
-      "release_note_id": 18,
-      "review_id": 594,
-      "release_note": "(reliability) The /feedback command was broken, sending the bug report meant for Slack into whichever channel you happened to be viewing. It's now been fixed. /gif celebrate.",
-      "review": "(reliability) getting false notification with a 1 next to icon its not showing highlighted channel where the new message is i have to force stop app and reopen",
-      "similarity": 0.5589
+      "release_note_id": 13,
+      "review_id": 856,
+      "release_note": "(efficiency) Switching to a different workspace while on an active huddle meant you were unable to return to the workspace hosting the huddle. It was a very \"no ins-and-outs\" policy, like a concert that doesn't allow re-entry. The thing is, it wasn't a policy at all; it was just a bug. Come on back in -- the show's about to start.",
+      "review": "(efficiency) dropped huddle",
+      "similarity": 0.2864
     },
     {
       "rank": 8,
-      "release_note_id": 18,
-      "review_id": 709,
-      "release_note": "(reliability) The /feedback command was broken, sending the bug report meant for Slack into whichever channel you happened to be viewing. It's now been fixed. /gif celebrate.",
-      "review": "(reliability) The latest update keeps crashing the app and doesn't open",
-      "similarity": 0.5429
+      "release_note_id": 2,
+      "review_id": 394,
+      "release_note": "(efficiency) Sharing into Slack from third-party apps (such as the Android photo gallery) was sometimes failing with the message \"Can't share content to the current workspace.\" After extensive testing in our labs, we've concluded that sharing is caring -- and so is this fix.",
+      "review": "(efficiency) why no message delete option?",
+      "similarity": 0.2651
     },
     {
       "rank": 9,
-      "release_note_id": 10,
-      "review_id": 800,
-      "release_note": "(reliability) We've sanded down some rough patches in the app so as to avoid any digital splinters. Did you know that 'digital splinters' were a thing? They are now, but they aren't anything you'll need to worry about.",
-      "review": "(reliability) there's some bugs on notifications and huddles",
-      "similarity": 0.5341
+      "release_note_id": 2,
+      "review_id": 306,
+      "release_note": "(efficiency) Sharing into Slack from third-party apps (such as the Android photo gallery) was sometimes failing with the message \"Can't share content to the current workspace.\" After extensive testing in our labs, we've concluded that sharing is caring -- and so is this fix.",
+      "review": "(efficiency) Suddenly get \"can't share content to current workspace. Try another workspace\" error. Renders app useless. Will delete.",
+      "similarity": 0.2513
     },
     {
       "rank": 10,
-      "release_note_id": 33,
-      "review_id": 800,
-      "release_note": "(reliability) We've sanded down some rough patches in the app so as to avoid any digital splinters. Did you know that 'digital splinters' were a thing? They are now, but they aren't anything you'll need to worry about.",
-      "review": "(reliability) there's some bugs on notifications and huddles",
-      "similarity": 0.5341
+      "release_note_id": 3,
+      "review_id": 485,
+      "release_note": "(reliability) Like a receipt for the wrong purchase, a media player notification was appearing in the drawer after tapping on an image in Slack. Weirder still, pressing play on the notification would begin playing audio or video from a separate file further back in the channel history. Talk about Stranger Things. Here's hoping we've seen the series finale of this bug.",
+      "review": "(reliability) Why is the search on the top gone? It broke my muscle memory of swiping up to quickly search the person or a channel.",
+      "similarity": 0.2465
     }
   ],
   "bottom_matches": [
     {
-      "rank": 1285,
-      "release_note_id": 6,
-      "review_id": 891,
-      "release_note": "(efficiency) If you were logged out via your workspace's session duration settings, you may have gotten a \"Sorry, an error occurred\" message when attempting to log back in. While technically correct, that's not very helpful (the message or the being locked out). With this update, you may come and go as you please.",
-      "review": "(efficiency) This app sucks",
-      "similarity": -0.0762
+      "rank": 6,
+      "release_note_id": 3,
+      "review_id": 735,
+      "release_note": "(reliability) Like a receipt for the wrong purchase, a media player notification was appearing in the drawer after tapping on an image in Slack. Weirder still, pressing play on the notification would begin playing audio or video from a separate file further back in the channel history. Talk about Stranger Things. Here's hoping we've seen the series finale of this bug.",
+      "review": "(reliability) Notification issues in my phone readmi turbo 4 pro",
+      "similarity": 0.3438
     },
     {
-      "rank": 1286,
-      "release_note_id": 6,
-      "review_id": 331,
-      "release_note": "(efficiency) If you were logged out via your workspace's session duration settings, you may have gotten a \"Sorry, an error occurred\" message when attempting to log back in. While technically correct, that's not very helpful (the message or the being locked out). With this update, you may come and go as you please.",
-      "review": "(efficiency) worst app I've ever seen.",
-      "similarity": -0.0806
+      "rank": 7,
+      "release_note_id": 13,
+      "review_id": 856,
+      "release_note": "(efficiency) Switching to a different workspace while on an active huddle meant you were unable to return to the workspace hosting the huddle. It was a very \"no ins-and-outs\" policy, like a concert that doesn't allow re-entry. The thing is, it wasn't a policy at all; it was just a bug. Come on back in -- the show's about to start.",
+      "review": "(efficiency) dropped huddle",
+      "similarity": 0.2864
     },
     {
-      "rank": 1287,
-      "release_note_id": 14,
-      "review_id": 821,
-      "release_note": "(security) If your workspace did not allow messages to be copied, we were also erroneously preventing you from viewing file attachments. Here's a message we're not just copying from previous bug fixes: We're sincerely sorry for the trouble.",
-      "review": "(security) it blows my mind how unintuitive this app is. being forced to use this in university should be considered a hate crime.",
-      "similarity": -0.0829
-    },
-    {
-      "rank": 1288,
-      "release_note_id": 6,
-      "review_id": 712,
-      "release_note": "(efficiency) If you were logged out via your workspace's session duration settings, you may have gotten a \"Sorry, an error occurred\" message when attempting to log back in. While technically correct, that's not very helpful (the message or the being locked out). With this update, you may come and go as you please.",
-      "review": "(efficiency) trash app. Don't work logging in.",
-      "similarity": -0.0859
-    },
-    {
-      "rank": 1289,
+      "rank": 8,
       "release_note_id": 2,
-      "review_id": 109,
+      "review_id": 394,
       "release_note": "(efficiency) Sharing into Slack from third-party apps (such as the Android photo gallery) was sometimes failing with the message \"Can't share content to the current workspace.\" After extensive testing in our labs, we've concluded that sharing is caring -- and so is this fix.",
-      "review": "(efficiency) Legitimately the worst UI ever. Why tf would I want grouped channels separated by read and unread in entirely different areas? Why can't I customize it? Why don't all my channels show up consistently every time. I hate it!",
-      "similarity": -0.0879
+      "review": "(efficiency) why no message delete option?",
+      "similarity": 0.2651
     },
     {
-      "rank": 1290,
-      "release_note_id": 6,
-      "review_id": 997,
-      "release_note": "(efficiency) If you were logged out via your workspace's session duration settings, you may have gotten a \"Sorry, an error occurred\" message when attempting to log back in. While technically correct, that's not very helpful (the message or the being locked out). With this update, you may come and go as you please.",
-      "review": "(efficiency) Bad sound setup always releasing sound from different speaker",
-      "similarity": -0.0908
-    },
-    {
-      "rank": 1291,
-      "release_note_id": 6,
-      "review_id": 813,
-      "release_note": "(efficiency) If you were logged out via your workspace's session duration settings, you may have gotten a \"Sorry, an error occurred\" message when attempting to log back in. While technically correct, that's not very helpful (the message or the being locked out). With this update, you may come and go as you please.",
-      "review": "(efficiency) Miserable experience, terrible UI, poor compatibility, opaque settings and just plain irritatingly pushy in all the ways a modern tech company can be. Would refuse to use it if I had a choice.",
-      "similarity": -0.107
-    },
-    {
-      "rank": 1292,
-      "release_note_id": 6,
-      "review_id": 825,
-      "release_note": "(efficiency) If you were logged out via your workspace's session duration settings, you may have gotten a \"Sorry, an error occurred\" message when attempting to log back in. While technically correct, that's not very helpful (the message or the being locked out). With this update, you may come and go as you please.",
-      "review": "(efficiency) Literally keeps \"Pausing\" all of my notifications by itself and there's no way to turn it off. Why is this a feature anyway? So stupid!",
-      "similarity": -0.1099
-    },
-    {
-      "rank": 1293,
+      "rank": 9,
       "release_note_id": 2,
-      "review_id": 825,
+      "review_id": 306,
       "release_note": "(efficiency) Sharing into Slack from third-party apps (such as the Android photo gallery) was sometimes failing with the message \"Can't share content to the current workspace.\" After extensive testing in our labs, we've concluded that sharing is caring -- and so is this fix.",
-      "review": "(efficiency) Literally keeps \"Pausing\" all of my notifications by itself and there's no way to turn it off. Why is this a feature anyway? So stupid!",
-      "similarity": -0.1127
+      "review": "(efficiency) Suddenly get \"can't share content to current workspace. Try another workspace\" error. Renders app useless. Will delete.",
+      "similarity": 0.2513
     },
     {
-      "rank": 1294,
+      "rank": 10,
+      "release_note_id": 3,
+      "review_id": 485,
+      "release_note": "(reliability) Like a receipt for the wrong purchase, a media player notification was appearing in the drawer after tapping on an image in Slack. Weirder still, pressing play on the notification would begin playing audio or video from a separate file further back in the channel history. Talk about Stranger Things. Here's hoping we've seen the series finale of this bug.",
+      "review": "(reliability) Why is the search on the top gone? It broke my muscle memory of swiping up to quickly search the person or a channel.",
+      "similarity": 0.2465
+    },
+    {
+      "rank": 11,
       "release_note_id": 6,
-      "review_id": 109,
+      "review_id": 394,
       "release_note": "(efficiency) If you were logged out via your workspace's session duration settings, you may have gotten a \"Sorry, an error occurred\" message when attempting to log back in. While technically correct, that's not very helpful (the message or the being locked out). With this update, you may come and go as you please.",
-      "review": "(efficiency) Legitimately the worst UI ever. Why tf would I want grouped channels separated by read and unread in entirely different areas? Why can't I customize it? Why don't all my channels show up consistently every time. I hate it!",
-      "similarity": -0.1179
+      "review": "(efficiency) why no message delete option?",
+      "similarity": 0.2389
+    },
+    {
+      "rank": 12,
+      "release_note_id": 3,
+      "review_id": 683,
+      "release_note": "(reliability) Like a receipt for the wrong purchase, a media player notification was appearing in the drawer after tapping on an image in Slack. Weirder still, pressing play on the notification would begin playing audio or video from a separate file further back in the channel history. Talk about Stranger Things. Here's hoping we've seen the series finale of this bug.",
+      "review": "(reliability) the channel I use most of the time keeps disappearing from view, and is very difficult to reach at times.",
+      "similarity": 0.2359
+    },
+    {
+      "rank": 13,
+      "release_note_id": 2,
+      "review_id": 333,
+      "release_note": "(efficiency) Sharing into Slack from third-party apps (such as the Android photo gallery) was sometimes failing with the message \"Can't share content to the current workspace.\" After extensive testing in our labs, we've concluded that sharing is caring -- and so is this fix.",
+      "review": "(efficiency) Cannot cancel paid slack workspace on app. They try to hide it in the UI making it very difficult.",
+      "similarity": 0.2019
+    },
+    {
+      "rank": 14,
+      "release_note_id": 2,
+      "review_id": 260,
+      "release_note": "(efficiency) Sharing into Slack from third-party apps (such as the Android photo gallery) was sometimes failing with the message \"Can't share content to the current workspace.\" After extensive testing in our labs, we've concluded that sharing is caring -- and so is this fix.",
+      "review": "(efficiency) why is it so hard to keep the delete message option in a chat app, you manage to lose it almost every other month",
+      "similarity": 0.0819
+    },
+    {
+      "rank": 15,
+      "release_note_id": 6,
+      "review_id": 260,
+      "release_note": "(efficiency) If you were logged out via your workspace's session duration settings, you may have gotten a \"Sorry, an error occurred\" message when attempting to log back in. While technically correct, that's not very helpful (the message or the being locked out). With this update, you may come and go as you please.",
+      "review": "(efficiency) why is it so hard to keep the delete message option in a chat app, you manage to lose it almost every other month",
+      "similarity": 0.041
     }
   ],
   "stats": {
-    "total_pairs": 1294,
+    "total_pairs": 15,
     "pairs_before_aspect": 394000
   }
 }

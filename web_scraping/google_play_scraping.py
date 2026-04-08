@@ -1,6 +1,8 @@
 from google_play_scraper import Sort, reviews
 import pandas as pd
 
+from release_notes_scraping import normalize_text
+
 def get_reviews(app_id, num_reviews=1000):
 
     result, continuation_token = reviews(
@@ -12,6 +14,7 @@ def get_reviews(app_id, num_reviews=1000):
     )
 
     df = pd.DataFrame(result)
+    df["content"] = df["content"].fillna("").map(normalize_text)
     return df
 
 if __name__ == "__main__":

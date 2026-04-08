@@ -5,6 +5,24 @@ from transformers import AutoModel
 from config import DEVICE
 
 
+def pool_embeddings(embeddings: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+    """Pool the embeddings using mean pooling, taking into account the attention mask.
+
+    Args:
+        embeddings (torch.Tensor): The input embeddings of shape (batch_size, seq_length, hidden_size).
+        attention_mask (torch.Tensor): The attention mask of shape (batch_size, seq_length).
+
+    Returns:
+        torch.Tensor: The pooled embeddings of shape (batch_size, hidden_size).
+    """
+    # Apply attention mask to the embeddings
+    masked = embeddings * attention_mask.unsqueeze(-1)
+    lengths = attention_mask.sum(dim=1).clamp(min=1)
+
+    # Mean pooling of the masked embeddings
+    mean_pooled = masked.sum(dim=1) / lengths.unsqueeze(-1)
+    return mean_pooled
+
 class AspectSentimentExtractor(torch.nn.Module):
     def __init__(self, model_name:str,  num_aspects: int, num_sentiments: int = 3) -> None: 
         """init procedure for AspectSentimentExtractor. 
@@ -55,12 +73,7 @@ class AspectSentimentExtractor(torch.nn.Module):
         outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
         embeddings = outputs.last_hidden_state
 
-        # Apply attention mask to the embeddings
-        masked = embeddings * attention_mask.unsqueeze(-1)
-        lengths = attention_mask.sum(dim=1).clamp(min=1)
-
-        # Mean pooling of the masked embeddings
-        mean_pooled = masked.sum(dim=1) / lengths.unsqueeze(-1)
+        mean_pooled = pool_embeddings(embeddings, attention_mask)
 
         x = self.dropout(mean_pooled)  # Use mean pooled representation
         aspect_logits = self.aspect_head(x)

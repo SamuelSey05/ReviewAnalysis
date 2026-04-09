@@ -1,6 +1,7 @@
 import csv
 from datetime import datetime
 from itertools import product
+from difflib import SequenceMatcher
 import json
 import logging
 import os
@@ -20,6 +21,9 @@ def load_csv_rows(file_path: str) -> list[dict]:
 
     with open(file_path, 'r') as file:
         return list(csv.DictReader(file))
+    
+def extract_keyword_tokens(text: str) -> list[str]:
+    return re.findall(r"[a-z0-9']+", text.lower())
 
 def encode_text(model: AspectSentimentExtractor, rows: list[dict], is_review: bool = False) -> dict[int, dict]:
     """Find embeddings and aspect/sentiment predictions for a list of text rows (from reviews or release notes) using the provided model
@@ -58,6 +62,7 @@ def encode_text(model: AspectSentimentExtractor, rows: list[dict], is_review: bo
                 row['id'] = i + batch_idx
                 row['embedding'] = mean_pooled[batch_idx].cpu().numpy()
                 row['aspect'] = aspect[batch_idx]
+                row['tokens'] = extract_keyword_tokens(row["content"])
 
                 # Only add sentiment if the text is from reviews, not release notes
                 if is_review:
@@ -66,9 +71,6 @@ def encode_text(model: AspectSentimentExtractor, rows: list[dict], is_review: bo
                 data[i + batch_idx] = row
 
         return data
-    
-def extract_keyword_tokens(text: str) -> set[str]:
-    return set(re.findall(r"[a-z0-9']+", text.lower()))
 
 def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict]) -> list[tuple[dict, dict]]:
     """Filters (release note, review) pairs so the note comes after a negative review about the same aspect
@@ -92,8 +94,8 @@ def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict
         )
 
         if note['aspect'] != review['aspect'] or not OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING.intersection(
-            extract_keyword_tokens(note['content']),
-            extract_keyword_tokens(review['content']),
+            set(note['tokens']),
+            set(review['tokens']),
         ):
             continue
 
@@ -104,6 +106,20 @@ def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict
             filtered_pairs.append((note, review))
 
     return filtered_pairs
+
+def lcs_length(a: list[str], b: list[str]) -> int:
+    """Calculate the length of the longest common subsequence between two lists of tokens
+
+    Args:
+        a (list[str]): First list of tokens
+        b (list[str]): Second list of tokens
+
+    Returns:
+        int: Length of the longest common subsequence
+    """
+    matcher = SequenceMatcher(None, a, b)
+    match = matcher.find_longest_match(0, len(a), 0, len(b))
+    return match.size
 
 def score_and_rank_pairs(filtered_pairs: list[tuple[dict, dict]]) -> list[tuple[tuple[int, int], dict]]:
     """Use cosine similarity to score and rank the filtered (release note, review) pairs based on their embeddings
@@ -117,16 +133,23 @@ def score_and_rank_pairs(filtered_pairs: list[tuple[dict, dict]]) -> list[tuple[
 
     results = dict()
     for note, review in filtered_pairs:
-        similarity = torch.cosine_similarity(
+        cosine = torch.cosine_similarity(
             torch.tensor(note['embedding']),
             torch.tensor(review['embedding']),
             dim=0
         ).item()
 
+        lcs_length_value = lcs_length(note["tokens"], review["tokens"])
+
+        lcs_score = lcs_length_value / max(1, min(len(note['tokens']), len(review['tokens'])))
+
+        similarity = 0.5 * cosine + 0.5 * lcs_score
+
         results[(note['id'], review['id'])] = {
             "similarity": similarity,
             "release_note": note,
             "review": review,
+            "lcs_length": lcs_length_value,
         }
 
     sorted_results = sorted(results.items(), key=lambda x: x[1]["similarity"], reverse=True)
@@ -157,7 +180,8 @@ def write_results_to_json(sorted_results: list[tuple[tuple[int, int], dict]], to
             "review_id": review_id,
             "release_note": f"({aspect_labels[note['aspect']]}) {note['content']}",
             "review": f"({aspect_labels[review['aspect']]}) {review['content']}",
-            "similarity": round(result["similarity"], 4)
+            "similarity": round(result["similarity"], 4),
+            "lcs_length": result["lcs_length"],
         })
 
     bottom_k_results = []
@@ -170,7 +194,8 @@ def write_results_to_json(sorted_results: list[tuple[tuple[int, int], dict]], to
             "review_id": review_id,
             "release_note": f"({aspect_labels[note['aspect']]}) {note['content']}",
             "review": f"({aspect_labels[review['aspect']]}) {review['content']}",
-            "similarity": round(result["similarity"], 4)
+            "similarity": round(result["similarity"], 4),
+            "lcs_length": result["lcs_length"],
         })
 
     output_payload = {

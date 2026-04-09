@@ -59,7 +59,6 @@ def encode_text(model: AspectSentimentExtractor, rows: list[dict], is_review: bo
             )
 
             for batch_idx, row in enumerate(batch_rows):
-                row['id'] = i + batch_idx
                 row['embedding'] = mean_pooled[batch_idx].cpu().numpy()
                 row['aspect'] = aspect[batch_idx]
                 row['tokens'] = extract_keyword_tokens(row["content"])
@@ -83,8 +82,8 @@ def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict
         list[tuple[dict, dict]]: List of (release note, review) pairs that match the filtering criteria
     """
      
-    # Filter to only negative reviews
-    review_data = {idx: data for idx, data in review_data.items() if data['sentiment'] == 0}
+    # Filter to only negative reviews and reviews with at least 5 words
+    review_data = {idx: data for idx, data in review_data.items() if data['sentiment'] == 0 and len(data['tokens']) >= 5}
 
     filtered_pairs = []
     for note, review in product(release_note_data.values(), review_data.values()):
@@ -93,10 +92,20 @@ def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict
             f"Review (aspect: {review['aspect']}, date: {review['at']})"
         )
 
-        if note['aspect'] != review['aspect'] or not OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING.intersection(
-            set(note['tokens']),
-            set(review['tokens']),
-        ):
+        cosine = torch.cosine_similarity(
+            torch.tensor(note['embedding']),
+            torch.tensor(review['embedding']),
+            dim=0
+        ).item()
+
+        # if note['aspect'] != review['aspect'] or not OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING.intersection(
+        #     set(note['tokens']),
+        #     set(review['tokens']),
+        # ):
+        if note['aspect'] == review['aspect']:
+            if cosine < 0.15:
+                continue
+        elif cosine < 0.4:
             continue
 
         note_date = datetime.strptime(note['date'], "%d %B %Y").date()
@@ -121,14 +130,14 @@ def lcs_length(a: list[str], b: list[str]) -> int:
     match = matcher.find_longest_match(0, len(a), 0, len(b))
     return match.size
 
-def score_and_rank_pairs(filtered_pairs: list[tuple[dict, dict]]) -> list[tuple[tuple[int, int], dict]]:
+def score_pairs(filtered_pairs: list[tuple[dict, dict]]) -> dict[tuple[int, int], dict]:
     """Use cosine similarity to score and rank the filtered (release note, review) pairs based on their embeddings
 
     Args:
         filtered_pairs (list[tuple[dict, dict]]): (release note, review) pairs that have been filtered to match the criteria of the note coming after a negative review about the same aspect
 
     Returns:
-        list[tuple[tuple[int, int], dict]]: Sorted list of ((release_note_id, review_id), {"similarity": float, "release_note": dict, "review": dict}) tuples, ranked by similarity in descending order
+        dict[tuple[int, int], dict]: Dict from (release_note_id, review_id) to {"similarity": float, "release_note": dict, "review": dict}) tuples
     """
 
     results = dict()
@@ -143,18 +152,19 @@ def score_and_rank_pairs(filtered_pairs: list[tuple[dict, dict]]) -> list[tuple[
 
         lcs_score = lcs_length_value / max(1, min(len(note['tokens']), len(review['tokens'])))
 
-        similarity = 0.5 * cosine + 0.5 * lcs_score
+        # Give a boost to pairs with long lcs
+        similarity = 0.5 * cosine + 0.5 * lcs_score + (0.2 if lcs_length_value >= 3 else 0) + (0.3 if OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING.intersection(set(note["tokens"]), set(review["tokens"])) else 0)
 
-        results[(note['id'], review['id'])] = {
+        # Maybe add a penalty for generic reviews
+
+        results[(note['version'], review['reviewId'])] = {
             "similarity": similarity,
             "release_note": note,
             "review": review,
             "lcs_length": lcs_length_value,
         }
 
-    sorted_results = sorted(results.items(), key=lambda x: x[1]["similarity"], reverse=True)
-
-    return sorted_results
+    return results
 
 def write_results_to_json(sorted_results: list[tuple[tuple[int, int], dict]], total_candidate_pairs: int, output_file: str) -> None:
     """Formats and writes the results of the similarity comparison by putting the 10 best and worst matches into the json 
@@ -176,7 +186,7 @@ def write_results_to_json(sorted_results: list[tuple[tuple[int, int], dict]], to
         review = result["review"]
         top_k_results.append({
             "rank": idx,
-            "release_note_id": note_id,
+            "release_version": note_id,
             "review_id": review_id,
             "release_note": f"({aspect_labels[note['aspect']]}) {note['content']}",
             "review": f"({aspect_labels[review['aspect']]}) {review['content']}",
@@ -190,7 +200,7 @@ def write_results_to_json(sorted_results: list[tuple[tuple[int, int], dict]], to
         review = result["review"]
         bottom_k_results.append({
             "rank": total_results - 10 + idx,
-            "release_note_id": note_id,
+            "release_version": note_id,
             "review_id": review_id,
             "release_note": f"({aspect_labels[note['aspect']]}) {note['content']}",
             "review": f"({aspect_labels[review['aspect']]}) {review['content']}",
@@ -231,7 +241,10 @@ def release_notes_vs_reviews_comparison(model: AspectSentimentExtractor, output_
     logger.info(f"Total release note-review pairs: {total_candidate_pairs}")
     logger.info(f"Filtered release note-review pairs (matching aspects): {len(filtered_pairs)}")
 
-    sorted_results = score_and_rank_pairs(filtered_pairs)
+    scored_results = score_pairs(filtered_pairs)
+
+    # Sort results by similarity in descending order
+    sorted_results = sorted(scored_results.items(), key=lambda x: x[1]['similarity'], reverse=True)
     
     write_results_to_json(sorted_results, total_candidate_pairs, output_file)
     

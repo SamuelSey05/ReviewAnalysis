@@ -106,4 +106,4 @@ def wordwise_sentiment_analysis(review: Review):
 
     polarities = [1 if score >= 0.1 else (-1 if score <= -0.1 else 0) for score in wordwise_sentiment_scores]
 
-    return max(0, min(5, 10 * np.mean(polarities) + 1)) * 2.5  # Scale from -1 to 1 into 0 to 5 (with amplification) but kept within bounds
+    return max(0, min(5, 10 * np.mean(polarities) + 1)) * 2.5  # Scale up from -1 to 1

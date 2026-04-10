@@ -142,7 +142,7 @@ def score_pairs(filtered_pairs: list[tuple[dict, dict]]) -> dict[tuple[int, int]
 
     results = dict()
     for note, review in filtered_pairs:
-        cosine = torch.cosine_similarity(
+        cosine = torch.nn.functional.cosine_similarity(
             torch.tensor(note['embedding']),
             torch.tensor(review['embedding']),
             dim=0

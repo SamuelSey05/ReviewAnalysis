@@ -159,8 +159,8 @@ def main() -> None:
         logger.info("Running aspect and sentiment inference...")
         # Carry out inference with trained model
         aspect_predictions, sentiment_predictions = aspect_sentiment_extractor.aspect_sentiment_inference(
-            input_ids=tokenised_sentence_dataset["input_ids"],
-            attention_masks=tokenised_sentence_dataset["attention_mask"],
+            input_ids=torch.tensor(tokenised_sentence_dataset["input_ids"]).to(DEVICE),
+            attention_masks=torch.tensor(tokenised_sentence_dataset["attention_mask"]).to(DEVICE),
             batch_size=BATCH_SIZE
         )
 

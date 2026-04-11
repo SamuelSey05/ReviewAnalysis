@@ -1,10 +1,11 @@
 import time
 import csv
+import re
 from ftfy import fix_text
 from unidecode import unidecode
 from playwright.sync_api import sync_playwright, Locator
 
-def normalize_text(text: str) -> str:
+def normalise_text(text: str) -> str:
     """Normalize text by fixing encoding issues and removing special characters.
 
     Args:
@@ -58,7 +59,7 @@ def clean_release_text(text: str, version: str, date: str) -> str:
     """
 
     return (
-        normalize_text(text)
+        normalise_text(text)
         .replace(version, "")
         .replace(date, "")
         .replace("Bug fixes", "")
@@ -66,16 +67,78 @@ def clean_release_text(text: str, version: str, date: str) -> str:
         .strip()
     )
 
+
+def extract_date_from_discord_url(article_url: str) -> str:
+    """Extract and normalize patch-note date from a Discord article URL.
+
+    Example URL suffix: discord-patch-notes-april-6-2026
+    """
+
+    match = re.search(r"discord-patch-notes-([a-z]+)(?:-(\d{1,2}))?-(\d{4})/?$", article_url)
+    if not match:
+        return ""
+
+    month, day, year = match.groups()
+    # Fallback on 30th if day is not present in URL
+    day = day or "30"
+    return f"{int(day)} {month.capitalize()} {year}"
+
+def scrape_release_notes_discord(url):
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto(url, wait_until="domcontentloaded", timeout=60000)
+        page.wait_for_selector("a[href*='/blog/discord-patch-notes-']", timeout=15000)
+
+        article_locators = page.locator("a.featured_main-card, a.cms_article").all()
+        articles = []
+        for locator in article_locators:
+            href = locator.get_attribute("href")
+            if href :
+                articles.append(f"https://discord.com{href}" if href.startswith("/") else href)
+
+        print(f"Found {len(articles)} release note articles.")
+
+        with open("datasets/discord_release_notes.csv", mode="w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=["version", "date", "content"])
+            writer.writeheader()
+
+            for article_url in articles:
+
+                print(f"Scraping article: {article_url}")
+
+                parsed_date = extract_date_from_discord_url(article_url)
+
+                page.goto(article_url, wait_until="networkidle", timeout=60000)
+
+                with open("diagnostic_dump.html", "w", encoding="utf-8") as f:
+                    f.write(page.content())
+
+                page.wait_for_selector("article.article_rich-text-2", timeout=15000)           
+
+                container = page.locator("article.article_rich-text-2")
+
+                elements = container.locator("> *").all()
+
+                current_category = "General"
+                for el in elements:
+                    tag_name = el.evaluate("node => node.tagName").lower()
+                    if tag_name == "h2":
+                        current_category = el.inner_text().strip()
+                    elif tag_name == "ul":
+                        bullet_items = el.locator("li").all()
+                        for index in range(len(bullet_items)):
+                            bullet_text = clean_release_text(bullet_items[index].inner_text().strip(), "", "")
+                            if bullet_text:
+                                writer.writerow({
+                                    "version": f"Discord {parsed_date}",
+                                    "date": parsed_date,
+                                    "content": f"{current_category.strip()}: {bullet_text.strip()}",
+                                })  
 def scrape_release_notes(url):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-            viewport={'width': 1280, 'height': 800}
-        )
-
-        page = context.new_page()
+        page = browser.new_page()
         page.goto(url, wait_until="networkidle", timeout=60000)
 
         # Scroll down to load more release notes
@@ -100,8 +163,8 @@ def scrape_release_notes(url):
             writer.writeheader()
 
             for release in releases:
-                version = normalize_text(release.locator("h2").inner_text().strip())
-                date = normalize_text(release.locator("p").first.inner_text().strip())
+                version = normalise_text(release.locator("h2").inner_text().strip())
+                date = normalise_text(release.locator("p").first.inner_text().strip())
 
                 snippets = extract_bug_fix_bullets(release, version, date)
                 snippets = [snippet for snippet in snippets if snippet]
@@ -120,6 +183,10 @@ def scrape_release_notes(url):
         browser.close()    
 
 if __name__ == "__main__":
-    url = "https://slack.com/release-notes/android"
-    scrape_release_notes(url)
-    print("Release notes scraped and saved to slack_release_notes.csv")
+    # url = "https://slack.com/release-notes/android"
+    # scrape_release_notes(url)
+    # print("Release notes scraped and saved to slack_release_notes.csv")
+
+    url = "https://discord.com/tags/patch-notes"
+    scrape_release_notes_discord(url)
+    print("Release notes scraped and saved to discord_release_notes.csv")

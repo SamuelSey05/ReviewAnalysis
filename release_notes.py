@@ -1,5 +1,5 @@
 import csv
-from datetime import datetime
+from datetime import datetime, date
 from itertools import product
 from difflib import SequenceMatcher
 import json
@@ -70,6 +70,18 @@ def encode_text(model: AspectSentimentExtractor, rows: list[dict], is_review: bo
                 data[i + batch_idx] = row
 
         return data
+    
+def pair_cosine_similarity(note: dict, review: dict) -> float:
+    return torch.nn.functional.cosine_similarity(
+        torch.tensor(note['embedding']),
+        torch.tensor(review['embedding']),
+        dim=0,
+    ).item()
+
+def pair_dates(note: dict, review: dict) -> tuple[date, date]:
+    note_date = datetime.strptime(note['date'], "%d %B %Y").date()
+    review_date = datetime.strptime(review['at'], "%Y-%m-%d %H:%M:%S").date()
+    return note_date, review_date
 
 def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict]) -> list[tuple[dict, dict]]:
     """Filters (release note, review) pairs so the note comes after a negative review about the same aspect
@@ -92,11 +104,7 @@ def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict
             f"Review (aspect: {review['aspect']}, date: {review['at']})"
         )
 
-        cosine = torch.cosine_similarity(
-            torch.tensor(note['embedding']),
-            torch.tensor(review['embedding']),
-            dim=0
-        ).item()
+        cosine = pair_cosine_similarity(note, review)
 
         # if note['aspect'] != review['aspect'] or not OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING.intersection(
         #     set(note['tokens']),
@@ -108,8 +116,7 @@ def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict
         elif cosine < 0.4:
             continue
 
-        note_date = datetime.strptime(note['date'], "%d %B %Y").date()
-        review_date = datetime.strptime(review['at'], "%Y-%m-%d %H:%M:%S").date()
+        note_date, review_date = pair_dates(note, review)
 
         if note_date > review_date:
             filtered_pairs.append((note, review))
@@ -126,6 +133,7 @@ def lcs_length(a: list[str], b: list[str]) -> int:
     Returns:
         int: Length of the longest common subsequence
     """
+
     matcher = SequenceMatcher(None, a, b)
     match = matcher.find_longest_match(0, len(a), 0, len(b))
     return match.size
@@ -142,29 +150,50 @@ def score_pairs(filtered_pairs: list[tuple[dict, dict]]) -> dict[tuple[int, int]
 
     results = dict()
     for note, review in filtered_pairs:
-        cosine = torch.nn.functional.cosine_similarity(
-            torch.tensor(note['embedding']),
-            torch.tensor(review['embedding']),
-            dim=0
-        ).item()
+        cosine = pair_cosine_similarity(note, review)
 
         lcs_length_value = lcs_length(note["tokens"], review["tokens"])
 
         lcs_score = lcs_length_value / max(1, min(len(note['tokens']), len(review['tokens'])))
 
         # Give a boost to pairs with long lcs
-        similarity = 0.5 * cosine + 0.5 * lcs_score + (0.2 if lcs_length_value >= 3 else 0) + (0.3 if OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING.intersection(set(note["tokens"]), set(review["tokens"])) else 0)
+        similarity = 0.5 * cosine + 0.5 * lcs_score + (0.2 if lcs_length_value >= 3 else 0) + (0.15 if OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING.intersection(set(note["tokens"]), set(review["tokens"])) else 0)
 
         # Maybe add a penalty for generic reviews
+
+        note_date, review_date = pair_dates(note, review)
 
         results[(note['version'], review['reviewId'])] = {
             "similarity": similarity,
             "release_note": note,
             "review": review,
             "lcs_length": lcs_length_value,
+            "time_diff_days": (note_date - review_date).days,
         }
 
     return results
+
+def format_result_rows(
+    ranked_results: list[tuple[tuple, dict]],
+    aspect_labels: list[str],
+    start_rank: int,
+) -> list[dict]:
+    rows = []
+    for offset, ((note_id, review_id), result) in enumerate(ranked_results):
+        note = result["release_note"]
+        review = result["review"]
+        rows.append({
+            "rank": start_rank + offset,
+            "release_version": note_id,
+            "review_id": review_id,
+            "release_note": f"({aspect_labels[note['aspect']]}) {note['content']}",
+            "review": f"({aspect_labels[review['aspect']]}) {review['content']}",
+            "similarity": round(result["similarity"], 4),
+            "lcs_length": result["lcs_length"],
+            "time_diff_days": result["time_diff_days"],
+        })
+
+    return rows
 
 def write_results_to_json(sorted_results: list[tuple[tuple[int, int], dict]], total_candidate_pairs: int, output_file: str) -> None:
     """Formats and writes the results of the similarity comparison by putting the 10 best and worst matches into the json 
@@ -180,33 +209,15 @@ def write_results_to_json(sorted_results: list[tuple[tuple[int, int], dict]], to
 
     aspect_labels = load_aspect_labels()
     # Format results for JSON output
-    top_k_results = []
-    for idx, ((note_id, review_id), result) in enumerate(sorted_results[:10], 1):
-        note = result["release_note"]
-        review = result["review"]
-        top_k_results.append({
-            "rank": idx,
-            "release_version": note_id,
-            "review_id": review_id,
-            "release_note": f"({aspect_labels[note['aspect']]}) {note['content']}",
-            "review": f"({aspect_labels[review['aspect']]}) {review['content']}",
-            "similarity": round(result["similarity"], 4),
-            "lcs_length": result["lcs_length"],
-        })
+    top_slice = sorted_results[:10]
+    bottom_slice = sorted_results[-10:]
 
-    bottom_k_results = []
-    for idx, ((note_id, review_id), result) in enumerate(sorted_results[-10:], 1):
-        note = result["release_note"]
-        review = result["review"]
-        bottom_k_results.append({
-            "rank": total_results - 10 + idx,
-            "release_version": note_id,
-            "review_id": review_id,
-            "release_note": f"({aspect_labels[note['aspect']]}) {note['content']}",
-            "review": f"({aspect_labels[review['aspect']]}) {review['content']}",
-            "similarity": round(result["similarity"], 4),
-            "lcs_length": result["lcs_length"],
-        })
+    top_k_results = format_result_rows(top_slice, aspect_labels, start_rank=1)
+    bottom_k_results = format_result_rows(
+        bottom_slice,
+        aspect_labels,
+        start_rank=max(1, total_results - 9),
+    )
 
     output_payload = {
         "top_matches": top_k_results,
@@ -221,19 +232,20 @@ def write_results_to_json(sorted_results: list[tuple[tuple[int, int], dict]], to
     with open(output_file, 'w') as f:
         json.dump(output_payload, f, indent=2)
 
-def release_notes_vs_reviews_comparison(model: AspectSentimentExtractor, output_file: str = "results/release_notes_comparison.json"):
+def release_notes_vs_reviews_comparison(model: AspectSentimentExtractor, app_name: str, output_file: str = "results/release_notes_comparison.json"):
     """Conduct comparison between release notes and reviews for the same app
 
     Args:
         model (AspectSentimentExtractor): Model for generating embeddings and aspect/sentiment predictions 
+        app_name (str): Name of the app to compare release notes and reviews for, used to load the correct CSV files
         output_file (str, optional): Output file to store results. Defaults to "results/release_notes_comparison.json".
     """
 
     logger.info("Loading release notes from CSV...")
-    release_note_data = encode_text(model, load_csv_rows('datasets/slack_release_notes.csv'))
+    release_note_data = encode_text(model, load_csv_rows(f'datasets/{app_name}_release_notes.csv'))
 
     logger.info("Loading reviews from CSV...")
-    review_data = encode_text(model, load_csv_rows('datasets/slack_reviews.csv'), is_review=True)
+    review_data = encode_text(model, load_csv_rows(f'datasets/{app_name}_reviews.csv'), is_review=True)
 
     filtered_pairs = filter_pairs(release_note_data, review_data)
     total_candidate_pairs = len(release_note_data) * len(review_data)
@@ -256,4 +268,10 @@ if __name__ == "__main__":
     model.load_state_dict(torch.load("./models/aspect_sentiment_extractor.pth", map_location=DEVICE))
     model.eval()
 
-    release_notes_vs_reviews_comparison(model, output_file="results/release_notes_comparison.json")
+    with open("./web_scraping/apps.csv", 'r') as f:
+        reader = csv.DictReader(f)
+        apps = [row['name'].strip().lower() for row in reader if row['app_id'].strip()]
+
+    for app_name in apps:
+        logger.info(f"Comparing release notes and reviews for {app_name}...")
+        release_notes_vs_reviews_comparison(model, app_name, output_file=f"results/{app_name}_release_notes_comparison_thinned.json")

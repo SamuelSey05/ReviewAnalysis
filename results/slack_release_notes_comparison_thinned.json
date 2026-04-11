@@ -1,0 +1,210 @@
+{
+  "top_matches": [
+    {
+      "rank": 1,
+      "release_version": "Slack 22.05.10",
+      "review_id": "ed2c88d4-4c2f-4be7-b10b-067270264244",
+      "release_note": "(reliability) Fixed: When a message was deleted, it would very occasionally linger in the mobile app longer than was appropriate. See here, deleted messages: No lingering, loitering, dawdling, dithering or dallying. (Slack penal code 22.05.10)",
+      "review": "(reliability) Not able to download the mobile app, have already mailed you the concern still no resolution",
+      "similarity": 0.8794,
+      "lcs_length": 3,
+      "time_diff_days": 6
+    },
+    {
+      "rank": 2,
+      "release_version": "Slack 23.02.20",
+      "review_id": "d628cf0d-499b-4081-b795-6375fda30065",
+      "release_note": "(reliability) Fixed: Archived channels were erroneously appearing in the channel-specific notifications list, refusing to let the past stay in the past. \"We're sorry, but the channel you're trying to reach is no longer in service\" (though, you can always unarchive the channel if the time is ripe for a return).",
+      "review": "(efficiency) Doesn't update the messages in a channel consistently. Get alerts that there's a new message, but the message doesn't appear in the channel. Have to force stop and restart to see new messages.",
+      "similarity": 0.8754,
+      "lcs_length": 3,
+      "time_diff_days": 804
+    },
+    {
+      "rank": 3,
+      "release_version": "Slack 20.06.20",
+      "review_id": "86b6f04e-d86d-49a0-b291-b6b0c5f674c4",
+      "release_note": "(compatibility) This is the last version of Slack that will work on Android 5.0. To get updates in the future, you'll need to update your device to Android 6.0 (or newer).",
+      "review": "(compatibility) Notification mostly does not work on Android 8.1.0 on vivo y93 phone",
+      "similarity": 0.8717,
+      "lcs_length": 3,
+      "time_diff_days": 369
+    },
+    {
+      "rank": 4,
+      "release_version": "Slack 23.12.10",
+      "review_id": "d628cf0d-499b-4081-b795-6375fda30065",
+      "release_note": "(efficiency) Fixed: The app was crashing when scrolling backward in a channel, which was less than ideal (to put it mildly). Time may only move in one direction, but your channel history should always be available to you.",
+      "review": "(efficiency) Doesn't update the messages in a channel consistently. Get alerts that there's a new message, but the message doesn't appear in the channel. Have to force stop and restart to see new messages.",
+      "similarity": 0.8218,
+      "lcs_length": 3,
+      "time_diff_days": 1104
+    },
+    {
+      "rank": 5,
+      "release_version": "Slack 25.02.40",
+      "review_id": "d628cf0d-499b-4081-b795-6375fda30065",
+      "release_note": "(reliability) Tapping the search icon (magnifying glass) in a channel was sometimes causing the app to crash. We're ... pretty sure that's not what you were looking for. That said, if it's a bug fix you seek? Well, look no further.",
+      "review": "(efficiency) Doesn't update the messages in a channel consistently. Get alerts that there's a new message, but the message doesn't appear in the channel. Have to force stop and restart to see new messages.",
+      "similarity": 0.7962,
+      "lcs_length": 3,
+      "time_diff_days": 1552
+    },
+    {
+      "rank": 6,
+      "release_version": "Slack 23.08.20",
+      "review_id": "fc89a731-7cbc-4bee-be91-2b4e63b19caa",
+      "release_note": "(reliability) Fixed: Tapping on a channel's bookmarked links would result in an error message that \"Something went wrong.\" We hope that every time a link works henceforth, you will think to yourself, \"Something went right.\"",
+      "review": "(reliability) It constantly breaks. Fails to send messages and then the failed messages stick around forever telling you they didn't work. I have to uninstall and reinstall every time a message doesn't send. Which is often. Totally unreliable.",
+      "similarity": 0.7942,
+      "lcs_length": 3,
+      "time_diff_days": 40
+    },
+    {
+      "rank": 7,
+      "release_version": "Slack 25.09.20",
+      "review_id": "d628cf0d-499b-4081-b795-6375fda30065",
+      "release_note": "(efficiency) When creating a new message, it wasn't possible to add multiple people to a DM (despite the checkboxes tantalizingly suggesting it was). We apologize for the mixed messages. Bug fixed? Check.",
+      "review": "(efficiency) Doesn't update the messages in a channel consistently. Get alerts that there's a new message, but the message doesn't appear in the channel. Have to force stop and restart to see new messages.",
+      "similarity": 0.7628,
+      "lcs_length": 3,
+      "time_diff_days": 1748
+    },
+    {
+      "rank": 8,
+      "release_version": "Slack 22.05.10",
+      "review_id": "fc6d4f33-530a-4c51-b58d-b9ea7dd3c17a",
+      "release_note": "(reliability) Fixed: When a message was deleted, it would very occasionally linger in the mobile app longer than was appropriate. See here, deleted messages: No lingering, loitering, dawdling, dithering or dallying. (Slack penal code 22.05.10)",
+      "review": "(compatibility) The newest update has made the app unstable it seems. Earlier it uses to be so fluid. I preferred the mobile app over the desktop app. But now the mobile app is almost unusable at times.",
+      "similarity": 0.7626,
+      "lcs_length": 3,
+      "time_diff_days": 640
+    },
+    {
+      "rank": 9,
+      "release_version": "Slack 26.03.20",
+      "review_id": "d628cf0d-499b-4081-b795-6375fda30065",
+      "release_note": "(reliability) Like a receipt for the wrong purchase, a media player notification was appearing in the drawer after tapping on an image in Slack. Weirder still, pressing play on the notification would begin playing audio or video from a separate file further back in the channel history. Talk about Stranger Things. Here's hoping we've seen the series finale of this bug.",
+      "review": "(efficiency) Doesn't update the messages in a channel consistently. Get alerts that there's a new message, but the message doesn't appear in the channel. Have to force stop and restart to see new messages.",
+      "similarity": 0.7578,
+      "lcs_length": 3,
+      "time_diff_days": 1930
+    },
+    {
+      "rank": 10,
+      "release_version": "Slack 23.06.30",
+      "review_id": "59a90a59-4fbd-4943-ba11-5c34c01b7dd2",
+      "release_note": "(reliability) Fixed: In larger group DMs, scheduling a message was triggering the \"no backsies\" clause, whereby the app would crash suddenly if you tried to make any changes from the Drafts & Sent screen. We appointed our amazing mobile engineers to be \"it,\" and they went ahead and tagged out this bug.",
+      "review": "(efficiency) The app would be great except they dont have their notifications thing figured out. It has been like this for months where I keep getting notifications over and over again for the same message. It refuses to sync up between the phone and the webapp. I dont need my phone vibrating non stop for the 28 messages I have already read.",
+      "similarity": 0.7531,
+      "lcs_length": 3,
+      "time_diff_days": 1255
+    }
+  ],
+  "bottom_matches": [
+    {
+      "rank": 18393,
+      "release_version": "Slack 23.11.20",
+      "review_id": "e62b94c8-07d2-4b8b-83a8-8affbd31c173",
+      "release_note": "(reliability) \"The bug so nice, they fixed it twice!\" A couple of months ago, we issued a fix for a bug where drafts were sometimes sent to the wrong channel on spotty connections. We thought we had gotten it all, but it seems we missed a spot. Many thanks for your understanding.",
+      "review": "(reliability) Terrible name. Opaque login account system. User unfriendly ui.",
+      "similarity": 0.076,
+      "lcs_length": 0,
+      "time_diff_days": 707
+    },
+    {
+      "rank": 18394,
+      "release_version": "Slack 22.11.30",
+      "review_id": "b4656662-fbc4-4ce6-9559-71320e561bfe",
+      "release_note": "(efficiency) Minor tinkerings and tune-ups across the app. We appreciate you staying up to date! Let us know if you run into any problems by dropping us a line at feedback@slack.com.",
+      "review": "(efficiency) Confusing UX, not giving notifications or update phone icon on new messages.",
+      "similarity": 0.0758,
+      "lcs_length": 0,
+      "time_diff_days": 1049
+    },
+    {
+      "rank": 18395,
+      "release_version": "Slack 24.04.40",
+      "review_id": "8082cc8e-91b3-4ad1-a83d-218b174da54e",
+      "release_note": "(usability) Say hi to Slack AI! Our brand-new set of generative AI tools lets you search smarter, summarize conversations instantly, and much more. Head over to the Help Center to see how you can put Slack AI to work for you: https://slack.com/help/articles/25076892548883-Introducing--Slack-AI",
+      "review": "(usability) Not working worst app time waste",
+      "similarity": 0.0758,
+      "lcs_length": 0,
+      "time_diff_days": 870
+    },
+    {
+      "rank": 18396,
+      "release_version": "Slack 22.11.30",
+      "review_id": "bfa77b27-c2b9-4f2d-9541-c486313b2425",
+      "release_note": "(efficiency) Minor tinkerings and tune-ups across the app. We appreciate you staying up to date! Let us know if you run into any problems by dropping us a line at feedback@slack.com.",
+      "review": "(efficiency) Notifications aren't reliable on android",
+      "similarity": 0.0755,
+      "lcs_length": 0,
+      "time_diff_days": 2682
+    },
+    {
+      "rank": 18397,
+      "release_version": "Slack 19.08.20",
+      "review_id": "5affa130-d337-4369-a209-79275d2fa529",
+      "release_note": "(reliability) Fixed: A crash that sometimes occurred after sending a message while offline, and then coming back online no longer occurs. The app stays up, and the message is sent. Everyone wins.",
+      "review": "(reliability) Why don't you just block us all?! =D =D =D",
+      "similarity": 0.0752,
+      "lcs_length": 0,
+      "time_diff_days": 248
+    },
+    {
+      "rank": 18398,
+      "release_version": "Slack 22.10.40",
+      "review_id": "0edfab51-2b4f-4fd5-8fc2-1fb1fb78b58f",
+      "release_note": "(usability) If you're the sort who finds calm through cleaning, find some portable peace by moving channels between sections in your sidebar (provided you've created those sections already on the desktop app). Furniture is expensive--why not redecorate your sidebar instead?",
+      "review": "(usability) Totally counter-intuitive and buggy, making it basically useless for me.",
+      "similarity": 0.0752,
+      "lcs_length": 0,
+      "time_diff_days": 1009
+    },
+    {
+      "rank": 18399,
+      "release_version": "Slack 26.02.10",
+      "review_id": "9b82755b-83c8-49eb-bd32-4bdb0ffaf639",
+      "release_note": "(efficiency) We've tuned the engine and given the interior a thorough clean. Everything is now running smoothly again.",
+      "review": "(efficiency) Worst notification handling in any app anywhere",
+      "similarity": 0.0752,
+      "lcs_length": 0,
+      "time_diff_days": 971
+    },
+    {
+      "rank": 18400,
+      "release_version": "Slack 25.08.20",
+      "review_id": "9b82755b-83c8-49eb-bd32-4bdb0ffaf639",
+      "release_note": "(efficiency) We've tuned the engine and given the interior a thorough clean. Everything is now running smoothly again.",
+      "review": "(efficiency) Worst notification handling in any app anywhere",
+      "similarity": 0.0752,
+      "lcs_length": 0,
+      "time_diff_days": 796
+    },
+    {
+      "rank": 18401,
+      "release_version": "Slack 26.01.20",
+      "review_id": "43f8c85d-6915-439c-b2d5-a1079cbf1d15",
+      "release_note": "(efficiency) We've been working hard behind the scenes to make sure that everything is polished, well-oiled and running as it should be. If you notice anything to the contrary, as always, let us know at feedback@slack.com!",
+      "review": "(efficiency) Your new UI sucks. It's worth of no stars.",
+      "similarity": 0.0751,
+      "lcs_length": 0,
+      "time_diff_days": 2067
+    },
+    {
+      "rank": 18402,
+      "release_version": "Slack 25.09.10",
+      "review_id": "43f8c85d-6915-439c-b2d5-a1079cbf1d15",
+      "release_note": "(efficiency) We've been working hard behind the scenes to make sure that everything is polished, well-oiled and running as it should be. If you notice anything to the contrary, as always, let us know at feedback@slack.com!",
+      "review": "(efficiency) Your new UI sucks. It's worth of no stars.",
+      "similarity": 0.0751,
+      "lcs_length": 0,
+      "time_diff_days": 1934
+    }
+  ],
+  "stats": {
+    "total_pairs": 18402,
+    "pairs_before_aspect": 869000
+  }
+}

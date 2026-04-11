@@ -1,0 +1,210 @@
+{
+  "top_matches": [
+    {
+      "rank": 1,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "88e5156d-16c2-47b5-b036-c1d83dd5b91e",
+      "release_note": "(cost) Chat: Fixed a mobile issue that caused the price to not render properly when opening a Wishlisted item within the Shop.",
+      "review": "(cost) this app is so greedy you guys already overpriced nitro, and now you are lowering the amount of orbs you can get for watching videos?? 200 orbs?? are you kidding me, nitro was already hard enough to get with the 700 per vid. and the other quests are horrible they either require a controller or a pc, they barely have any mobile friendly quests which is so unfair, not everyone has enough money to buy expensive electronics and on top of that have 10$ a month to have the bare minimum. smh",
+      "similarity": 0.5635,
+      "lcs_length": 1,
+      "time_diff_days": 28
+    },
+    {
+      "rank": 2,
+      "release_version": "Discord 6 March 2026",
+      "review_id": "0b9ac63c-5b6d-4f4e-8ba8-0fcc18b1cc9f",
+      "release_note": "(usability) Accessibility: Screen readers can no longer focus on background elements in the Activities list in DM calls.",
+      "review": "(reliability) This app has become unusable since the last update. I can no longer interact with any buttons or navigate channels. So disappointed.",
+      "similarity": 0.5088,
+      "lcs_length": 3,
+      "time_diff_days": 4
+    },
+    {
+      "rank": 3,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "9294464a-87cf-493b-a57f-b4192e74f905",
+      "release_note": "(reliability) Media: Fixed an alignment issue on iOS and Android where the Send button for media was misaligned in the upload sheet.",
+      "review": "(reliability) save button doesn't work anymore. plz fix now because it keeps not wanting to save ANYTHING",
+      "similarity": 0.4863,
+      "lcs_length": 1,
+      "time_diff_days": 2
+    },
+    {
+      "rank": 4,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "587dd3fb-9fc2-4b02-b228-a2803df5f911",
+      "release_note": "(usability) Accessibility: The \"Join Voice\" button on voice channel invites is now properly grouped with the invite content for screen readers.",
+      "review": "(usability) Login impossible, because apparently I'm in a \"new location\" (I'm not, I'm literally at home with the same device I always use). The \"Verify Login\" button I get via Email only leads to error messages. App therefore unusable.",
+      "similarity": 0.485,
+      "lcs_length": 2,
+      "time_diff_days": 26
+    },
+    {
+      "rank": 5,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "bfd953e7-413d-4863-8680-d6df6ccaff30",
+      "release_note": "(usability) Accessibility: The \"Join Voice\" button on voice channel invites is now properly grouped with the invite content for screen readers.",
+      "review": "(usability) what the hell is e2e and I can't use voice",
+      "similarity": 0.4277,
+      "lcs_length": 1,
+      "time_diff_days": 34
+    },
+    {
+      "rank": 6,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "dfbb8945-cc6b-437e-96fe-4498bbf86a45",
+      "release_note": "(cost) Chat: Fixed a mobile issue that caused the price to not render properly when opening a Wishlisted item within the Shop.",
+      "review": "(cost) im not paying for stickers",
+      "similarity": 0.4203,
+      "lcs_length": 1,
+      "time_diff_days": 8
+    },
+    {
+      "rank": 7,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "fa1ce7ad-04b3-41e3-97ff-6d799f3eb311",
+      "release_note": "(reliability) Media: Fixed an alignment issue on iOS and Android where the Send button for media was misaligned in the upload sheet.",
+      "review": "(reliability) Ever since they've stopped having a dedicated android app, the mobile experience has continued to decline update after update",
+      "similarity": 0.4094,
+      "lcs_length": 1,
+      "time_diff_days": 33
+    },
+    {
+      "rank": 8,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "2ef1eb8b-eaf6-4ee2-9c84-cfab77a27cf5",
+      "release_note": "(efficiency) Accessibility: Fixed an issue where the \"people in common\" toast during Server Onboarding interfered with screen reader navigation.",
+      "review": "(efficiency) Useless on a tablet / large form screen. Every version has the same bug. Edit a message? Bottom of screen does not account for nav bar existence, draws under it, and since there is no keyboard 'SEND' function (enter is new line. Shift-Enter is new line!) and the Send BUTTON is behind another screen element, cannot send the edited message. Basic UI design, failed. Good job Discord.",
+      "similarity": 0.3905,
+      "lcs_length": 1,
+      "time_diff_days": 21
+    },
+    {
+      "rank": 9,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "3e638eae-f95c-4a00-961d-81c391963d76",
+      "release_note": "(efficiency) Accessibility: Fixed an issue where the \"people in common\" toast during Server Onboarding interfered with screen reader navigation.",
+      "review": "(efficiency) always bugging out with the microphone. no other chatting apps have this problem.",
+      "similarity": 0.3833,
+      "lcs_length": 1,
+      "time_diff_days": 14
+    },
+    {
+      "rank": 10,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "c46d18d5-ee46-4448-aaf2-fdfe92d2c442",
+      "release_note": "(efficiency) Accessibility: Fixed an issue where the \"people in common\" toast during Server Onboarding interfered with screen reader navigation.",
+      "review": "(reliability) this app is the worst",
+      "similarity": 0.3798,
+      "lcs_length": 1,
+      "time_diff_days": 18
+    }
+  ],
+  "bottom_matches": [
+    {
+      "rank": 988,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "e8dfb571-4d99-437f-ae36-442e22a6e787",
+      "release_note": "(usability) Accessibility: Fixed a bug on Desktop where Shop carousels continued to animate even with the Reduce Motion setting enabled.",
+      "review": "(usability) im suicidal and can't change my pfp",
+      "similarity": 0.0784,
+      "lcs_length": 0,
+      "time_diff_days": 7
+    },
+    {
+      "rank": 989,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "a07602d3-af33-4087-863a-8a5637b009df",
+      "release_note": "(security) Accessibility: Server icons in invite cards now announce their full server name for screen readers.",
+      "review": "(security) Billion dollar company that can't even create a working age verification system. How hard is it to simply just verify my age?",
+      "similarity": 0.0776,
+      "lcs_length": 0,
+      "time_diff_days": 30
+    },
+    {
+      "rank": 990,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "84b86a73-85fa-4307-83c9-b79e0c134967",
+      "release_note": "(usability) Accessibility: Current user information in server channel dropdown menus is now included in screen reader focus order.",
+      "review": "(usability) horrendous app. Never remembers me or my passwords so its useless to me",
+      "similarity": 0.0774,
+      "lcs_length": 0,
+      "time_diff_days": 4
+    },
+    {
+      "rank": 991,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "18cf4d00-7d03-4508-872e-764c7cffe6fb",
+      "release_note": "(security) Accessibility: Screen readers now announce the muted status of members in voice channel details.",
+      "review": "(security) From Data Leaks to Security Vulnerabilities Avoid At All Costs!!!",
+      "similarity": 0.0772,
+      "lcs_length": 0,
+      "time_diff_days": 31
+    },
+    {
+      "rank": 992,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "6ed39493-7978-489e-8adb-6dc3e90a2b66",
+      "release_note": "(security) Accessibility: Screen readers now announce the muted status of members in voice channel details.",
+      "review": "(security) There's this problem when I change my profile with a normal photo and I keep on getting banned. Like what's wrong with it? it's not something that offends.",
+      "similarity": 0.077,
+      "lcs_length": 0,
+      "time_diff_days": 28
+    },
+    {
+      "rank": 993,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "e1f50b07-272f-4a92-9418-02ec7a8f47b1",
+      "release_note": "(security) Accessibility: Screen readers now announce the muted status of members in voice channel details.",
+      "review": "(security) worst privacy breaching app ever seen",
+      "similarity": 0.0763,
+      "lcs_length": 0,
+      "time_diff_days": 19
+    },
+    {
+      "rank": 994,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "54736b59-2164-481a-8877-fedec826a965",
+      "release_note": "(security) Accessibility: The \"Join\" button on server invite cards in DMs is now properly grouped with the invite content for screen readers.",
+      "review": "(security) bad security and collecting of user data.",
+      "similarity": 0.0763,
+      "lcs_length": 0,
+      "time_diff_days": 33
+    },
+    {
+      "rank": 995,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "9ab3c85e-9018-42aa-a407-517c4e7076c3",
+      "release_note": "(usability) Accessibility: Edit Profile tabs now announce tab numbers for screen readers (e.g., \"1 of 2\").",
+      "review": "(usability) why are they gooning on Discord app logo/icon ",
+      "similarity": 0.076,
+      "lcs_length": 0,
+      "time_diff_days": 28
+    },
+    {
+      "rank": 996,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "a46347cb-e36a-4e59-83b8-dfe29dae35d0",
+      "release_note": "(security) Accessibility: The \"Join\" button on server invite cards in DMs is now properly grouped with the invite content for screen readers.",
+      "review": "(security) Use anything but discord, because they don't care about you and your privacy.",
+      "similarity": 0.0759,
+      "lcs_length": 0,
+      "time_diff_days": 38
+    },
+    {
+      "rank": 997,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "dc6ae1fe-1ece-4cfc-aa69-3c843c4a8c0e",
+      "release_note": "(usability) Accessibility: Current user information in server channel dropdown menus is now included in screen reader focus order.",
+      "review": "(usability) it needs to stop asking me what I think",
+      "similarity": 0.0754,
+      "lcs_length": 0,
+      "time_diff_days": 19
+    }
+  ],
+  "stats": {
+    "total_pairs": 997,
+    "pairs_before_aspect": 11750000
+  }
+}

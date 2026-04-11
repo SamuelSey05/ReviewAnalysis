@@ -1,0 +1,210 @@
+{
+  "top_matches": [
+    {
+      "rank": 1,
+      "release_version": "Discord 3 February 2025",
+      "review_id": "2719076d-fdd1-461b-998c-0da953126051",
+      "release_note": "(reliability) Media: Videos that are within a spoiler tag should no longer have the video player controls cut off.",
+      "review": "(reliability) The video player is trash",
+      "similarity": 1.0614,
+      "lcs_length": 3,
+      "time_diff_days": 21
+    },
+    {
+      "rank": 2,
+      "release_version": "Discord 4 August 2025",
+      "review_id": "16966c1c-700d-4873-88eb-d18c83f95fa5",
+      "release_note": "(efficiency) Media: Fixed an issue on iOS where images in chat would disappear after interacting with a web link and navigating back to the app.",
+      "review": "(efficiency) there's randomly no option to hit send on messages, same issue on iOS",
+      "similarity": 0.8809,
+      "lcs_length": 3,
+      "time_diff_days": 424
+    },
+    {
+      "rank": 3,
+      "release_version": "Discord 4 February 2026",
+      "review_id": "72e8c778-6fd4-4697-b95f-41afd0078c11",
+      "release_note": "(security) Accessibility: The \"Forget your password\" text for the modal to add a passkey is now properly marked as a header for screen readers.",
+      "review": "(security) Its an okay app but my problem is that I had made an account but for some reason it wouldn't allow me in unless I signed din again and when I attempted it said somthing was wrong and the fact u can make another acount is annoying and unreasonable what if u forget your password and attempt to awake another acount u can't. Im sort of annoyed and would like to see some changes.",
+      "similarity": 0.7352,
+      "lcs_length": 3,
+      "time_diff_days": 354
+    },
+    {
+      "rank": 4,
+      "release_version": "Discord 7 October 2025",
+      "review_id": "80eb6022-a185-4a8d-90ff-8f823bf7f24e",
+      "release_note": "(efficiency) Accessibility: Resolved issues with the VoiceOver two-finger Scrub gesture not registering properly in certain parts of the app.",
+      "review": "(effectiveness) I have no issues with the app",
+      "similarity": 0.6965,
+      "lcs_length": 3,
+      "time_diff_days": 213
+    },
+    {
+      "rank": 5,
+      "release_version": "Discord 6 March 2026",
+      "review_id": "04ce3e5f-d794-4746-bca6-7ff60d66542e",
+      "release_note": "(reliability) Accessibility: Fixed a bug that caused screen reader focus to shift when the \"Toggle media keyboard\" button is used to initiate a collapse.",
+      "review": "(reliability) multiple UI bugs require restart to be fixed. including the scaling of media roll when you tap the plus button. this has been a bug for years, and they still havent fixed it somehow",
+      "similarity": 0.6715,
+      "lcs_length": 2,
+      "time_diff_days": 103
+    },
+    {
+      "rank": 6,
+      "release_version": "Discord 1 May 2025",
+      "review_id": "fff51e99-2c4d-4763-bc6e-1b2966c93f6d",
+      "release_note": "(efficiency) Audio/Video: Fixed a false alarm where Discord could incorrectly report no mic input while you're muted.",
+      "review": "(cost) The addition of video adds will ruin the entire app. needlessly greedy",
+      "similarity": 0.6705,
+      "lcs_length": 1,
+      "time_diff_days": 37
+    },
+    {
+      "rank": 7,
+      "release_version": "Discord 3 September 2025",
+      "review_id": "28452d09-bf62-4690-95b6-5a70ac4236ee",
+      "release_note": "(reliability) Media: Fixed an Android crash that could occur when receiving call notifications due to improper image loading initialization.",
+      "review": "(reliability) Since the major rework at the start of 2024 image attachment previews will often fail to load if the channel has high activity, and occasionally causing a complete app crash. I spent weeks going through it with Discord support to try resolve the issue but they refuse to acknowledge the problem even exists, despite including videos of it.",
+      "similarity": 0.6656,
+      "lcs_length": 1,
+      "time_diff_days": 393
+    },
+    {
+      "rank": 8,
+      "release_version": "Discord 1 August 2024",
+      "review_id": "5eb34d4f-bcb5-482f-9841-3c3051b26b9c",
+      "release_note": "(efficiency) General: Unbanning users should now immediately remove them from the ban list in the UI.",
+      "review": "(safety) every one wants to ban me",
+      "similarity": 0.6643,
+      "lcs_length": 1,
+      "time_diff_days": 15
+    },
+    {
+      "rank": 9,
+      "release_version": "Discord 3 February 2025",
+      "review_id": "65b5fa14-bc20-47e4-b3c6-d58d715b40de",
+      "release_note": "(usability) Accessibility: Screen readers should no longer get their focus stuck on \"Copy Link\" in the DM list.",
+      "review": "(efficiency) App is user-hostile. It hangs, it lags. It fails to function as intended on 2 of every 5 buttons. Awful. Worse than this, Discord doesn't care. Watch below for another tonedeaf copy-paste diatribe by their astroturfing team.",
+      "similarity": 0.6635,
+      "lcs_length": 1,
+      "time_diff_days": 247
+    },
+    {
+      "rank": 10,
+      "release_version": "Discord 11 March 2025",
+      "review_id": "bb71066e-5b09-4433-bf07-1476326521de",
+      "release_note": "(efficiency) Media: Resolved issues with navigation within Image Galleries on mobile not functioning properly.",
+      "review": "(efficiency) The mobile app is not to good.",
+      "similarity": 0.6606,
+      "lcs_length": 1,
+      "time_diff_days": 198
+    }
+  ],
+  "bottom_matches": [
+    {
+      "rank": 18216,
+      "release_version": "Discord 8 December 2025",
+      "review_id": "485026f6-d0d5-4ca2-b0fa-e90e648edaa6",
+      "release_note": "(reliability) Media: Fixed a bug that caused videos on Android to stop playing when a new reaction was added to them.",
+      "review": "(reliability) Making the experience worse and worse.",
+      "similarity": 0.0753,
+      "lcs_length": 0,
+      "time_diff_days": 565
+    },
+    {
+      "rank": 18217,
+      "release_version": "Discord 7 July 2025",
+      "review_id": "d1280d48-fce6-44fb-90c7-b5a6e8f609e0",
+      "release_note": "(usability) Accessibility: Resolved several insufficient contrast issues in various flows with the back button.",
+      "review": "(usability) Kind of hard to use your app if I have no way to login to my account.",
+      "similarity": 0.0753,
+      "lcs_length": 0,
+      "time_diff_days": 150
+    },
+    {
+      "rank": 18218,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "942987ea-8a2d-410d-b1ca-7fbae7cd43aa",
+      "release_note": "(security) Accessibility: Server icons in invite cards now announce their full server name for screen readers.",
+      "review": "(security) Ridiculous, they send u verification codes that dont work and so you spend hours trying to get back into your account.",
+      "similarity": 0.0753,
+      "lcs_length": 0,
+      "time_diff_days": 528
+    },
+    {
+      "rank": 18219,
+      "release_version": "Discord 4 August 2025",
+      "review_id": "b79caa96-a8ea-4bb6-b65e-8e90c8eb4b10",
+      "release_note": "(usability) Accessibility: The Channel Name and Channel Topic input fields in Channel Settings now have labels for screen readers.",
+      "review": "(usability) it's too hard to use",
+      "similarity": 0.0752,
+      "lcs_length": 0,
+      "time_diff_days": 116
+    },
+    {
+      "rank": 18220,
+      "release_version": "Discord 6 March 2026",
+      "review_id": "793fec2d-05ae-45a9-b0fe-4105fe4bcb56",
+      "release_note": "(security) Accessibility: VoiceOver should now properly announce dates and hours for sent messages.",
+      "review": "(security) my friend gifted me nitro, but it told me to verify my account, I tried to verify my account, I was clicking it a lot but it just DIDN'T work. I tried to add my email but it said that my email was already in another account, which was true but I deleted the account after so that means my email isn't in the account anymore cuz it doesn't exist. I was genuinely very upset because I could not receive my nitro!.",
+      "similarity": 0.0752,
+      "lcs_length": 0,
+      "time_diff_days": 103
+    },
+    {
+      "rank": 18221,
+      "release_version": "Discord 3 September 2025",
+      "review_id": "f8a00f76-ce87-401d-857d-2ec54331c2f9",
+      "release_note": "(compatibility) General: The channel details header no longer overlaps with the iPad status bar.",
+      "review": "(compatibility) new ui is just so bad and inconvenient",
+      "similarity": 0.0751,
+      "lcs_length": 0,
+      "time_diff_days": 412
+    },
+    {
+      "rank": 18222,
+      "release_version": "Discord 8 December 2025",
+      "review_id": "7da397ca-0dd2-47a9-b520-88d09fc71161",
+      "release_note": "(reliability) Media: Fixed a bug that caused animated GIFs to not animate for the sender on Android.",
+      "review": "(reliability) chtwnh myyn fsh mydyn bhtryn brnmh ynh bld nysty nyz ny bryzy",
+      "similarity": 0.0751,
+      "lcs_length": 0,
+      "time_diff_days": 287
+    },
+    {
+      "rank": 18223,
+      "release_version": "Discord 6 April 2026",
+      "review_id": "14183b37-c0c6-4bee-9ef3-47e835590f33",
+      "release_note": "(usability) Accessibility: The Community Server Onboarding page text now has proper heading markup for screen readers.",
+      "review": "(usability) I lost my phone I try to login my account its show me to enter my passcode I don't know why",
+      "similarity": 0.0751,
+      "lcs_length": 0,
+      "time_diff_days": 306
+    },
+    {
+      "rank": 18224,
+      "release_version": "Discord 4 November 2025",
+      "review_id": "4073513b-1dda-4c03-8803-92336f01700b",
+      "release_note": "(efficiency) Accessibility: Resolved an issue where VoiceOver scrolling could break after loading additional messages in a channel.",
+      "review": "(efficiency) Very bad glichy very hard to use",
+      "similarity": 0.0751,
+      "lcs_length": 0,
+      "time_diff_days": 503
+    },
+    {
+      "rank": 18225,
+      "release_version": "Discord 1 May 2025",
+      "review_id": "ebc64fdb-316f-4e89-a794-edf8c6d90455",
+      "release_note": "(usability) Accessibility: Fixed an issue where screen reader users could accidentally switch tabs while navigating search results.",
+      "review": "(usability) Horrible app. I'm going to use the desktop website in chrome. I hate mobile accessability design. They have done it so bad.",
+      "similarity": 0.075,
+      "lcs_length": 0,
+      "time_diff_days": 196
+    }
+  ],
+  "stats": {
+    "total_pairs": 18225,
+    "pairs_before_aspect": 23500000
+  }
+}

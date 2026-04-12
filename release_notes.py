@@ -1,5 +1,5 @@
 import csv
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from itertools import product
 from difflib import SequenceMatcher
 import json
@@ -118,56 +118,58 @@ def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict
 
         note_date, review_date = pair_dates(note, review)
 
-        if note_date > review_date:
+        # Release note must come after the review, and within a year of the review
+        if note_date > review_date and (note_date - review_date) < timedelta(days=365):
             filtered_pairs.append((note, review))
 
     return filtered_pairs
 
-def lcs_length(a: list[str], b: list[str]) -> int:
-    """Calculate the length of the longest common subsequence between two lists of tokens
+def get_longest_match(a: list[str], b: list[str]) -> list[str]:
+    """Calculate the length of the longest match between two lists of tokens
 
     Args:
         a (list[str]): First list of tokens
         b (list[str]): Second list of tokens
 
     Returns:
-        int: Length of the longest common subsequence
+        list[str]: The longest match
     """
 
     matcher = SequenceMatcher(None, a, b)
     match = matcher.find_longest_match(0, len(a), 0, len(b))
-    return match.size
+    return a[match.a: match.a + match.size]
 
-def score_pairs(filtered_pairs: list[tuple[dict, dict]]) -> dict[tuple[int, int], dict]:
+def score_pairs(filtered_pairs: list[tuple[dict, dict]]) -> dict[tuple[str, str], dict]:
     """Use cosine similarity to score and rank the filtered (release note, review) pairs based on their embeddings
 
     Args:
         filtered_pairs (list[tuple[dict, dict]]): (release note, review) pairs that have been filtered to match the criteria of the note coming after a negative review about the same aspect
 
     Returns:
-        dict[tuple[int, int], dict]: Dict from (release_note_id, review_id) to {"similarity": float, "release_note": dict, "review": dict}) tuples
+        dict[tuple[str, str], dict]: Dict from (release_note_id, review_id) to {"similarity": float, "release_note": dict, "review": dict}) tuples
     """
 
     results = dict()
     for note, review in filtered_pairs:
         cosine = pair_cosine_similarity(note, review)
 
-        lcs_length_value = lcs_length(note["tokens"], review["tokens"])
+        longest_match = get_longest_match(note["tokens"], review["tokens"])
+        longest_match_length = len(longest_match)
 
-        lcs_score = lcs_length_value / max(1, min(len(note['tokens']), len(review['tokens'])))
+        longest_match_score = longest_match_length / max(1, min(len(note['tokens']), len(review['tokens'])))
 
         # Give a boost to pairs with long lcs
-        similarity = 0.5 * cosine + 0.5 * lcs_score + (0.2 if lcs_length_value >= 3 else 0) + (0.15 if OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING.intersection(set(note["tokens"]), set(review["tokens"])) else 0)
+        similarity = 0.4 * cosine + 0.4 * longest_match_score + (0.2 if set(longest_match).intersection(OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING) else 0)
 
         # Maybe add a penalty for generic reviews
 
         note_date, review_date = pair_dates(note, review)
 
-        results[(note['version'], review['reviewId'])] = {
+        results[(note['release_note_id'], review['reviewId'])] = {
             "similarity": similarity,
             "release_note": note,
             "review": review,
-            "lcs_length": lcs_length_value,
+            "lcs_length": longest_match_length,
             "time_diff_days": (note_date - review_date).days,
         }
 
@@ -179,12 +181,13 @@ def format_result_rows(
     start_rank: int,
 ) -> list[dict]:
     rows = []
-    for offset, ((note_id, review_id), result) in enumerate(ranked_results):
+    for offset, ((release_note_id, review_id), result) in enumerate(ranked_results):
         note = result["release_note"]
         review = result["review"]
         rows.append({
             "rank": start_rank + offset,
-            "release_version": note_id,
+            "release_note_id": release_note_id,
+            "release_version": note["version"],
             "review_id": review_id,
             "release_note": f"({aspect_labels[note['aspect']]}) {note['content']}",
             "review": f"({aspect_labels[review['aspect']]}) {review['content']}",
@@ -195,11 +198,11 @@ def format_result_rows(
 
     return rows
 
-def write_results_to_json(sorted_results: list[tuple[tuple[int, int], dict]], total_candidate_pairs: int, output_file: str) -> None:
+def write_results_to_json(sorted_results: list[tuple[tuple[str, str], dict]], total_candidate_pairs: int, output_file: str) -> None:
     """Formats and writes the results of the similarity comparison by putting the 10 best and worst matches into the json 
 
     Args:
-        sorted_results (list[tuple[tuple[int, int], dict]]): Sorted list of ((release_note_id, review_id), {"similarity": float, "release_note": dict, "review": dict}) tuples, ranked by similarity in descending order
+        sorted_results (list[tuple[tuple[str, str], dict]]): Sorted list of ((release_note_id, review_id), {"similarity": float, "release_note": dict, "review": dict}) tuples, ranked by similarity in descending order
         total_candidate_pairs (int): Total number of release note-review pairs before filtering by aspect and date, used for context in the output stats
         total_filtered_pairs (int): Total number of release note-review pairs after filtering by aspect and date, used for context in the output stats
         output_file (str): Output file path for the results JSON

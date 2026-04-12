@@ -5,6 +5,8 @@ from ftfy import fix_text
 from unidecode import unidecode
 from playwright.sync_api import sync_playwright, Locator
 
+RELEASE_NOTE_FIELDS = ["release_note_id", "version", "date", "content"]
+
 def normalise_text(text: str) -> str:
     """Normalize text by fixing encoding issues and removing special characters.
 
@@ -69,9 +71,13 @@ def clean_release_text(text: str, version: str, date: str) -> str:
 
 
 def extract_date_from_discord_url(article_url: str) -> str:
-    """Extract and normalize patch-note date from a Discord article URL.
+    """Extract release date from a Discord release note article URL.
 
-    Example URL suffix: discord-patch-notes-april-6-2026
+    Args:
+        article_url (str): URL of the Discord release note article to extract the date from.
+
+    Returns:
+        str: String representation of the release date in form "DD Month YYYY".
     """
 
     match = re.search(r"discord-patch-notes-([a-z]+)(?:-(\d{1,2}))?-(\d{4})/?$", article_url)
@@ -82,6 +88,25 @@ def extract_date_from_discord_url(article_url: str) -> str:
     # Fallback on 30th if day is not present in URL
     day = day or "30"
     return f"{int(day)} {month.capitalize()} {year}"
+
+
+def write_release_note_row(writer: csv.DictWriter, release_note_id: str, version: str, date: str, content: str) -> None:
+    """Write row to csv for a release note.
+
+    Args:
+        writer (csv.DictWriter): CSV DictWriter object to write the row with.
+        release_note_id (str): ID for the release note, should be unique and stable across runs.
+        version (str): Version string for the release note, e.g. "Discord 30 September 2023".
+        date (str): Release date string, e.g. "30 September 2023".
+        content (str): Content of the release note.
+    """
+
+    writer.writerow({
+        "release_note_id": release_note_id,
+        "version": version.strip(),
+        "date": date.strip(),
+        "content": content.strip(),
+    })
 
 def scrape_release_notes_discord(url):
     with sync_playwright() as p:
@@ -100,8 +125,9 @@ def scrape_release_notes_discord(url):
         print(f"Found {len(articles)} release note articles.")
 
         with open("datasets/discord_release_notes.csv", mode="w", newline="", encoding="utf-8") as file:
-            writer = csv.DictWriter(file, fieldnames=["version", "date", "content"])
+            writer = csv.DictWriter(file, fieldnames=RELEASE_NOTE_FIELDS)
             writer.writeheader()
+            release_note_id = 0
 
             for article_url in articles:
 
@@ -110,9 +136,6 @@ def scrape_release_notes_discord(url):
                 parsed_date = extract_date_from_discord_url(article_url)
 
                 page.goto(article_url, wait_until="networkidle", timeout=60000)
-
-                with open("diagnostic_dump.html", "w", encoding="utf-8") as f:
-                    f.write(page.content())
 
                 page.wait_for_selector("article.article_rich-text-2", timeout=15000)           
 
@@ -130,11 +153,16 @@ def scrape_release_notes_discord(url):
                         for index in range(len(bullet_items)):
                             bullet_text = clean_release_text(bullet_items[index].inner_text().strip(), "", "")
                             if bullet_text:
-                                writer.writerow({
-                                    "version": f"Discord {parsed_date}",
-                                    "date": parsed_date,
-                                    "content": f"{current_category.strip()}: {bullet_text.strip()}",
-                                })  
+                                release_note_id += 1
+                                write_release_note_row(
+                                    writer,
+                                    f"discord-{release_note_id}",
+                                    f"Discord {parsed_date}",
+                                    parsed_date,
+                                    f"{current_category.strip()}: {bullet_text.strip()}",
+                                )
+
+
 def scrape_release_notes(url):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -159,8 +187,9 @@ def scrape_release_notes(url):
         print(f"Found {len(releases)} release notes.")
 
         with open("datasets/slack_release_notes.csv", mode="w", newline="", encoding="utf-8") as file:
-            writer = csv.DictWriter(file, fieldnames=["version", "date", "content"])
+            writer = csv.DictWriter(file, fieldnames=RELEASE_NOTE_FIELDS)
             writer.writeheader()
+            release_note_id = 0
 
             for release in releases:
                 version = normalise_text(release.locator("h2").inner_text().strip())
@@ -174,18 +203,21 @@ def scrape_release_notes(url):
                     snippets = [raw_content] if raw_content else []
 
                 for snippet in snippets:
-                    writer.writerow({
-                        "version": version.strip(),
-                        "date": date.strip(),
-                        "content": snippet.strip(),
-                    })
+                    release_note_id += 1
+                    write_release_note_row(
+                        writer,
+                        f"slack-{release_note_id}",
+                        version,
+                        date,
+                        snippet,
+                    )
 
         browser.close()    
 
 if __name__ == "__main__":
-    # url = "https://slack.com/release-notes/android"
-    # scrape_release_notes(url)
-    # print("Release notes scraped and saved to slack_release_notes.csv")
+    url = "https://slack.com/release-notes/android"
+    scrape_release_notes(url)
+    print("Release notes scraped and saved to slack_release_notes.csv")
 
     url = "https://discord.com/tags/patch-notes"
     scrape_release_notes_discord(url)

@@ -334,17 +334,6 @@
   "bottom_matches": [
     {
       "rank": 294,
-      "release_note_id": "slack-18",
-      "release_version": "Slack 26.01.10",
-      "review_id": "6f1b1dd7-c6dd-46a4-bdba-b73cf706f9fe",
-      "release_note": "(efficiency) We tweaked some things too small to notice or too difficult to explain. We'll return you to your regular, more interesting types of release next time (we hope).",
-      "review": "(efficiency) Such a poorly designed log in flow. I want to, but am unable, to log in and upgrade my organization.",
-      "similarity": 0.1491,
-      "lcs_length": 1,
-      "time_diff_days": 121
-    },
-    {
-      "rank": 295,
       "release_note_id": "slack-190",
       "release_version": "Slack 23.04.10",
       "review_id": "adffcc84-7747-4e78-9d35-84695759c2d9",
@@ -355,7 +344,7 @@
       "time_diff_days": 263
     },
     {
-      "rank": 296,
+      "rank": 295,
       "release_note_id": "slack-302",
       "release_version": "Slack 21.04.10",
       "review_id": "6ab16ae5-0adf-4d3e-926f-121bd491e4f9",
@@ -366,7 +355,7 @@
       "time_diff_days": 5
     },
     {
-      "rank": 297,
+      "rank": 296,
       "release_note_id": "slack-255",
       "release_version": "Slack 22.03.10",
       "review_id": "a75ce58a-8843-41e9-8c41-dd93c3de7214",
@@ -377,7 +366,7 @@
       "time_diff_days": 255
     },
     {
-      "rank": 298,
+      "rank": 297,
       "release_note_id": "slack-165",
       "release_version": "Slack 23.08.30",
       "review_id": "50db678a-3d6b-4141-bdf4-b9569d1c7120",
@@ -388,7 +377,7 @@
       "time_diff_days": 197
     },
     {
-      "rank": 299,
+      "rank": 298,
       "release_note_id": "slack-112",
       "release_version": "Slack 24.06.20",
       "review_id": "c24b26f2-2df0-4ecb-a87f-9ba5b864eba2",
@@ -399,7 +388,7 @@
       "time_diff_days": 337
     },
     {
-      "rank": 300,
+      "rank": 299,
       "release_note_id": "slack-22",
       "release_version": "Slack 25.12.10",
       "review_id": "e8840689-42e0-4a48-8f0e-e334ea9182bd",
@@ -410,7 +399,7 @@
       "time_diff_days": 313
     },
     {
-      "rank": 301,
+      "rank": 300,
       "release_note_id": "slack-109",
       "release_version": "Slack 24.07.10",
       "review_id": "2edfddaf-a938-4d66-9f98-9a223ed9ab7a",
@@ -421,7 +410,7 @@
       "time_diff_days": 164
     },
     {
-      "rank": 302,
+      "rank": 301,
       "release_note_id": "slack-192",
       "release_version": "Slack 23.03.40",
       "review_id": "3cf5c4ee-6ed9-495d-b2bd-db94546cdea3",
@@ -432,7 +421,7 @@
       "time_diff_days": 180
     },
     {
-      "rank": 303,
+      "rank": 302,
       "release_note_id": "slack-27",
       "release_version": "Slack 25.11.11",
       "review_id": "8a93f5fc-dd40-4de8-b040-4a609e5df7d2",
@@ -443,7 +432,7 @@
       "time_diff_days": 227
     },
     {
-      "rank": 304,
+      "rank": 303,
       "release_note_id": "slack-30",
       "release_version": "Slack 25.10.40",
       "review_id": "8a93f5fc-dd40-4de8-b040-4a609e5df7d2",
@@ -454,7 +443,7 @@
       "time_diff_days": 212
     },
     {
-      "rank": 305,
+      "rank": 304,
       "release_note_id": "slack-33",
       "release_version": "Slack 25.10.10",
       "review_id": "8a93f5fc-dd40-4de8-b040-4a609e5df7d2",
@@ -465,7 +454,7 @@
       "time_diff_days": 191
     },
     {
-      "rank": 306,
+      "rank": 305,
       "release_note_id": "slack-61",
       "release_version": "Slack 25.04.20",
       "review_id": "8a93f5fc-dd40-4de8-b040-4a609e5df7d2",
@@ -476,7 +465,7 @@
       "time_diff_days": 16
     },
     {
-      "rank": 307,
+      "rank": 306,
       "release_note_id": "slack-293",
       "release_version": "Slack 21.06.20",
       "review_id": "2631b483-3b74-4124-b0d5-0fa3819575ee",
@@ -485,6 +474,17 @@
       "similarity": 0.1343,
       "lcs_length": 1,
       "time_diff_days": 61
+    },
+    {
+      "rank": 307,
+      "release_note_id": "slack-306",
+      "release_version": "Slack 21.03.20",
+      "review_id": "d10fb0c6-06a5-4f1d-83fb-a98fda4c67fc",
+      "release_note": "(reliability) Fixed: Marking a reminder as complete should give you a deep and profound sense of satisfaction, not an error message. Those errors are gone now, so you can keep blazing through your to-do list.",
+      "review": "(reliability) Not trustworthy. Every now and then messages won't show in this app buggy they show in the windows app. Buggy",
+      "similarity": 0.1338,
+      "lcs_length": 1,
+      "time_diff_days": 6
     },
     {
       "rank": 308,

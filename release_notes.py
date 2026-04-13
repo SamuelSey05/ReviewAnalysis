@@ -195,14 +195,13 @@ def format_result_rows(
 
     return rows
 
-def write_results_to_json(sorted_results: list[tuple[tuple[str, str], dict]], total_candidate_pairs: int, density: float, mttr: float, output_file: str, k: int = 10) -> None:
+def write_results_to_json(sorted_results: list[tuple[tuple[str, str], dict]], total_candidate_pairs: int, no_of_negative_reviews: int, output_file: str, k: int = 10) -> None:
     """Formats and writes the results of the similarity comparison by putting the 10 best and worst matches into the json 
 
     Args:
         sorted_results (list[tuple[tuple[str, str], dict]]): Sorted list of ((release_note_id, review_id), {"similarity": float, "release_note": dict, "review": dict}) tuples, ranked by similarity in descending order
         total_candidate_pairs (int): Total number of release note-review pairs before filtering by aspect and date, used for context in the output stats
-        density (float): Density of matches above the similarity threshold, used for context in the output stats
-        mttr (float): Mean time to resolution for matches above the similarity threshold, used for context in the output stats
+        no_of_negative_reviews (int): Total number of negative reviews, used for calculating match density in the output stats
         output_file (str): Output file path for the results JSON
         k (int, optional): Number of top and bottom results to include in the output. Defaults to 10.
     """
@@ -221,6 +220,8 @@ def write_results_to_json(sorted_results: list[tuple[tuple[str, str], dict]], to
         start_rank=max(1, total_results - 9),
     )
 
+    density, mttr = calculate_reactivity(sorted_results, no_of_negative_reviews=no_of_negative_reviews)
+
     output_payload = {
         "top_matches": top_k_results,
         "bottom_matches": bottom_k_results,
@@ -235,6 +236,24 @@ def write_results_to_json(sorted_results: list[tuple[tuple[str, str], dict]], to
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     with open(output_file, 'w') as f:
         json.dump(output_payload, f, indent=2)
+
+def write_results(sorted_results: list[tuple[tuple[str, str], dict]], total_candidate_pairs: int, no_of_negative_reviews: int, output_file: str, k: int = 10) -> None:
+    """Write both raw and deduplicated result variants to JSON files.
+
+    Args:
+        sorted_results (list[tuple[tuple[str, str], dict]]): Sorted list of results by similarity (descending)
+        total_candidate_pairs (int): Total candidate pairs before filtering
+        no_of_negative_reviews (int): Number of negative reviews
+        output_file (str): Output file path for raw results
+        k (int, optional): Number of top and bottom results to include. Defaults to 10.
+    """
+    # Write raw results
+    write_results_to_json(sorted_results, total_candidate_pairs, no_of_negative_reviews, output_file, k=k)
+    
+    # Write deduplicated results
+    deduped_sorted_results = dedup_results_by_release_note(sorted_results)
+    deduped_output_file = output_file.replace(".json", "_dedup.json")
+    write_results_to_json(deduped_sorted_results, total_candidate_pairs, no_of_negative_reviews, deduped_output_file, k=k)
 
 def calculate_reactivity(sorted_results: list[tuple[tuple[str, str], dict]], no_of_negative_reviews: int, threshold: float = 0.5) -> tuple[float, float | None]:
 
@@ -293,7 +312,9 @@ def release_notes_vs_reviews_comparison(
     # Filter to only negative reviews and reviews with at least 5 words
     negative_reviews = {idx: data for idx, data in review_data.items() if data['sentiment'] == 0 and len(data['tokens']) >= 5}
 
-    filtered_pairs = filter_pairs(release_note_data, negative_reviews)
+    non_generic_notes = {idx: data for idx, data in release_note_data.items() if len(data['tokens']) >= 5}
+
+    filtered_pairs = filter_pairs(non_generic_notes, negative_reviews)
     total_candidate_pairs = len(release_note_data) * len(review_data)
 
     logger.info(f"Total release note-review pairs: {total_candidate_pairs}")
@@ -303,17 +324,10 @@ def release_notes_vs_reviews_comparison(
 
     # Sort results by similarity in descending order
     sorted_results = sorted(scored_results.items(), key=lambda x: x[1]['similarity'], reverse=True)
-    deduped_sorted_results = dedup_results_by_release_note(sorted_results)
 
-
-    density, mttr = calculate_reactivity(sorted_results, no_of_negative_reviews=len(negative_reviews))
-
-    if not mttr:
-        raise ValueError("No matches found above the similarity threshold, cannot calculate mean time to resolution.")
-
-    write_results_to_json(sorted_results, total_candidate_pairs, density, mttr, output_file, k=30)
+    write_results(sorted_results, total_candidate_pairs, len(negative_reviews), output_file, k=30)
     
-    logger.info(f"Results written to {output_file}")
+    logger.info(f"Results written to {output_file} and {output_file.replace('.json', '_deduped.json')}")
 
 
 if __name__ == "__main__":

@@ -83,22 +83,19 @@ def pair_dates(note: dict, review: dict) -> tuple[date, date]:
     review_date = datetime.strptime(review['at'], "%Y-%m-%d %H:%M:%S").date()
     return note_date, review_date
 
-def filter_pairs(release_note_data: dict[int, dict], review_data: dict[int, dict]) -> list[tuple[dict, dict]]:
+def filter_pairs(release_note_data: dict[int, dict], negative_reviews: dict[int, dict]) -> list[tuple[dict, dict]]:
     """Filters (release note, review) pairs so the note comes after a negative review about the same aspect
 
     Args:
         release_note_data (dict[int, dict]): Release notes
-        review_data (dict[int, dict]): Reviews
+        negative_reviews (dict[int, dict]): Negative reviews, filtered to only include those with at least 5 tokens to avoid generic one-word reviews
 
     Returns:
         list[tuple[dict, dict]]: List of (release note, review) pairs that match the filtering criteria
     """
-     
-    # Filter to only negative reviews and reviews with at least 5 words
-    review_data = {idx: data for idx, data in review_data.items() if data['sentiment'] == 0 and len(data['tokens']) >= 5}
 
     filtered_pairs = []
-    for note, review in product(release_note_data.values(), review_data.values()):
+    for note, review in product(release_note_data.values(), negative_reviews.values()):
         logger.debug(
             f"Release note (aspect: {note['aspect']}, date: {note['date']}), "
             f"Review (aspect: {review['aspect']}, date: {review['at']})"
@@ -198,22 +195,24 @@ def format_result_rows(
 
     return rows
 
-def write_results_to_json(sorted_results: list[tuple[tuple[str, str], dict]], total_candidate_pairs: int, output_file: str) -> None:
+def write_results_to_json(sorted_results: list[tuple[tuple[str, str], dict]], total_candidate_pairs: int, density: float, mttr: float, output_file: str, k: int = 10) -> None:
     """Formats and writes the results of the similarity comparison by putting the 10 best and worst matches into the json 
 
     Args:
         sorted_results (list[tuple[tuple[str, str], dict]]): Sorted list of ((release_note_id, review_id), {"similarity": float, "release_note": dict, "review": dict}) tuples, ranked by similarity in descending order
         total_candidate_pairs (int): Total number of release note-review pairs before filtering by aspect and date, used for context in the output stats
-        total_filtered_pairs (int): Total number of release note-review pairs after filtering by aspect and date, used for context in the output stats
+        density (float): Density of matches above the similarity threshold, used for context in the output stats
+        mttr (float): Mean time to resolution for matches above the similarity threshold, used for context in the output stats
         output_file (str): Output file path for the results JSON
+        k (int, optional): Number of top and bottom results to include in the output. Defaults to 10.
     """
 
     total_results = len(sorted_results)
 
     aspect_labels = load_aspect_labels()
     # Format results for JSON output
-    top_slice = sorted_results[:10]
-    bottom_slice = sorted_results[-10:]
+    top_slice = sorted_results[:k]
+    bottom_slice = sorted_results[-k:]
 
     top_k_results = format_result_rows(top_slice, aspect_labels, start_rank=1)
     bottom_k_results = format_result_rows(
@@ -228,6 +227,8 @@ def write_results_to_json(sorted_results: list[tuple[tuple[str, str], dict]], to
         "stats": {
             "total_pairs": total_results,
             "pairs_before_aspect": total_candidate_pairs,
+            "match_density": density,
+            "mean_time_to_resolution_days": mttr,
         }
     }
     
@@ -235,14 +236,53 @@ def write_results_to_json(sorted_results: list[tuple[tuple[str, str], dict]], to
     with open(output_file, 'w') as f:
         json.dump(output_payload, f, indent=2)
 
-def release_notes_vs_reviews_comparison(model: AspectSentimentExtractor, app_name: str, output_file: str = "results/release_notes_comparison.json"):
+def calculate_reactivity(sorted_results: list[tuple[tuple[str, str], dict]], no_of_negative_reviews: int, threshold: float = 0.5) -> tuple[float, float | None]:
+
+    fullfillments = [result for result in sorted_results if result[1]['similarity'] > threshold]
+
+    if not fullfillments:
+        return 0, None
+
+    density = len(fullfillments) / no_of_negative_reviews
+
+    mttr = sum(result[1]['time_diff_days'] for result in fullfillments) / len(fullfillments) 
+
+    return density, mttr
+
+def dedup_results_by_release_note(sorted_results: list[tuple[tuple[str, str], dict]]) -> list[tuple[tuple[str, str], dict]]:
+    """Keep only the highest-ranked match per release note ID.
+
+    Args:
+        sorted_results (list[tuple[tuple[str, str], dict]]): Similarity-ranked list of ((release_note_id, review_id), result) tuples.
+
+    Returns:
+        list[tuple[tuple[str, str], dict]]: Deduplicated ranking with at most one entry per release_note_id.
+    """
+
+    seen_release_note_ids = set()
+    deduped_results = []
+
+    for (release_note_id, review_id), result in sorted_results:
+        if release_note_id in seen_release_note_ids:
+            continue
+
+        seen_release_note_ids.add(release_note_id)
+        deduped_results.append(((release_note_id, review_id), result))
+
+    return deduped_results
+
+
+def release_notes_vs_reviews_comparison(
+    model: AspectSentimentExtractor,
+    app_name: str,
+    output_file: str = "results/release_notes_comparison.json",
+):
     """Conduct comparison between release notes and reviews for the same app
 
     Args:
         model (AspectSentimentExtractor): Model for generating embeddings and aspect/sentiment predictions 
         app_name (str): Name of the app to compare release notes and reviews for, used to load the correct CSV files
-        output_file (str, optional): Output file to store results. Defaults to "results/release_notes_comparison.json".
-    """
+        output_file (str, optional): Output file to store results. Defaults to "results/release_notes_comparison.json".    """
 
     logger.info("Loading release notes from CSV...")
     release_note_data = encode_text(model, load_csv_rows(f'datasets/{app_name}_release_notes.csv'))
@@ -250,7 +290,10 @@ def release_notes_vs_reviews_comparison(model: AspectSentimentExtractor, app_nam
     logger.info("Loading reviews from CSV...")
     review_data = encode_text(model, load_csv_rows(f'datasets/{app_name}_reviews.csv'), is_review=True)
 
-    filtered_pairs = filter_pairs(release_note_data, review_data)
+    # Filter to only negative reviews and reviews with at least 5 words
+    negative_reviews = {idx: data for idx, data in review_data.items() if data['sentiment'] == 0 and len(data['tokens']) >= 5}
+
+    filtered_pairs = filter_pairs(release_note_data, negative_reviews)
     total_candidate_pairs = len(release_note_data) * len(review_data)
 
     logger.info(f"Total release note-review pairs: {total_candidate_pairs}")
@@ -260,8 +303,15 @@ def release_notes_vs_reviews_comparison(model: AspectSentimentExtractor, app_nam
 
     # Sort results by similarity in descending order
     sorted_results = sorted(scored_results.items(), key=lambda x: x[1]['similarity'], reverse=True)
-    
-    write_results_to_json(sorted_results, total_candidate_pairs, output_file)
+    deduped_sorted_results = dedup_results_by_release_note(sorted_results)
+
+
+    density, mttr = calculate_reactivity(sorted_results, no_of_negative_reviews=len(negative_reviews))
+
+    if not mttr:
+        raise ValueError("No matches found above the similarity threshold, cannot calculate mean time to resolution.")
+
+    write_results_to_json(sorted_results, total_candidate_pairs, density, mttr, output_file, k=30)
     
     logger.info(f"Results written to {output_file}")
 

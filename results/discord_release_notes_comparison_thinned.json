@@ -109,11 +109,451 @@
       "similarity": 0.537,
       "lcs_length": 2,
       "time_diff_days": 141
+    },
+    {
+      "rank": 11,
+      "release_note_id": "discord-1459",
+      "release_version": "Discord 3 April 2025",
+      "review_id": "9cd81c78-e9d9-40ba-89e1-c6099807b211",
+      "release_note": "(efficiency) Accessibility: Users with screen readers will receive a more descriptive error message when entering an invalid phone number.",
+      "review": "(reliability) Sick of seeing \"ultra rare error\" message.",
+      "similarity": 0.5314,
+      "lcs_length": 2,
+      "time_diff_days": 167
+    },
+    {
+      "rank": 12,
+      "release_note_id": "discord-1783",
+      "release_version": "Discord 1 November 2024",
+      "review_id": "dd04140f-47dc-4db0-9e6f-b29690e5d474",
+      "release_note": "(efficiency) Chat: Fixed a bug that caused Notification Settings to incorrectly appear on DMs on mobile.",
+      "review": "(reliability) It lags on mobile pls fix ://",
+      "similarity": 0.5295,
+      "lcs_length": 2,
+      "time_diff_days": 47
+    },
+    {
+      "rank": 13,
+      "release_note_id": "discord-1446",
+      "release_version": "Discord 3 April 2025",
+      "review_id": "dd04140f-47dc-4db0-9e6f-b29690e5d474",
+      "release_note": "(reliability) Media: Fixed a bug on mobile where replying to a message by taking a picture locked the keyboard and sheet into an invalid state.",
+      "review": "(reliability) It lags on mobile pls fix ://",
+      "similarity": 0.5279,
+      "lcs_length": 2,
+      "time_diff_days": 200
+    },
+    {
+      "rank": 14,
+      "release_note_id": "discord-2270",
+      "release_version": "Discord 30 April 2024",
+      "review_id": "67062b69-fa6c-4208-931e-9ef97ffb6b18",
+      "release_note": "(efficiency) General: Resolved an issue where poll answer input on mobile had duplicate UI elements.",
+      "review": "(efficiency) Issues screensharing on mobile device",
+      "similarity": 0.5221,
+      "lcs_length": 2,
+      "time_diff_days": 212
+    },
+    {
+      "rank": 15,
+      "release_note_id": "discord-2323",
+      "release_version": "Discord 30 April 2024",
+      "review_id": "fbdaac68-9a9d-4cb1-b98e-e08c6117333f",
+      "release_note": "(efficiency) Audio/Video: Resolved an issue where voice messages weren't properly reducing background noise.",
+      "review": "(efficiency) Low quality on voice messages and calls",
+      "similarity": 0.5205,
+      "lcs_length": 2,
+      "time_diff_days": 177
+    },
+    {
+      "rank": 16,
+      "release_note_id": "discord-1070",
+      "release_version": "Discord 7 July 2025",
+      "review_id": "dd04140f-47dc-4db0-9e6f-b29690e5d474",
+      "release_note": "(reliability) General: Fixed a bug on mobile where the wrong back button icon was used on the Search screen. The correct one is back!",
+      "review": "(reliability) It lags on mobile pls fix ://",
+      "similarity": 0.5195,
+      "lcs_length": 2,
+      "time_diff_days": 295
+    },
+    {
+      "rank": 17,
+      "release_note_id": "discord-901",
+      "release_version": "Discord 4 August 2025",
+      "review_id": "dd04140f-47dc-4db0-9e6f-b29690e5d474",
+      "release_note": "(efficiency) General: Fixed an issue that caused masked links to not render properly in event descriptions on mobile.",
+      "review": "(reliability) It lags on mobile pls fix ://",
+      "similarity": 0.5165,
+      "lcs_length": 2,
+      "time_diff_days": 323
+    },
+    {
+      "rank": 18,
+      "release_note_id": "discord-1784",
+      "release_version": "Discord 1 November 2024",
+      "review_id": "fbdaac68-9a9d-4cb1-b98e-e08c6117333f",
+      "release_note": "(efficiency) Chat: Fixed a bug where the Voice Message UI was not placed properly, clipping into text input.",
+      "review": "(efficiency) Low quality on voice messages and calls",
+      "similarity": 0.5165,
+      "lcs_length": 1,
+      "time_diff_days": 362
+    },
+    {
+      "rank": 19,
+      "release_note_id": "discord-1446",
+      "release_version": "Discord 3 April 2025",
+      "review_id": "9cd81c78-e9d9-40ba-89e1-c6099807b211",
+      "release_note": "(reliability) Media: Fixed a bug on mobile where replying to a message by taking a picture locked the keyboard and sheet into an invalid state.",
+      "review": "(reliability) Sick of seeing \"ultra rare error\" message.",
+      "similarity": 0.5155,
+      "lcs_length": 1,
+      "time_diff_days": 167
+    },
+    {
+      "rank": 20,
+      "release_note_id": "discord-855",
+      "release_version": "Discord 3 September 2025",
+      "review_id": "434b1212-7fee-4706-8992-294bab8f7510",
+      "release_note": "(efficiency) Audio/Video: Getting kicked from a Voice Channel will now cause Discord to release your camera properly.",
+      "review": "(reliability) It would be funny how many issues this app has developed over the course of the last few months if it wasn't so genuinely experience breaking. Screen sharing mutes my audio when I leave the app, buttons will disappear, and now my audio cuts out constantly. It's not an issue with my phone, normal phone calls don't have this issue, and it's not my connection as I can join from PC with no audio issues. They say to uninstall and reinstall, I HAVE, THREE TIMES. This app is broken beyond belief.",
+      "similarity": 0.5151,
+      "lcs_length": 1,
+      "time_diff_days": 312
+    },
+    {
+      "rank": 21,
+      "release_note_id": "discord-780",
+      "release_version": "Discord 3 September 2025",
+      "review_id": "e3061285-de98-4aa7-9c17-4d05c32c5c34",
+      "release_note": "(efficiency) General: Fixed an issue causing the Country Code element for phone numbers on the login page to not function properly on Android.",
+      "review": "(efficiency) Can't login. No customer support",
+      "similarity": 0.5118,
+      "lcs_length": 1,
+      "time_diff_days": 303
+    },
+    {
+      "rank": 22,
+      "release_note_id": "discord-2099",
+      "release_version": "Discord 1 July 2024",
+      "review_id": "67062b69-fa6c-4208-931e-9ef97ffb6b18",
+      "release_note": "(efficiency) General: Fixed an issue with the Server Invitation page that caused the accept button to not be accessible in landscape mode on mobile.",
+      "review": "(efficiency) Issues screensharing on mobile device",
+      "similarity": 0.5104,
+      "lcs_length": 2,
+      "time_diff_days": 274
+    },
+    {
+      "rank": 23,
+      "release_note_id": "discord-1962",
+      "release_version": "Discord 30 August 2024",
+      "review_id": "fbdaac68-9a9d-4cb1-b98e-e08c6117333f",
+      "release_note": "(efficiency) Chat: Fixed a bug in Voice Messages that caused the volume icon to not properly change colors when the background color changed.",
+      "review": "(efficiency) Low quality on voice messages and calls",
+      "similarity": 0.5099,
+      "lcs_length": 2,
+      "time_diff_days": 299
+    },
+    {
+      "rank": 24,
+      "release_note_id": "discord-2324",
+      "release_version": "Discord 30 April 2024",
+      "review_id": "fbdaac68-9a9d-4cb1-b98e-e08c6117333f",
+      "release_note": "(efficiency) Audio/Video: Resolved an inconsistent issue where users couldn't mute properly in DM calls",
+      "review": "(efficiency) Low quality on voice messages and calls",
+      "similarity": 0.5085,
+      "lcs_length": 1,
+      "time_diff_days": 177
+    },
+    {
+      "rank": 25,
+      "release_note_id": "discord-1710",
+      "release_version": "Discord 5 December 2024",
+      "review_id": "9cd81c78-e9d9-40ba-89e1-c6099807b211",
+      "release_note": "(efficiency) General: Fixed an issue where message forwarding optional message input was improperly themed.",
+      "review": "(reliability) Sick of seeing \"ultra rare error\" message.",
+      "similarity": 0.5083,
+      "lcs_length": 1,
+      "time_diff_days": 48
+    },
+    {
+      "rank": 26,
+      "release_note_id": "discord-1721",
+      "release_version": "Discord 5 December 2024",
+      "review_id": "dd04140f-47dc-4db0-9e6f-b29690e5d474",
+      "release_note": "(efficiency) Activities and Apps: Fixed an issue where the modal that asks \"How'd the call go?\" on mobile was no longer able to be interacted with.",
+      "review": "(reliability) It lags on mobile pls fix ://",
+      "similarity": 0.5059,
+      "lcs_length": 2,
+      "time_diff_days": 81
+    },
+    {
+      "rank": 27,
+      "release_note_id": "discord-793",
+      "release_version": "Discord 3 September 2025",
+      "review_id": "dd04140f-47dc-4db0-9e6f-b29690e5d474",
+      "release_note": "(efficiency) General: Resolved an issue on mobile regarding the channel details panel's width being incorrect after rotating the device.",
+      "review": "(reliability) It lags on mobile pls fix ://",
+      "similarity": 0.5051,
+      "lcs_length": 2,
+      "time_diff_days": 353
+    },
+    {
+      "rank": 28,
+      "release_note_id": "discord-1345",
+      "release_version": "Discord 1 May 2025",
+      "review_id": "434b1212-7fee-4706-8992-294bab8f7510",
+      "release_note": "(efficiency) Audio/Video: Fixed a false alarm where Discord could incorrectly report no mic input while you're muted.",
+      "review": "(reliability) It would be funny how many issues this app has developed over the course of the last few months if it wasn't so genuinely experience breaking. Screen sharing mutes my audio when I leave the app, buttons will disappear, and now my audio cuts out constantly. It's not an issue with my phone, normal phone calls don't have this issue, and it's not my connection as I can join from PC with no audio issues. They say to uninstall and reinstall, I HAVE, THREE TIMES. This app is broken beyond belief.",
+      "similarity": 0.505,
+      "lcs_length": 1,
+      "time_diff_days": 187
+    },
+    {
+      "rank": 29,
+      "release_note_id": "discord-1900",
+      "release_version": "Discord 1 October 2024",
+      "review_id": "95f90708-78ff-476a-8466-65dd98fcf7eb",
+      "release_note": "(reliability) Audio/Video: Fixed a bug that caused the mute icon in calls to be the incorrect color.",
+      "review": "(efficiency) Calls drop randomly, and require restarting my phone",
+      "similarity": 0.5048,
+      "lcs_length": 1,
+      "time_diff_days": 223
+    },
+    {
+      "rank": 30,
+      "release_note_id": "discord-1775",
+      "release_version": "Discord 1 November 2024",
+      "review_id": "fbdaac68-9a9d-4cb1-b98e-e08c6117333f",
+      "release_note": "(efficiency) Chat: Resolved an issue that caused the \"Hold to record\" tooltip for Voice Messages on mobile to not animate properly when the keyboard collapsed.",
+      "review": "(efficiency) Low quality on voice messages and calls",
+      "similarity": 0.5026,
+      "lcs_length": 2,
+      "time_diff_days": 362
     }
   ],
   "bottom_matches": [
     {
       "rank": 160773,
+      "release_note_id": "discord-1738",
+      "release_version": "Discord 1 November 2024",
+      "review_id": "4eacb95e-3368-41e2-92fa-115e463c9359",
+      "release_note": "(reliability) General: Fixed a short-lived bug where the send message and add friend buttons were no longer on the large profile screen.",
+      "review": "(reliability) Awful updates, sells your data, greedy bastards, if there was something else to communicate with my friends I'd use it",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 307
+    },
+    {
+      "rank": 160774,
+      "release_note_id": "discord-1209",
+      "release_version": "Discord 3 June 2025",
+      "review_id": "e753bfac-f9cc-4faa-97c0-539131c5d8bb",
+      "release_note": "(efficiency) Chat: Fixed an issue with rendering increments in reaction counts. The previous animation would briefly render only one digit when incrementing the tens digit.",
+      "review": "(efficiency) app crash and lagging too much.",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 6
+    },
+    {
+      "rank": 160775,
+      "release_note_id": "discord-2298",
+      "release_version": "Discord 30 April 2024",
+      "review_id": "369f640a-1202-4895-85d4-33723fd37acc",
+      "release_note": "(usability) Chat: Mentions shouldn't append extra text on iOS when there's an inline text prediction anymore.",
+      "review": "(usability) The username change is the dumbest decision they've ever made.",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 300
+    },
+    {
+      "rank": 160776,
+      "release_note_id": "discord-2139",
+      "release_version": "Discord 1 July 2024",
+      "review_id": "7b32c206-3e30-470b-aee6-b77b453ac253",
+      "release_note": "(efficiency) Media: Fixed an issue that caused sending files via iOS's share function to not properly attach files.",
+      "review": "(efficiency) Mobile app is worst. lack of responsiveness",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 203
+    },
+    {
+      "rank": 160777,
+      "release_note_id": "discord-1549",
+      "release_version": "Discord 11 March 2025",
+      "review_id": "4e9eda86-ada6-4c1d-a991-942281c3654c",
+      "release_note": "(usability) Accessibility: Users utilizing a screen reader should now be properly informed when their search returns no results.",
+      "review": "(usability) This app is worst Not login in my account and not received any kind of mail",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 354
+    },
+    {
+      "rank": 160778,
+      "release_note_id": "discord-2019",
+      "release_version": "Discord 1 August 2024",
+      "review_id": "b5afe840-dfba-4e7c-b67a-c6aab590e9c3",
+      "release_note": "(reliability) General: Resolved an incorrect padding issue on iOS after adding a friend on a new account.",
+      "review": "(reliability) i just registered and yall already banned me, what the heck.",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 84
+    },
+    {
+      "rank": 160779,
+      "release_note_id": "discord-1973",
+      "release_version": "Discord 30 August 2024",
+      "review_id": "8e066424-8620-49e1-bd71-7a0930706435",
+      "release_note": "(efficiency) Chat: Resolved a bug that caused adding emojis to the subtext of a message in the composer would break chat input.",
+      "review": "(efficiency) Ur old account doesn't work",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 195
+    },
+    {
+      "rank": 160780,
+      "release_note_id": "discord-816",
+      "release_version": "Discord 3 September 2025",
+      "review_id": "90ea1ef7-0b84-4a07-a5e6-8eef64a9bd3c",
+      "release_note": "(usability) Search: Partial word search queries now work properly in Forum searches.",
+      "review": "(usability) i don't know why my account was disabled by discord",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 207
+    },
+    {
+      "rank": 160781,
+      "release_note_id": "discord-1420",
+      "release_version": "Discord 3 April 2025",
+      "review_id": "774e02b8-9fd3-4a38-874f-754007a69f3a",
+      "release_note": "(efficiency) Chat: Resolved an issue that caused only the first few letters to be visible for messages in a \"Slowmode\" channel.",
+      "review": "(efficiency) words can not translate my hatred",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 356
+    },
+    {
+      "rank": 160782,
+      "release_note_id": "discord-1741",
+      "release_version": "Discord 1 November 2024",
+      "review_id": "6d6f71f0-4c6b-4455-a958-9dba736c8e8d",
+      "release_note": "(usability) General: Fixed a bug that could cause profile banners to have incorrect zoom levels after saving.",
+      "review": "(usability) EDIT: Nah I'm done with Discord, literally the worse app ever. My account is disabled so I'm done.",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 112
+    },
+    {
+      "rank": 160783,
+      "release_note_id": "discord-1851",
+      "release_version": "Discord 1 October 2024",
+      "review_id": "97a561cd-ca64-4b74-9ec7-50a9674b2ffb",
+      "release_note": "(reliability) General: Resolved a bug that caused certain avatar decorations to have an unintended border.",
+      "review": "(reliability) it's not letting me cancel my nitro description, and I can't cancel it on google playstore!!",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 290
+    },
+    {
+      "rank": 160784,
+      "release_note_id": "discord-2194",
+      "release_version": "Discord 30 May 2024",
+      "review_id": "32d20e41-d8c4-4483-9e3c-e855b595b35e",
+      "release_note": "(efficiency) General: The Overlay now should respect \"disabled sound\" Soundboard settings.",
+      "review": "(efficiency) No transalate option so bad, i think had to unistall this app",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 99
+    },
+    {
+      "rank": 160785,
+      "release_note_id": "discord-2303",
+      "release_version": "Discord 30 April 2024",
+      "review_id": "983d3f45-5e9c-4371-bf5c-ebc75ae6f447",
+      "release_note": "(efficiency) Chat: Fixed a bug where Discord sometimes wouldn't autofocus to chat input when typing.",
+      "review": "(efficiency) New UI is terrible. No idea what they were thinking",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 134
+    },
+    {
+      "rank": 160786,
+      "release_note_id": "discord-53",
+      "release_version": "Discord 6 April 2026",
+      "review_id": "159d0fd3-7cf8-4dfb-abfd-b0f8878791b5",
+      "release_note": "(efficiency) General: Resolved an alignment issue on Desktop where the Orbs balance in the Shop wasn't aligned to the right edge of the client.",
+      "review": "(efficiency) I keep getting limited access and theyre not doing anything about it",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 133
+    },
+    {
+      "rank": 160787,
+      "release_note_id": "discord-1603",
+      "release_version": "Discord 3 February 2025",
+      "review_id": "ae31bd3d-40cb-4121-98d4-8978388e3640",
+      "release_note": "(usability) General: Resolved some date formatting issues that affected localization in Mod View.",
+      "review": "(usability) I HATE how inconvenient the new layout is, what's the point of the change? Everything feels so cluttered and confusing now. Pls go back Discord",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 256
+    },
+    {
+      "rank": 160788,
+      "release_note_id": "discord-775",
+      "release_version": "Discord 3 September 2025",
+      "review_id": "84af213d-6cff-4989-8473-09ce28f4561a",
+      "release_note": "(reliability) General: Fixed a bug on iOS that caused the Thread list to flicker when opened from the Channel List.",
+      "review": "(reliability) Turkey/Russia ban is so useless those bad ppl just gonna use VPN like wth if we go another app they will be there too this is useless I want all of money back if this access block continues",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 327
+    },
+    {
+      "rank": 160789,
+      "release_note_id": "discord-2336",
+      "release_version": "Discord 30 April 2024",
+      "review_id": "94035550-55f3-4af1-9e9f-f61df5e16ae7",
+      "release_note": "(usability) Media: Resolved bugs where certain links to popular websites would open in the in-app browser instead of the relevant applications.",
+      "review": "(usability) NEW LAYOUT IS NOT NEEDED!! its unnecessary and ugly too",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 144
+    },
+    {
+      "rank": 160790,
+      "release_note_id": "discord-1550",
+      "release_version": "Discord 11 March 2025",
+      "review_id": "aa2ec883-1ca8-4028-9123-74774e1acfb0",
+      "release_note": "(usability) Accessibility: The \"Learn More\" link in the Add Friends flow now has a role assigned for screen readers.",
+      "review": "(usability) Don't want AI features. Take them out.",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 14
+    },
+    {
+      "rank": 160791,
+      "release_note_id": "discord-1053",
+      "release_version": "Discord 7 July 2025",
+      "review_id": "1f6df170-f630-40a8-817d-f6b8d265a082",
+      "release_note": "(usability) General: Fixed a Desktop bug that prevented users from saving changes that deleted characters from the names of Server Templates.",
+      "review": "(usability) I can't see anything at all when I load in, I log into my account and see absolutely nothing. No friends, no notifications, not nothing! I dunno why I can't see anything at all.",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 88
+    },
+    {
+      "rank": 160792,
+      "release_note_id": "discord-2298",
+      "release_version": "Discord 30 April 2024",
+      "review_id": "c9baff3a-41c5-4e30-a321-5da3ebc3cd64",
+      "release_note": "(usability) Chat: Mentions shouldn't append extra text on iOS when there's an inline text prediction anymore.",
+      "review": "(usability) The new redesign is genuinely awful. Reduced usability, much more laggy, outright painful to look at. Awful.",
+      "similarity": 0.0601,
+      "lcs_length": 0,
+      "time_diff_days": 80
+    },
+    {
+      "rank": 160793,
       "release_note_id": "discord-1939",
       "release_version": "Discord 30 August 2024",
       "review_id": "f6d9070f-fcb2-4ecc-9400-61be9abf1a71",
@@ -124,7 +564,7 @@
       "time_diff_days": 262
     },
     {
-      "rank": 160774,
+      "rank": 160794,
       "release_note_id": "discord-1035",
       "release_version": "Discord 7 July 2025",
       "review_id": "f3035693-a189-4edb-9dfd-9d0366881372",
@@ -135,7 +575,7 @@
       "time_diff_days": 88
     },
     {
-      "rank": 160775,
+      "rank": 160795,
       "release_note_id": "discord-389",
       "release_version": "Discord 4 February 2026",
       "review_id": "e753bfac-f9cc-4faa-97c0-539131c5d8bb",
@@ -146,7 +586,7 @@
       "time_diff_days": 252
     },
     {
-      "rank": 160776,
+      "rank": 160796,
       "release_note_id": "discord-493",
       "release_version": "Discord 8 December 2025",
       "review_id": "f436776a-6f6f-4b23-b4f3-77ccebe91a2c",
@@ -157,7 +597,7 @@
       "time_diff_days": 85
     },
     {
-      "rank": 160777,
+      "rank": 160797,
       "release_note_id": "discord-2243",
       "release_version": "Discord 30 May 2024",
       "review_id": "6b9cd4a7-d8a9-4ef1-b0fe-adc7ced862ce",
@@ -168,7 +608,7 @@
       "time_diff_days": 136
     },
     {
-      "rank": 160778,
+      "rank": 160798,
       "release_note_id": "discord-2074",
       "release_version": "Discord 1 August 2024",
       "review_id": "486d5cf0-1c7b-4579-b258-6d8df4399361",
@@ -179,7 +619,7 @@
       "time_diff_days": 344
     },
     {
-      "rank": 160779,
+      "rank": 160799,
       "release_note_id": "discord-1818",
       "release_version": "Discord 1 November 2024",
       "review_id": "c8732aeb-ead7-402a-9337-c0ee12167d5a",
@@ -190,7 +630,7 @@
       "time_diff_days": 316
     },
     {
-      "rank": 160780,
+      "rank": 160800,
       "release_note_id": "discord-688",
       "release_version": "Discord 7 October 2025",
       "review_id": "32fa70dd-4f10-40b0-b2dd-9af0f2ba97fc",
@@ -201,7 +641,7 @@
       "time_diff_days": 146
     },
     {
-      "rank": 160781,
+      "rank": 160801,
       "release_note_id": "discord-2052",
       "release_version": "Discord 1 August 2024",
       "review_id": "72fedda1-ca9c-4ea5-b06f-528bdfbe240e",
@@ -212,7 +652,7 @@
       "time_diff_days": 211
     },
     {
-      "rank": 160782,
+      "rank": 160802,
       "release_note_id": "discord-380",
       "release_version": "Discord 4 February 2026",
       "review_id": "0e996a0e-2850-4819-a26e-0436e97e81e6",
@@ -225,6 +665,8 @@
   ],
   "stats": {
     "total_pairs": 160782,
-    "pairs_before_aspect": 23530550
+    "pairs_before_aspect": 23530550,
+    "match_density": 0.020257826887661142,
+    "mean_time_to_resolution_days": 225.72727272727272
   }
 }

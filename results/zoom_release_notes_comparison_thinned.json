@@ -665,8 +665,13 @@
   ],
   "stats": {
     "total_pairs": 7743,
-    "pairs_before_aspect": 1132096,
+    "pairs_before_filter": 1132096,
     "match_density": 0.004213483146067416,
-    "mean_time_to_resolution_days": 172.0
+    "mean_time_to_resolution_days": 172.0,
+    "times_to_resolutions": [
+      247,
+      220,
+      49
+    ]
   }
 }

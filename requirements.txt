@@ -5,8 +5,10 @@ scikit-learn
 optuna
 tqdm
 numpy
+matplotlib
 vaderSentiment
 pandas
+beautifulsoup4
 tensorboard
 google-play-scraper
 playwright

@@ -1,3 +1,4 @@
+from collections import Counter
 import csv
 from datetime import datetime, date, timedelta
 from itertools import product
@@ -7,16 +8,19 @@ import logging
 import os
 import re
 
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 
 from aspect_based import AspectSentimentExtractor, pool_embeddings
+from comparison_models import EncodedReleaseNote, EncodedReview
 from config import DISTILBERT_BASE, DEVICE, BATCH_SIZE, OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING
 from preprocess import load_aspect_labels
 from processing import tokenize
 
 logger = logging.getLogger(__name__)
 
-def load_csv_rows(file_path: str) -> list[dict]:
+def load_csv_rows(file_path: str) -> list[dict[str, str]]:
     """Load CSV rows into a list of dictionaries."""
 
     with open(file_path, 'r') as file:
@@ -25,19 +29,22 @@ def load_csv_rows(file_path: str) -> list[dict]:
 def extract_keyword_tokens(text: str) -> list[str]:
     return re.findall(r"[a-z0-9']+", text.lower())
 
-def encode_text(model: AspectSentimentExtractor, rows: list[dict], is_review: bool = False) -> dict[int, dict]:
-    """Find embeddings and aspect/sentiment predictions for a list of text rows (from reviews or release notes) using the provided model
+
+def _collect_encoded_rows(
+    model: AspectSentimentExtractor,
+    rows: list[dict[str, str]],
+) -> list[tuple[int, dict[str, str], np.ndarray, int, int]]:
+    """Encode rows of either reviews or release notes using model provided.
 
     Args:
-        model (AspectSentimentExtractor): Model for generating embeddings and aspect/sentiment predictions
-        rows (list[dict]): List of dictionaries containing text data to encode
-        is_review (bool, optional): If the text provided is from reviews, if so, give sentiments as well. Defaults to False.
+        model (AspectSentimentExtractor): Model to use for encoding rows, used to generate embeddings and aspect/sentiment predictions.
+        rows (list[dict[str, str]]): Rows from csv files to encode, as list of dictionaries. Each dictionary should contain a "content" key with the text to encode.
 
     Returns:
-        dict[int, dict]: Dictionary mapping row IDs to their content, aspect/sentiment predictions and embeddings
+        list[tuple[int, dict[str, str], np.ndarray, int, int]]: List of tuples containing (row index, row data, embedding, aspect prediction, sentiment prediction) for each row in the input list.
     """
 
-    data = dict()
+    encoded_rows: list[tuple[int, dict[str, str], np.ndarray, int, int]] = []
 
     with torch.no_grad():
         for i in range(0, len(rows), BATCH_SIZE):
@@ -49,46 +56,85 @@ def encode_text(model: AspectSentimentExtractor, rows: list[dict], is_review: bo
 
             outputs = model.encoder(input_ids=input_ids, attention_mask=attention_mask)
             embeddings = outputs.last_hidden_state
-
             mean_pooled = pool_embeddings(embeddings, attention_mask)
 
-            aspect, sentiment = model.aspect_sentiment_inference(
+            aspects, sentiments = model.aspect_sentiment_inference(
                 input_ids=input_ids,
                 attention_masks=attention_mask,
                 batch_size=BATCH_SIZE,
             )
 
             for batch_idx, row in enumerate(batch_rows):
-                row['embedding'] = mean_pooled[batch_idx].cpu().numpy()
-                row['aspect'] = aspect[batch_idx]
-                row['tokens'] = extract_keyword_tokens(row["content"])
+                encoded_rows.append((
+                    i + batch_idx,
+                    row,
+                    mean_pooled[batch_idx].cpu().numpy(),
+                    aspects[batch_idx],
+                    sentiments[batch_idx],
+                ))
 
-                # Only add sentiment if the text is from reviews, not release notes
-                if is_review:
-                    row['sentiment'] = sentiment[batch_idx]
+    return encoded_rows
 
-                data[i + batch_idx] = row
+def encode_release_notes(model: AspectSentimentExtractor, rows: list[dict[str, str]]) -> dict[int, EncodedReleaseNote]:
+    """Encode release-note rows and return typed encoded release-note objects."""
+    data: dict[int, EncodedReleaseNote] = {}
 
-        return data
+    for idx, row, embedding, aspect, _ in _collect_encoded_rows(model, rows):
+        data[idx] = EncodedReleaseNote(
+            release_note_id=row.get("release_note_id", ""),
+            version=row.get("version", ""),
+            date=row.get("date", ""),
+            content=row.get("content", ""),
+            embedding=embedding,
+            aspect=aspect,
+            tokens=extract_keyword_tokens(row["content"]),
+        )
+
+    return data
+
+
+def encode_reviews(model: AspectSentimentExtractor, rows: list[dict[str, str]]) -> dict[int, EncodedReview]:
+    """Encode review rows and return typed encoded review objects."""
+    data: dict[int, EncodedReview] = {}
+
+    for idx, row, embedding, aspect, sentiment in _collect_encoded_rows(model, rows):
+        raw_score = row.get("score", "")
+        data[idx] = EncodedReview(
+            review_id=row.get("reviewId", ""),
+            content=row.get("content", ""),
+            at=row.get("at", ""),
+            score=int(raw_score) if raw_score and raw_score.isdigit() else 0,
+            reply_content=row.get("replyContent", ""),
+            replied_at=row.get("repliedAt", ""),
+            embedding=embedding,
+            aspect=aspect,
+            tokens=extract_keyword_tokens(row["content"]),
+            sentiment=sentiment,
+        )
+
+    return data
     
-def pair_cosine_similarity(note: dict, review: dict) -> float:
+def pair_cosine_similarity(note: EncodedReleaseNote, review: EncodedReview) -> float:
     return torch.nn.functional.cosine_similarity(
-        torch.tensor(note['embedding']),
-        torch.tensor(review['embedding']),
+        torch.tensor(note.embedding),
+        torch.tensor(review.embedding),
         dim=0,
     ).item()
 
-def pair_dates(note: dict, review: dict) -> tuple[date, date]:
-    note_date = datetime.strptime(note['date'], "%d %B %Y").date()
-    review_date = datetime.strptime(review['at'], "%Y-%m-%d %H:%M:%S").date()
+def pair_dates(note: EncodedReleaseNote, review: EncodedReview) -> tuple[date, date]:
+    note_date = datetime.strptime(note.date, "%d %B %Y").date()
+    review_date = datetime.strptime(review.at, "%Y-%m-%d %H:%M:%S").date()
     return note_date, review_date
 
-def filter_pairs(release_note_data: dict[int, dict], negative_reviews: dict[int, dict]) -> list[tuple[dict, dict]]:
+def filter_pairs(
+    release_note_data: dict[int, EncodedReleaseNote],
+    negative_reviews: dict[int, EncodedReview],
+) -> list[tuple[EncodedReleaseNote, EncodedReview]]:
     """Filters (release note, review) pairs so the note comes after a negative review about the same aspect
 
     Args:
-        release_note_data (dict[int, dict]): Release notes
-        negative_reviews (dict[int, dict]): Negative reviews, filtered to only include those with at least 5 tokens to avoid generic one-word reviews
+        release_note_data (dict[int, EncodedReleaseNote]): Release notes
+        negative_reviews (dict[int, EncodedReview]): Negative reviews, filtered to only include those with at least 5 tokens to avoid generic one-word reviews
 
     Returns:
         list[tuple[dict, dict]]: List of (release note, review) pairs that match the filtering criteria
@@ -97,8 +143,8 @@ def filter_pairs(release_note_data: dict[int, dict], negative_reviews: dict[int,
     filtered_pairs = []
     for note, review in product(release_note_data.values(), negative_reviews.values()):
         logger.debug(
-            f"Release note (aspect: {note['aspect']}, date: {note['date']}), "
-            f"Review (aspect: {review['aspect']}, date: {review['at']})"
+            f"Release note (aspect: {note.aspect}, date: {note.date}), "
+            f"Review (aspect: {review.aspect}, date: {review.at})"
         )
 
         cosine = pair_cosine_similarity(note, review)
@@ -107,7 +153,7 @@ def filter_pairs(release_note_data: dict[int, dict], negative_reviews: dict[int,
         #     set(note['tokens']),
         #     set(review['tokens']),
         # ):
-        if note['aspect'] == review['aspect']:
+        if note.aspect == review.aspect:
             if cosine < 0.15:
                 continue
         elif cosine < 0.4:
@@ -136,24 +182,24 @@ def get_longest_match(a: list[str], b: list[str]) -> list[str]:
     match = matcher.find_longest_match(0, len(a), 0, len(b))
     return a[match.a: match.a + match.size]
 
-def score_pairs(filtered_pairs: list[tuple[dict, dict]]) -> dict[tuple[str, str], dict]:
+def score_pairs(filtered_pairs: list[tuple[EncodedReleaseNote, EncodedReview]]) -> dict[tuple[str, str], dict]:
     """Use cosine similarity to score and rank the filtered (release note, review) pairs based on their embeddings
 
     Args:
-        filtered_pairs (list[tuple[dict, dict]]): (release note, review) pairs that have been filtered to match the criteria of the note coming after a negative review about the same aspect
+        filtered_pairs (list[tuple[EncodedReleaseNote, EncodedReview]]): (release note, review) pairs that have been filtered to match the criteria of the note coming after a negative review about the same aspect
 
     Returns:
         dict[tuple[str, str], dict]: Dict from (release_note_id, review_id) to {"similarity": float, "release_note": dict, "review": dict}) tuples
     """
 
-    results = dict()
+    results = {}
     for note, review in filtered_pairs:
         cosine = pair_cosine_similarity(note, review)
 
-        longest_match = get_longest_match(note["tokens"], review["tokens"])
+        longest_match = get_longest_match(note.tokens, review.tokens)
         longest_match_length = len(longest_match)
 
-        longest_match_score = longest_match_length / max(1, min(len(note['tokens']), len(review['tokens'])))
+        longest_match_score = longest_match_length / max(1, min(len(note.tokens), len(review.tokens)))
 
         # Give a boost to pairs with long lcs
         similarity = 0.4 * cosine + 0.4 * longest_match_score + (0.2 if set(longest_match).intersection(OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING) else 0)
@@ -162,7 +208,7 @@ def score_pairs(filtered_pairs: list[tuple[dict, dict]]) -> dict[tuple[str, str]
 
         note_date, review_date = pair_dates(note, review)
 
-        results[(note['release_note_id'], review['reviewId'])] = {
+        results[(note.release_note_id, review.review_id)] = {
             "similarity": similarity,
             "release_note": note,
             "review": review,
@@ -179,15 +225,15 @@ def format_result_rows(
 ) -> list[dict]:
     rows = []
     for offset, ((release_note_id, review_id), result) in enumerate(ranked_results):
-        note = result["release_note"]
-        review = result["review"]
+        note: EncodedReleaseNote = result["release_note"]
+        review: EncodedReview = result["review"]
         rows.append({
             "rank": start_rank + offset,
             "release_note_id": release_note_id,
-            "release_version": note["version"],
+            "release_version": note.version,
             "review_id": review_id,
-            "release_note": f"({aspect_labels[note['aspect']]}) {note['content']}",
-            "review": f"({aspect_labels[review['aspect']]}) {review['content']}",
+            "release_note": f"({aspect_labels[note.aspect]}) {note.content}",
+            "review": f"({aspect_labels[review.aspect]}) {review.content}",
             "similarity": round(result["similarity"], 4),
             "lcs_length": result["lcs_length"],
             "time_diff_days": result["time_diff_days"],
@@ -227,9 +273,10 @@ def write_results_to_json(sorted_results: list[tuple[tuple[str, str], dict]], to
         "bottom_matches": bottom_k_results,
         "stats": {
             "total_pairs": total_results,
-            "pairs_before_aspect": total_candidate_pairs,
+            "pairs_before_filter": total_candidate_pairs,
             "match_density": density,
             "mean_time_to_resolution_days": mttr,
+            "times_to_resolutions": [result[1]["time_diff_days"] for result in sorted_results if result[1]["similarity"] > 0.5],
         }
     }
     
@@ -237,13 +284,43 @@ def write_results_to_json(sorted_results: list[tuple[tuple[str, str], dict]], to
     with open(output_file, 'w') as f:
         json.dump(output_payload, f, indent=2)
 
-def write_results(sorted_results: list[tuple[tuple[str, str], dict]], total_candidate_pairs: int, no_of_negative_reviews: int, output_file: str, k: int = 10) -> None:
+def write_aspect_based_metrics(sorted_results: list[tuple[tuple[str, str], dict]], aspect_counts: dict, output_file: str) -> None:
+    aspect_metrics = dict()
+
+    for (release_note_id, review_id), result in sorted_results:
+        review: EncodedReview = result['review']
+        aspect = review.aspect
+        if aspect not in aspect_metrics:
+            aspect_metrics[aspect] = {
+                "fulfillments": 0,
+                "total": aspect_counts.get(aspect, 0),
+                "time_diffs": [],
+            }
+
+        if result['similarity'] > 0.5:  
+            aspect_metrics[aspect]["fulfillments"] += 1
+            aspect_metrics[aspect]["time_diffs"].append(result["time_diff_days"])
+            
+
+    for aspect, metrics in aspect_metrics.items():
+        metrics["match_density"] = metrics["fulfillments"] / metrics["total"] if metrics["total"] > 0 else 0
+        metrics["mean_time_to_resolution_days"] = sum(metrics["time_diffs"]) / len(metrics["time_diffs"]) if metrics["time_diffs"] else None
+
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    with open(output_file, 'w') as f:
+        json.dump(aspect_metrics, f, indent=2)
+
+    plot_aspect_density_comparison(aspect_metrics, output_file=output_file.replace(".json", ".png"))
+
+
+def write_results(sorted_results: list[tuple[tuple[str, str], dict]], total_candidate_pairs: int, no_of_negative_reviews: int, aspect_counts: dict, output_file: str, k: int = 10) -> None:
     """Write both raw and deduplicated result variants to JSON files.
 
     Args:
         sorted_results (list[tuple[tuple[str, str], dict]]): Sorted list of results by similarity (descending)
         total_candidate_pairs (int): Total candidate pairs before filtering
         no_of_negative_reviews (int): Number of negative reviews
+        aspect_counts (dict): Counts of aspects in the negative reviews, used for calculating aspect-based MTTR and density
         output_file (str): Output file path for raw results
         k (int, optional): Number of top and bottom results to include. Defaults to 10.
     """
@@ -255,16 +332,19 @@ def write_results(sorted_results: list[tuple[tuple[str, str], dict]], total_cand
     deduped_output_file = output_file.replace(".json", "_dedup.json")
     write_results_to_json(deduped_sorted_results, total_candidate_pairs, no_of_negative_reviews, deduped_output_file, k=k)
 
+    # Write aspect-based MTTR and density
+    write_aspect_based_metrics(sorted_results, aspect_counts, output_file.replace(".json", "_aspect_metrics.json"))
+
 def calculate_reactivity(sorted_results: list[tuple[tuple[str, str], dict]], no_of_negative_reviews: int, threshold: float = 0.5) -> tuple[float, float | None]:
 
-    fullfillments = [result for result in sorted_results if result[1]['similarity'] > threshold]
+    fulfillments = [result for result in sorted_results if result[1]['similarity'] > threshold]
 
-    if not fullfillments:
+    if not fulfillments:
         return 0, None
 
-    density = len(fullfillments) / no_of_negative_reviews
+    density = len(fulfillments) / no_of_negative_reviews
 
-    mttr = sum(result[1]['time_diff_days'] for result in fullfillments) / len(fullfillments) 
+    mttr = sum(result[1]['time_diff_days'] for result in fulfillments) / len(fulfillments)
 
     return density, mttr
 
@@ -295,24 +375,32 @@ def release_notes_vs_reviews_comparison(
     model: AspectSentimentExtractor,
     app_name: str,
     output_file: str = "results/release_notes_comparison.json",
-):
+) -> tuple[list[tuple[tuple[str, str], dict]], int, int]:
     """Conduct comparison between release notes and reviews for the same app
 
     Args:
         model (AspectSentimentExtractor): Model for generating embeddings and aspect/sentiment predictions 
         app_name (str): Name of the app to compare release notes and reviews for, used to load the correct CSV files
-        output_file (str, optional): Output file to store results. Defaults to "results/release_notes_comparison.json".    """
+        output_file (str, optional): Output file to store results. Defaults to "results/release_notes_comparison.json".    
+    Returns:
+        list[tuple[tuple[str, str], dict]]: Sorted list of ((release_note_id, review_id), {"similarity": float, "release_note": dict, "review": dict}) tuples, ranked by similarity in descending order
+        int: Total number of release note-review pairs before filtering by aspect and date, used for context in the output stats
+        int: Total number of negative reviews, used for calculating match density in the output stats
+
+    """
 
     logger.info("Loading release notes from CSV...")
-    release_note_data = encode_text(model, load_csv_rows(f'datasets/{app_name}_release_notes.csv'))
+    release_note_data = encode_release_notes(model, load_csv_rows(f'datasets/{app_name}_release_notes.csv'))
 
     logger.info("Loading reviews from CSV...")
-    review_data = encode_text(model, load_csv_rows(f'datasets/{app_name}_reviews.csv'), is_review=True)
+    review_data = encode_reviews(model, load_csv_rows(f'datasets/{app_name}_reviews.csv'))
 
     # Filter to only negative reviews and reviews with at least 5 words
-    negative_reviews = {idx: data for idx, data in review_data.items() if data['sentiment'] == 0 and len(data['tokens']) >= 5}
+    negative_reviews = {idx: data for idx, data in review_data.items() if data.sentiment == 0 and len(data.tokens) >= 5}
 
-    non_generic_notes = {idx: data for idx, data in release_note_data.items() if len(data['tokens']) >= 5}
+    aspect_counts = Counter(data.aspect for data in negative_reviews.values())
+
+    non_generic_notes = {idx: data for idx, data in release_note_data.items() if len(data.tokens) >= 5}
 
     filtered_pairs = filter_pairs(non_generic_notes, negative_reviews)
     total_candidate_pairs = len(release_note_data) * len(review_data)
@@ -325,10 +413,128 @@ def release_notes_vs_reviews_comparison(
     # Sort results by similarity in descending order
     sorted_results = sorted(scored_results.items(), key=lambda x: x[1]['similarity'], reverse=True)
 
-    write_results(sorted_results, total_candidate_pairs, len(negative_reviews), output_file, k=30)
+    write_results(sorted_results, total_candidate_pairs, len(negative_reviews), aspect_counts, output_file, k=30)
     
     logger.info(f"Results written to {output_file} and {output_file.replace('.json', '_deduped.json')}")
 
+    return sorted_results, total_candidate_pairs, len(negative_reviews)
+
+def plot_mttr_comparison(app_summaries: dict) -> None:
+    """Plot MTTR comparison across apps as a bar chart.
+    
+    Args:
+        app_summaries (dict): Dictionary with app names as keys and stats dicts as values
+    """
+    fig, ax = plt.subplots(figsize=(10, 6))
+    app_names = [name.upper() for name in app_summaries.keys()]
+    mttrs = []
+    errors = []
+
+    for app_name, summary in app_summaries.items():
+        values = summary.get("times_to_resolutions", [])
+        if values:
+            values_array = np.array(values, dtype=float)
+            mttrs.append(float(np.mean(values_array)))
+        else:
+            values_array = None
+            mttrs.append(0.0)
+
+
+        if values_array is not None and values_array.size > 1:
+            std = float(np.std(values_array, ddof=1))
+            sem = std / float(np.sqrt(values_array.size))
+            errors.append(1.96 * sem)
+        else:
+            errors.append(0.0)
+    
+    ax.bar(
+        app_names,
+        mttrs,
+        yerr=errors,
+        capsize=6,
+        color=['#1f77b4', '#ff7f0e', '#2ca02c'],
+        error_kw={"elinewidth": 1.5},
+    )
+    ax.set_ylabel("Days", fontsize=12)
+    ax.set_title("Mean Time To Resolution (MTTR) by App", fontsize=14)
+    ax.grid(axis='y', alpha=0.3)
+    
+    for i, (v, err) in enumerate(zip(mttrs, errors)):
+        ax.text(i, v + err + 2, f"{v:.1f} ± {err:.1f}", ha='center', va='bottom', fontsize=11)
+    
+    plt.tight_layout()
+    output_path = "results/mttr_comparison.png"
+    plt.savefig(output_path, dpi=300)
+    logger.info(f"MTTR comparison plot saved to {output_path}")
+    plt.close()
+
+
+def plot_resolution_time_distribution(app_summaries: dict) -> None:
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    bp = ax.boxplot(
+        [summary.get("times_to_resolutions", []) for summary in app_summaries.values()],
+        tick_labels=[name.upper() for name in app_summaries.keys()],
+        patch_artist=True,
+        widths=0.6,
+    )
+
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
+    for patch, color in zip(bp['boxes'], colors):
+        patch.set_facecolor(color)
+        patch.set_alpha(0.7)
+
+    ax.set_ylabel("Days to Resolution", fontsize=12)
+    ax.set_title("Distribution of Resolution Times by App", fontsize=14)
+    ax.grid(axis='y', alpha=0.3)
+
+    plt.tight_layout()
+    output_path = "results/resolution_time_distribution.png"
+    plt.savefig(output_path, dpi=300)
+    logger.info(f"Resolution time distribution plot saved to {output_path}")
+    plt.close()
+
+def plot_specificity_comparison(all_results: list[tuple[tuple[str, str], dict]]) -> None:
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    similarities = [result[1]['similarity'] for result in all_results]
+    time_to_resolution = [result[1]['time_diff_days'] for result in all_results]
+
+    scatter = ax.scatter(similarities, time_to_resolution, alpha=0.6)
+    ax.set_xlabel("Similarity Score", fontsize=12)
+    ax.set_ylabel("Time to Resolution (Days)", fontsize=12)
+    ax.set_title("Similarity vs Time to Resolution", fontsize=14)
+    ax.grid(alpha=0.3)
+
+    plt.tight_layout()
+    output_path = "results/similarity_vs_resolution_time.png"
+    plt.savefig(output_path, dpi=300)
+    logger.info(f"Similarity vs Time to Resolution plot saved to {output_path}")
+    plt.close()
+
+def plot_aspect_density_comparison(aspect_metrics: dict, output_file: str = "results/aspect_density_comparison.png") -> None:
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    aspect_labels = load_aspect_labels()
+
+    aspects = [aspect_labels[aspect] for aspect in aspect_metrics.keys()]
+    densities = [metrics["match_density"] for metrics in aspect_metrics.values()]
+
+    ax.bar(
+        aspects,
+        densities,
+        color='#1f77b4',
+        alpha=0.7,
+    )
+    ax.set_ylabel("Match Density", fontsize=12)
+    ax.set_title("Match Density by Aspect", fontsize=14)
+    ax.grid(axis='y', alpha=0.3)
+
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    plt.savefig(output_file, dpi=300)
+    logger.info(f"Aspect density comparison plot saved to {output_file}")
+    plt.close()
 
 if __name__ == "__main__":
     model = AspectSentimentExtractor(DISTILBERT_BASE, num_aspects=12).to(DEVICE)
@@ -339,6 +545,27 @@ if __name__ == "__main__":
         reader = csv.DictReader(f)
         apps = [row['name'].strip().lower() for row in reader if row['app_id'].strip()]
 
+    app_summaries = {}
+    all_results = []
     for app_name in apps:
         logger.info(f"Comparing release notes and reviews for {app_name}...")
-        release_notes_vs_reviews_comparison(model, app_name, output_file=f"results/{app_name}_release_notes_comparison_thinned.json")
+        sorted_results, total_candidate_pairs, no_of_negative_reviews = release_notes_vs_reviews_comparison(model, app_name, output_file=f"results/{app_name}_release_notes_comparison_thinned.json")
+
+        with open(f"results/{app_name}_release_notes_comparison_thinned.json", 'r') as f:
+            data = json.load(f)
+
+        app_summaries[app_name] = {
+            "total_pairs": total_candidate_pairs,
+            "match_density": data["stats"]["match_density"],
+            "mean_time_to_resolution_days": data["stats"]["mean_time_to_resolution_days"],
+            "times_to_resolutions": data["stats"]["times_to_resolutions"],
+        }
+
+        all_results.extend(sorted_results)
+
+    # Plot graphs
+    plot_mttr_comparison(app_summaries)
+
+    plot_resolution_time_distribution(app_summaries)
+
+    plot_specificity_comparison(all_results)

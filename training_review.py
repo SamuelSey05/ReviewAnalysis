@@ -1,4 +1,4 @@
-class Review:
+class TrainingReivew:
     def __init__(self, domain: str, app:str, review_id:str, title:str, review:str, rating:int, is_opinion:bool):
         """Class representing a review entry from the AWARE dataset
 
@@ -20,7 +20,7 @@ class Review:
         self.is_opinion = is_opinion
 
     @staticmethod
-    def from_dict(data: dict[str, str]) -> 'Review':
+    def from_dict(data: dict[str, str]) -> 'TrainingReivew':
         """Extracts review from dictionary taken from csv
 
         Args:
@@ -29,7 +29,7 @@ class Review:
         Returns:
             Review: Review extracted from the dictionary
         """
-        return Review(
+        return TrainingReivew(
             domain=data.get("domain"),
             app=data.get("app"),
             review_id=data.get("review_id"),
@@ -40,7 +40,7 @@ class Review:
         )
 
 class Sentence:
-    def __init__(self, review: Review, sentence_id:str, category:str, term:str, from_word:int, to_word:int, sentiment:str):
+    def __init__(self, review: TrainingReivew, sentence_id:str, category:str, term:str, from_word:int, to_word:int, sentiment:str):
         """Class representing a sentence from the AWARE dataset, which is part of a review with a sentiment
 
         Args:
@@ -61,7 +61,7 @@ class Sentence:
         self.sentiment = sentiment
 
     @staticmethod
-    def from_review_and_dict(review: Review, data: dict[str, str]) -> 'Sentence':
+    def from_review_and_dict(review: TrainingReivew, data: dict[str, str]) -> 'Sentence':
         """Extracts sentence from dictionary taken from csv
 
         Args:

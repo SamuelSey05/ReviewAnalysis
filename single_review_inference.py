@@ -9,7 +9,7 @@ from aspect_based import AspectSentimentExtractor
 from config import DEVICE, DISTILBERT_BASE
 from preprocess import load_aspect_labels
 from processing import tokenize
-from review import Review
+from training_review import TrainingReivew
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +21,8 @@ def read_review_text(path: str) -> str:
     with open(path, "r", encoding="utf-8") as f:
         return f.read().strip()
 
-def build_review(text: str) -> Review:
-    return Review(
+def build_review(text: str) -> TrainingReivew:
+    return TrainingReivew(
         domain="",
         app="",
         review_id="",

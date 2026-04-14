@@ -1,8 +1,8 @@
-from review import Review, Sentence
+from training_review import TrainingReivew, Sentence
 from tests.constants import OPINION_REVIEW_ROW, SENTENCE_ROW
 
 def test_review_from_dict_parses_values_and_types():
-    review = Review.from_dict(OPINION_REVIEW_ROW)
+    review = TrainingReivew.from_dict(OPINION_REVIEW_ROW)
 
     assert review.domain == "productivity"
     assert review.app == "things-3"
@@ -14,7 +14,7 @@ def test_review_from_dict_parses_values_and_types():
 
 
 def test_sentence_from_dict_parses_values_and_types():
-    review = Review.from_dict(OPINION_REVIEW_ROW)
+    review = TrainingReivew.from_dict(OPINION_REVIEW_ROW)
     sentence = Sentence.from_review_and_dict(review, SENTENCE_ROW)
 
     assert sentence.sentence_id == "014a7d01-f6c0-408a-897b-f6b36cdd8543"

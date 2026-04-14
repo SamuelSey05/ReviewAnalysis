@@ -4,11 +4,11 @@ import logging
 from pathlib import Path
 from typing import Tuple
 
-from review import Review, Sentence
+from training_review import TrainingReivew, Sentence
 
 logger = logging.getLogger(__name__)
 
-def load_csv(file_path) -> Tuple[dict[str, Review], list[Sentence]]:
+def load_csv(file_path) -> Tuple[dict[str, TrainingReivew], list[Sentence]]:
     """Load a csv file and return its contents as a list of dictionaries.
     
     Args:
@@ -27,7 +27,7 @@ def load_csv(file_path) -> Tuple[dict[str, Review], list[Sentence]]:
         data = dict()
         review_parts = []
         for row in csv_reader:
-            review = Review.from_dict(row)
+            review = TrainingReivew.from_dict(row)
             if review.review_id not in data:
                 data[review.review_id] = review
             if review.is_opinion:

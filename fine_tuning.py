@@ -2,28 +2,37 @@ import logging
 
 import optuna
 from sklearn.metrics import accuracy_score
-import torch
-from transformers import AutoModelForSequenceClassification, PreTrainedModel, Trainer, TrainingArguments
+from transformers import AutoModelForSequenceClassification, EvalPrediction, PreTrainedModel, Trainer, TrainingArguments
 
-from datasets import Dataset
+from datasets import Dataset as HFDataset
 
 from config import DEVICE, FINE_TUNED_MODEL_PATH
 
 logger = logging.getLogger(__name__)
 
-def fine_tune_model(tokenised_dataset: Dataset, model_name: str, optimise_hyperparameters: bool = False) -> PreTrainedModel:
+
+def fine_tune_model(tokenised_dataset: HFDataset, model_name: str, optimise_hyperparameters: bool = False) -> PreTrainedModel:
     """Fine-tune a pre-trained model on a tokenized dataset.
 
     Args:
-        tokenised_dataset (Dataset): The tokenized dataset for training and evaluation.
+        tokenised_dataset (HFDataset): The tokenized dataset for training and evaluation.
         model_name (str): The name or path of the pre-trained model.
         optimise_hyperparameters (bool, optional): Whether to perform hyperparameter optimization. Defaults to False.
 
     Returns:
         PreTrainedModel: The fine-tuned model.
     """
+
     # Split the dataset into training and testing sets
     train_test_dataset = tokenised_dataset.train_test_split(test_size=0.2)
+
+    def compute_metrics(eval_pred: EvalPrediction) -> dict[str, float]:
+        """Compute accuracy for model evaluation."""
+
+        logits = eval_pred.predictions[0] if isinstance(eval_pred.predictions, tuple) else eval_pred.predictions
+        predictions = logits.argmax(axis=1)
+        labels = eval_pred.label_ids
+        return {"accuracy": float(accuracy_score(labels, predictions))}
 
     if optimise_hyperparameters:
         def objective(trial: optuna.trial.Trial):   
@@ -51,12 +60,13 @@ def fine_tune_model(tokenised_dataset: Dataset, model_name: str, optimise_hyperp
                 args=training_args,
                 train_dataset = train_test_dataset["train"],
                 eval_dataset= train_test_dataset["test"],
+                compute_metrics=compute_metrics,
             )
 
             trainer.train()
-            metrics = accuracy_score(train_test_dataset["test"]["sentiment"], trainer.predict(train_test_dataset["test"]).predictions.argmax(axis=1))
+            metrics = trainer.evaluate()
 
-            return float(metrics)    
+            return float(metrics["eval_accuracy"])    
         
         logger.info("Starting hyperparameter tuning with Optuna...")
         study = optuna.create_study(direction="maximize")
@@ -95,6 +105,7 @@ def fine_tune_model(tokenised_dataset: Dataset, model_name: str, optimise_hyperp
         args=training_args,
         train_dataset=train_test_dataset["train"],
         eval_dataset=train_test_dataset["test"],
+        compute_metrics=compute_metrics,
     )
 
     trainer.train()

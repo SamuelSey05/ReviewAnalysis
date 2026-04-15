@@ -2,6 +2,7 @@ import json
 import time
 import csv
 import re
+import logging
 from datetime import datetime
 from ftfy import fix_text
 from unidecode import unidecode
@@ -9,6 +10,7 @@ from playwright.sync_api import sync_playwright, Locator
 from bs4 import BeautifulSoup
 
 RELEASE_NOTE_FIELDS = ["release_note_id", "version", "date", "content"]
+logger = logging.getLogger(__name__)
 
 def normalise_text(text: str) -> str:
     """Normalize text by fixing encoding issues and removing special characters.
@@ -19,6 +21,7 @@ def normalise_text(text: str) -> str:
     Returns:
         str: Normalized text.
     """
+    
     try:
         text = text.encode().decode('unicode-escape')
     except:
@@ -39,6 +42,7 @@ def extract_bug_fix_bullets(release: Locator, version: str, date: str) -> list[s
     Returns:
         list[str]: List of cleaned bullet-point bug fixes from the release note.
     """
+
     bullets = []
     for item in release.locator("li").all():
         text = clean_release_text(item.inner_text().strip(), version, date)
@@ -58,6 +62,7 @@ def clean_release_text(text: str, version: str, date: str) -> str:
     Returns:
         str: Cleaned release text with version, date, and common labels removed.
     """
+
     text = normalise_text(text)
     for remove in [version, date, "Bug fixes", "What's new"]:
         text = text.replace(remove, "")
@@ -125,6 +130,13 @@ def write_release_note_row(writer: csv.DictWriter, release_note_id: str, version
 
 
 def write_release_note_rows(output_path: str, app_prefix: str, rows: list[tuple[str, str, str]]) -> None:
+    """Write release-note tuples to a CSV file with stable generated IDs.
+
+    Args:
+        output_path (str): Destination CSV path.
+        app_prefix (str): Prefix used when generating release_note_id values.
+        rows (list[tuple[str, str, str]]): List of (version, date, content) tuples.
+    """
 
     with open(output_path, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=RELEASE_NOTE_FIELDS)
@@ -151,7 +163,7 @@ def scrape_discord():
             if href:
                 articles.append(f"https://discord.com{href}" if href.startswith("/") else href)
 
-        print(f"Found {len(articles)} release note articles.")
+        logger.info("Found %d release note articles.", len(articles))
 
         for article_url in articles:
             parsed_date = extract_date_from_discord_url(article_url)
@@ -188,14 +200,14 @@ def scrape_slack():
 
         try:
             page.get_by_role("button", name="ACCEPT ALL COOKIES").click(timeout=5000)
-            print("Banner dismissed.")
+            logger.info("Banner dismissed.")
         except Exception:
-            print("Banner did not appear or was already closed.")
+            logger.info("Banner did not appear or was already closed.")
 
         time.sleep(5)
         
         releases = page.locator("div.release-note article").all()
-        print(f"Found {len(releases)} release notes.")
+        logger.info("Found %d release notes.", len(releases))
 
         for release in releases:
             version = normalise_text(release.locator("h2").inner_text().strip())
@@ -259,11 +271,13 @@ def scrape_zoom():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
+
     scrape_slack()
-    print("Release notes scraped and saved to slack_release_notes.csv")
+    logger.info("Release notes scraped and saved to slack_release_notes.csv")
 
     scrape_discord()
-    print("Release notes scraped and saved to discord_release_notes.csv")
+    logger.info("Release notes scraped and saved to discord_release_notes.csv")
 
     scrape_zoom()
-    print("Release notes scraped and saved to zoom_release_notes.csv")
+    logger.info("Release notes scraped and saved to zoom_release_notes.csv")

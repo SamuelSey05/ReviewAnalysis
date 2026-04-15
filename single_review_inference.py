@@ -18,10 +18,26 @@ SENTIMENT_LABELS = ["negative", "neutral", "positive"]
 ASPECT_LABELS = load_aspect_labels()
 
 def read_review_text(path: str) -> str:
+    """Read review text from a file.
+
+    Args:
+        path (str): Path to the text file containing the review.
+
+    Returns:
+        str: The review text with leading/trailing whitespace removed.
+    """
     with open(path, "r", encoding="utf-8") as f:
         return f.read().strip()
 
 def build_review(text: str) -> TrainingReview:
+    """Build a TrainingReview object from raw review text.
+
+    Args:
+        text (str): The review text content.
+
+    Returns:
+        TrainingReview: A TrainingReview object with default/empty fields and the given text.
+    """
     return TrainingReview(
         domain="",
         app="",
@@ -33,6 +49,11 @@ def build_review(text: str) -> TrainingReview:
     )
 
 def main() -> None:
+    """Main entry point for aspect and sentiment inference on a single review text file.
+
+    Reads a review from a text file, builds a TrainingReview object, tokenizes it,
+    and runs aspect/sentiment extraction using the loaded model.
+    """
     parser = argparse.ArgumentParser(
         description="Tokenise and run aspect+sentiment inference on a single review."
     )
@@ -70,8 +91,8 @@ def main() -> None:
         else "unknown"
     )
 
-    print(f"Aspect: {aspect_label} (index={aspect_idx})")
-    print(f"Sentiment: {sentiment_label} (index={sentiment_idx})")
+    logger.info("Aspect: %s (index=%d)", aspect_label, aspect_idx)
+    logger.info("Sentiment: %s (index=%d)", sentiment_label, sentiment_idx)
 
 
 if __name__ == "__main__":

@@ -1,23 +1,23 @@
+import logging
 import torch
+from datasets import Dataset as HFDataset
 from tqdm import tqdm
 
-from datasets import Dataset
+logger = logging.getLogger(__name__)
 
 
 def train_aspect_sentiment_extractor(
     model: torch.nn.Module,
-    dataset: Dataset, 
+    dataset: HFDataset, 
     aspect_criterion: torch.nn.Module, 
     sentiment_criterion: torch.nn.Module, 
     num_epochs: int = 3
     ) -> None:
-    """Train the AspectSentimentExtractor model on the given dataset and embeddings
+    """Train the AspectSentimentExtractor model on the given dataset using combined aspect and sentiment losses.
 
     Args:
         model (torch.nn.Module): Model to train
-        dataset (Dataset): Dataset to train the model on
-        embeddings (torch.Tensor): Embeddings to use for training
-        sentence_indices (list[int]): List of indices mapping each sentence to its review embedding in the embeddings tensor
+        dataset (HFDataset): Dataset to train the model on
         aspect_criterion (torch.nn.Module): Loss function to use for aspect classification
         sentiment_criterion (torch.nn.Module): Loss function to use for sentiment classification
         num_epochs (int, optional): Number of epochs to train for. Defaults to 3.
@@ -57,4 +57,4 @@ def train_aspect_sentiment_extractor(
 
             total_loss += loss.item()
     
-    print(f"Training completed. Final loss: {total_loss:.4f}")
+    logger.info("Training completed. Final loss: %.4f", total_loss)

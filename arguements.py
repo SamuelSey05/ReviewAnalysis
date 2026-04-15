@@ -6,6 +6,7 @@ def get_args() -> argparse.Namespace:
     Returns:
         argparse.Namespace: Parsed command-line arguments.
     """
+
     argparser = argparse.ArgumentParser()
 
     argparser.add_argument(
@@ -18,12 +19,6 @@ def get_args() -> argparse.Namespace:
         "results",
         type=str,
         help="Name of the results file to save the output."
-    )
-
-    argparser.add_argument(
-        "--is_sentiment",
-        action="store_true",
-        help="Whether to perform sentiment analysis or aspect extraction."
     )
 
     argparser.add_argument(

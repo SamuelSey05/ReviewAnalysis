@@ -15,6 +15,7 @@ def pool_embeddings(embeddings: torch.Tensor, attention_mask: torch.Tensor) -> t
     Returns:
         torch.Tensor: The pooled embeddings of shape (batch_size, hidden_size).
     """
+
     # Apply attention mask to the embeddings
     masked = embeddings * attention_mask.unsqueeze(-1)
     lengths = attention_mask.sum(dim=1).clamp(min=1)
@@ -25,12 +26,16 @@ def pool_embeddings(embeddings: torch.Tensor, attention_mask: torch.Tensor) -> t
 
 class AspectSentimentExtractor(torch.nn.Module):
     def __init__(self, model_name:str,  num_aspects: int, num_sentiments: int = 3) -> None: 
-        """init procedure for AspectSentimentExtractor. 
+        """Initialize aspect/sentiment extractor with DistilBERT encoder.
+
+        Encoder is frozen by default, with only the last 2 transformer layers unfrozen for fine-tuning.
 
         Args:
+            model_name (str): Name of the model to load from Hugging Face (e.g., 'distilbert-base-uncased').
             num_aspects (int): Number of aspects to classify.
             num_sentiments (int, optional): Number of sentiment classes. Defaults to 3.
         """
+
         super().__init__()
 
         self.encoder = AutoModel.from_pretrained(model_name)
@@ -63,11 +68,11 @@ class AspectSentimentExtractor(torch.nn.Module):
         """Forward pass for aspect and sentiment extraction.
 
         Args:
-            embeddings (torch.Tensor): embeddings tensor of shape (batch_size, seq_length, hidden_size).
-            attention_mask (torch.Tensor): attention mask tensor of shape (batch_size, seq_length).
+            input_ids (torch.Tensor): Token IDs tensor of shape (batch_size, seq_length).
+            attention_mask (torch.Tensor): Attention mask tensor of shape (batch_size, seq_length).
 
         Returns:
-            tuple[torch.Tensor, torch.Tensor]: A tuple containing the aspect logits and sentiment logits tensors.
+            tuple[torch.Tensor, torch.Tensor]: A tuple containing aspect logits and sentiment logits tensors.
         """
 
         outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
@@ -81,7 +86,7 @@ class AspectSentimentExtractor(torch.nn.Module):
         return aspect_logits, sentiment_logits
 
 
-    def aspect_sentiment_inference(self, input_ids: torch.Tensor, attention_masks: torch.Tensor, batch_size: int = 64) -> tuple[list, list]:
+    def aspect_sentiment_inference(self, input_ids: torch.Tensor, attention_masks: torch.Tensor, batch_size: int = 64) -> tuple[list[int], list[int]]:
         """Inference method for aspect and sentiment extraction.
 
         Args:
@@ -90,8 +95,9 @@ class AspectSentimentExtractor(torch.nn.Module):
             batch_size (int, optional): Batch size for inference. Defaults to 64.
 
         Returns:
-            tuple[list, list]: A tuple containing the list of aspect predictions and sentiment predictions.
+            tuple[list[int], list[int]]: A tuple containing the list of aspect predictions and sentiment predictions.
         """
+
         aspect_predictions = []
         sentiment_predictions = []
 

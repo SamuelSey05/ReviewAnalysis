@@ -3,6 +3,8 @@ from dataclasses import dataclass
 
 @dataclass
 class TrainingReview:
+    """Container for one review row used during training and preprocessing."""
+
     domain: str
     app: str
     review_id: str
@@ -30,6 +32,8 @@ class TrainingReview:
 
 @dataclass
 class Sentence:
+    """Container for one sentence-level aspect annotation linked to a review."""
+
     review: TrainingReview
     sentence_id: str
     category: str

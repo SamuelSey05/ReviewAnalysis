@@ -24,6 +24,7 @@ def tokenize(reviews: list[str], model_name: str) -> dict[str, torch.Tensor]:
     Returns:
         dict[str, torch.Tensor]: Dictionary containing input IDs and attention masks for the tokenized reviews.
     """
+
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     tokens = tokenizer(
         reviews,
@@ -49,6 +50,7 @@ def get_word_embeddings(inputs: dict[str, torch.Tensor], model_name: str, batch_
     Returns:
         torch.Tensor: Tensor containing the generated word embeddings.
     """
+
     model = AutoModel.from_pretrained(model_name)
     model.to(DEVICE)
     model.eval()
@@ -79,6 +81,7 @@ def sentiment_inference(embeddings: torch.Tensor, model: PreTrainedModel, batch_
     Returns:
         torch.Tensor: Tensor of predicted sentiment classes (0: Negative, 1: Neutral, 2: Positive)
     """
+
     predictions = []
 
     pre_classifier = cast(nn.Module, model.pre_classifier)
@@ -100,6 +103,15 @@ def sentiment_inference(embeddings: torch.Tensor, model: PreTrainedModel, batch_
     return torch.cat(predictions, dim=0)
 
 def wordwise_sentiment_analysis(review: TrainingReview):
+    """Analyze sentiment at word-level using VADER sentiment analyzer and aggregate to review-level rating.
+
+    Args:
+        review (TrainingReview): Training review object containing review text.
+
+    Returns:
+        float: Aggregated sentiment score scaled to range [0, 10].
+    """
+
     analyser = SentimentIntensityAnalyzer()
 
     wordwise_sentiment_scores = [analyser.polarity_scores(word)["compound"] for word in review.review.split()]

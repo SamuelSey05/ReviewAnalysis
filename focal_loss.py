@@ -9,6 +9,7 @@ class FocalLoss(torch.nn.Module):
             alpha (torch.Tensor): Weighting factor for each class.
             gamma (float): Focusing parameter to reduce the relative loss for well-classified examples.
         """
+
         super(FocalLoss, self).__init__()
         self.alpha = alpha
         self.gamma = gamma
@@ -23,6 +24,7 @@ class FocalLoss(torch.nn.Module):
         Returns:
             torch.Tensor: computed focal loss.
         """
+
         probs = torch.softmax(logits, dim=-1)
 
         # One-hot encode the targets for gathering true class probabilities

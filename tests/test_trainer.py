@@ -8,7 +8,9 @@ from trainer import train_aspect_sentiment_extractor
 class DummyExtractor(torch.nn.Module):
     """
     A dummy aspect sentiment extractor model for testing the training loop.
+    
     """
+
     def __init__(self):
         super().__init__()
         self.embed = torch.nn.Embedding(32, 8)

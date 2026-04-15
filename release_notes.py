@@ -7,6 +7,9 @@ import json
 import logging
 import os
 import re
+import argparse
+
+from sentence_transformers import SentenceTransformer, util
 
 import numpy as np
 import torch
@@ -20,18 +23,35 @@ import release_notes_plots
 
 logger = logging.getLogger(__name__)
 
+
 def load_csv_rows(file_path: str) -> list[dict[str, str]]:
-    """Load CSV rows into a list of dictionaries."""
+    """Loads CSV rows into a list of dictionaries.
+
+    Args:
+        file_path (str): Path to the CSV file.
+
+    Returns:
+        list[dict[str, str]]: CSV rows keyed by column name.
+    """
 
     with open(file_path, 'r') as file:
         return list(csv.DictReader(file))
     
 def extract_keyword_tokens(text: str) -> list[str]:
+    """Extract normalized word-like tokens from text.
+
+    Args:
+        text (str): Input text.
+
+    Returns:
+        list[str]: Lower-cased alphanumeric tokens including apostrophes.
+    """
+
     return re.findall(r"[a-z0-9']+", text.lower())
 
 
 def _collect_encoded_rows(
-    model: AspectSentimentExtractor,
+    model: AspectSentimentExtractor | SentenceTransformer,
     rows: list[dict[str, str]],
 ) -> list[tuple[int, dict[str, str], np.ndarray, int, int]]:
     """Encode rows of either reviews or release notes using model provided.
@@ -50,33 +70,46 @@ def _collect_encoded_rows(
         for i in range(0, len(rows), BATCH_SIZE):
             batch_rows = rows[i:i+BATCH_SIZE]
 
-            inputs = tokenize([row["content"] for row in batch_rows], DISTILBERT_BASE)
-            input_ids = inputs['input_ids'].to(DEVICE)
-            attention_mask = inputs['attention_mask'].to(DEVICE)
+            if isinstance(model, AspectSentimentExtractor):
+                inputs = tokenize([row["content"] for row in batch_rows], DISTILBERT_BASE)
+                input_ids = inputs['input_ids'].to(DEVICE)
+                attention_mask = inputs['attention_mask'].to(DEVICE)
 
-            outputs = model.encoder(input_ids=input_ids, attention_mask=attention_mask)
-            embeddings = outputs.last_hidden_state
-            mean_pooled = pool_embeddings(embeddings, attention_mask)
+                outputs = model.encoder(input_ids=input_ids, attention_mask=attention_mask)
+                embeddings = outputs.last_hidden_state
+                mean_pooled = pool_embeddings(embeddings, attention_mask)
 
-            aspects, sentiments = model.aspect_sentiment_inference(
-                input_ids=input_ids,
-                attention_masks=attention_mask,
-                batch_size=BATCH_SIZE,
-            )
+                aspects, sentiments = model.aspect_sentiment_inference(
+                    input_ids=input_ids,
+                    attention_masks=attention_mask,
+                    batch_size=BATCH_SIZE,
+                )
+            else:
+                embeddings = model.encode([row["content"] for row in batch_rows], convert_to_numpy=True, normalize_embeddings=True)
+                aspects = [0] * len(batch_rows) 
+                sentiments = [0] * len(batch_rows)
 
             for batch_idx, row in enumerate(batch_rows):
                 encoded_rows.append((
                     i + batch_idx,
                     row,
-                    mean_pooled[batch_idx].cpu().numpy(),
+                    embeddings[batch_idx],
                     aspects[batch_idx],
                     sentiments[batch_idx],
                 ))
 
     return encoded_rows
 
-def encode_release_notes(model: AspectSentimentExtractor, rows: list[dict[str, str]]) -> dict[int, EncodedReleaseNote]:
-    """Encode release-note rows and return typed encoded release-note objects."""
+def encode_release_notes(model: AspectSentimentExtractor | SentenceTransformer, rows: list[dict[str, str]]) -> dict[int, EncodedReleaseNote]:
+    """Encode release-note rows into typed release-note objects.
+
+    Args:
+        model (AspectSentimentExtractor | SentenceTransformer): Encoder model used to build embeddings and optional predictions.
+        rows (list[dict[str, str]]): Release-note CSV rows.
+
+    Returns:
+        dict[int, EncodedReleaseNote]: Mapping from row index to encoded release-note object.
+    """
     data: dict[int, EncodedReleaseNote] = {}
 
     for idx, row, embedding, aspect, _ in _collect_encoded_rows(model, rows):
@@ -93,7 +126,7 @@ def encode_release_notes(model: AspectSentimentExtractor, rows: list[dict[str, s
     return data
 
 
-def encode_reviews(model: AspectSentimentExtractor, rows: list[dict[str, str]]) -> dict[int, EncodedReview]:
+def encode_reviews(model: AspectSentimentExtractor | SentenceTransformer, rows: list[dict[str, str]]) -> dict[int, EncodedReview]:
     """Encode reviews into the EncodedReview object with embeddings and aspect/sentiment predictions from the model.
 
     Args:
@@ -124,6 +157,16 @@ def encode_reviews(model: AspectSentimentExtractor, rows: list[dict[str, str]]) 
     return data
     
 def pair_cosine_similarity(note: EncodedReleaseNote, review: EncodedReview) -> float:
+    """Compute cosine similarity between one release note and one review embedding.
+
+    Args:
+        note (EncodedReleaseNote): Encoded release note.
+        review (EncodedReview): Encoded review.
+
+    Returns:
+        float: Cosine similarity score.
+    """
+
     return torch.nn.functional.cosine_similarity(
         torch.tensor(note.embedding),
         torch.tensor(review.embedding),
@@ -131,6 +174,16 @@ def pair_cosine_similarity(note: EncodedReleaseNote, review: EncodedReview) -> f
     ).item()
 
 def pair_dates(note: EncodedReleaseNote, review: EncodedReview) -> tuple[date, date]:
+    """Parse and return comparable release-note and review dates.
+
+    Args:
+        note (EncodedReleaseNote): Encoded release note with DD Month YYYY date.
+        review (EncodedReview): Encoded review with timestamp date.
+
+    Returns:
+        tuple[date, date]: Parsed (note_date, review_date).
+    """
+
     note_date = datetime.strptime(note.date, "%d %B %Y").date()
     review_date = datetime.strptime(review.at, "%Y-%m-%d %H:%M:%S").date()
     return note_date, review_date
@@ -232,6 +285,17 @@ def format_result_rows(
     aspect_labels: list[str],
     start_rank: int,
 ) -> list[dict]:
+    """Format ranked pair results into JSON-serializable rows.
+
+    Args:
+        ranked_results (list[RankedResult]): Ranked ((release_note_id, review_id), PairResult) tuples.
+        aspect_labels (list[str]): Aspect label names indexed by class id.
+        start_rank (int): Rank value for the first row in this slice.
+
+    Returns:
+        list[dict]: Formatted rows with identifiers, text, and metrics.
+    """
+    
     rows = []
     for offset, ((release_note_id, review_id), result) in enumerate(ranked_results):
         note: EncodedReleaseNote = result.release_note
@@ -251,7 +315,7 @@ def format_result_rows(
     return rows
 
 def write_results_to_json(sorted_results: list[RankedResult], total_candidate_pairs: int, no_of_negative_reviews: int, output_file: str, k: int = 10) -> None:
-    """Formats and writes the results of the similarity comparison by putting the 10 best and worst matches into the json 
+    """Formats and writes the results of the similarity comparison to JSON, including top/bottom k matches and aggregated stats.
 
     Args:
         sorted_results (list[RankedResult]): Sorted list of ((release_note_id, review_id), PairResult) tuples, ranked by similarity in descending order
@@ -294,6 +358,13 @@ def write_results_to_json(sorted_results: list[RankedResult], total_candidate_pa
         json.dump(output_payload, f, indent=2)
 
 def write_aspect_based_metrics(sorted_results: list[RankedResult], aspect_counts: dict, output_file: str) -> None:
+    """Calculate and write per-aspect match density and mean time-to-resolution metrics to JSON and PNG.
+
+    Args:
+        sorted_results (list[RankedResult]): Sorted list of ((release_note_id, review_id), PairResult) tuples
+        aspect_counts (dict): Dictionary mapping aspect IDs to their total count in negative reviews
+        output_file (str): Output file path for the metrics JSON (PNG will be generated with .png suffix)
+    """
     aspect_metrics = dict()
 
     for (release_note_id, review_id), result in sorted_results:
@@ -349,6 +420,16 @@ def write_results(sorted_results: list[RankedResult], total_candidate_pairs: int
     write_aspect_based_metrics(sorted_results, aspect_counts, output_file.replace(".json", "_aspect_metrics.json"))
 
 def calculate_reactivity(sorted_results: list[RankedResult], no_of_negative_reviews: int, threshold: float = 0.5) -> tuple[float, float | None]:
+    """Calculate match density and mean time-to-resolution above a similarity threshold.
+
+    Args:
+        sorted_results (list[RankedResult]): Ranked pair results.
+        no_of_negative_reviews (int): Number of negative reviews considered.
+        threshold (float, optional): Similarity threshold for counting fulfillments. Defaults to 0.5.
+
+    Returns:
+        tuple[float, float | None]: (match_density, mean_time_to_resolution_days).
+    """
 
     fulfillments = [pair_result for _, pair_result in sorted_results if pair_result.similarity > threshold]
 
@@ -385,7 +466,7 @@ def dedup_results_by_release_note(sorted_results: list[RankedResult]) -> list[Ra
 
 
 def release_notes_vs_reviews_comparison(
-    model: AspectSentimentExtractor,
+    model: AspectSentimentExtractor | SentenceTransformer,
     app_name: str,
     output_file: str = "results/release_notes_comparison.json",
 ) -> tuple[list[RankedResult], int, int]:
@@ -432,10 +513,110 @@ def release_notes_vs_reviews_comparison(
 
     return sorted_results, total_candidate_pairs, len(negative_reviews)
 
+
+def sbert_comparison() -> None:
+    """Run SBERT-based similarity comparison and write top/bottom 30 pairs to file.
+    
+    Encodes all release notes and reviews using SentenceTransformer all-MiniLM-L6-v2,
+    computes cosine similarities between all pairs, and outputs top and bottom 30 matches
+    with full text content to results/sbert_comparison_top_bottom.txt.
+    """
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+
+    release_note_data = load_csv_rows('datasets/discord_release_notes.csv')
+    review_data = load_csv_rows('datasets/discord_reviews.csv')
+
+    logger.info(
+        "Encoding %d release notes and %d reviews for SBERT comparison...",
+        len(release_note_data),
+        len(review_data),
+    )
+
+    review_embeddings = model.encode([row["content"] for row in review_data], convert_to_tensor=True, normalize_embeddings=True)
+    release_note_embeddings = model.encode([row["content"] for row in release_note_data], convert_to_tensor=True, normalize_embeddings=True)
+
+    # Keep matrix operations vectorized; avoid per-pair .item() and Python object creation.
+    cosine_scores = util.cos_sim(release_note_embeddings, review_embeddings).cpu().numpy()
+
+    n_notes, n_reviews = cosine_scores.shape
+    total_pairs = n_notes * n_reviews
+    k = min(30, total_pairs)
+    flat_scores = cosine_scores.ravel()
+
+    top_idx = np.argpartition(flat_scores, -k)[-k:]
+    top_idx = top_idx[np.argsort(flat_scores[top_idx])[::-1]]
+
+    bottom_idx = np.argpartition(flat_scores, k - 1)[:k]
+    bottom_idx = bottom_idx[np.argsort(flat_scores[bottom_idx])]
+
+    os.makedirs("results", exist_ok=True)
+    output_file = "results/sbert_comparison_top_bottom.txt"
+
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(f"{'Rank':<6} {'Release Note ID':<20} {'Review ID':<20} {'Similarity':<12}\\n")
+        f.write("=" * 60 + "\\n")
+
+        f.write(f"\\nTOP {k} PAIRS:\\n")
+        f.write("-" * 60 + "\\n")
+        for rank, flat_idx in enumerate(top_idx, start=1):
+            note_idx, review_idx = divmod(int(flat_idx), n_reviews)
+            note_row = release_note_data[note_idx]
+            review_row = review_data[review_idx]
+            note_id = note_row.get("release_note_id", f"n{note_idx}")
+            review_id = review_row.get("reviewId", f"r{review_idx}")
+            similarity = float(flat_scores[flat_idx])
+
+            f.write(f"{rank:<6} {note_id:<20} {review_id:<20} {similarity:<12.4f}\\n")
+            f.write(f"  Release Note: {note_row.get('content', '')}\\n")
+            f.write(f"  Review:       {review_row.get('content', '')}\\n\\n")
+
+        f.write(f"\\nBOTTOM {k} PAIRS:\\n")
+        f.write("-" * 60 + "\\n")
+        for offset, flat_idx in enumerate(bottom_idx):
+            note_idx, review_idx = divmod(int(flat_idx), n_reviews)
+            note_row = release_note_data[note_idx]
+            review_row = review_data[review_idx]
+            note_id = note_row.get("release_note_id", f"n{note_idx}")
+            review_id = review_row.get("reviewId", f"r{review_idx}")
+            similarity = float(flat_scores[flat_idx])
+            rank = total_pairs - k + offset + 1
+
+            f.write(f"{rank:<6} {note_id:<20} {review_id:<20} {similarity:<12.4f}\\n")
+            f.write(f"  Release Note: {note_row.get('content', '')}\\n")
+            f.write(f"  Review:       {review_row.get('content', '')}\\n\\n")
+
+    logger.info("SBERT comparison complete. Wrote top/bottom %d pairs to %s", k, output_file)
+
+
+
 if __name__ == "__main__":
-    model = AspectSentimentExtractor(DISTILBERT_BASE, num_aspects=12).to(DEVICE)
-    model.load_state_dict(torch.load("./models/aspect_sentiment_extractor.pth", map_location=DEVICE))
-    model.eval()
+    argparser = argparse.ArgumentParser(description="Compare release notes and reviews for an app using SBERT or aspect-based model.")
+
+    argparser.add_argument(
+        "--use_sbert",
+        action="store_true",
+        help="Whether to use SBERT for the comparison instead of the aspect-based model. If not set, the aspect-based model will be used by default.",
+    )
+    argparser.add_argument(
+        "--results_dir",
+        type=str,
+        default=None,
+        help="Base directory for output files. Defaults to results/ for normal mode and results/sbert/ for SBERT mode.",
+    )
+
+    args = argparser.parse_args()
+
+    default_results_dir = "results/sbert" if args.use_sbert else "results"
+    results_dir = args.results_dir or default_results_dir
+    os.makedirs(results_dir, exist_ok=True)
+
+    if args.use_sbert:
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+    else:
+        model = AspectSentimentExtractor(DISTILBERT_BASE, num_aspects=12).to(DEVICE)
+        model.load_state_dict(torch.load("./models/aspect_sentiment_extractor.pth", map_location=DEVICE))
+        model.eval()
+
 
     with open("./web_scraping/apps.csv", 'r') as f:
         reader = csv.DictReader(f)
@@ -445,9 +626,14 @@ if __name__ == "__main__":
     all_results = []
     for app_name in apps:
         logger.info(f"Comparing release notes and reviews for {app_name}...")
-        sorted_results, total_candidate_pairs, no_of_negative_reviews = release_notes_vs_reviews_comparison(model, app_name, output_file=f"results/{app_name}_release_notes_comparison_thinned.json")
+        comparison_output_file = os.path.join(results_dir, f"{app_name}_release_notes_comparison_thinned.json")
+        sorted_results, total_candidate_pairs, no_of_negative_reviews = release_notes_vs_reviews_comparison(
+            model,
+            app_name,
+            output_file=comparison_output_file,
+        )
 
-        with open(f"results/{app_name}_release_notes_comparison_thinned.json", 'r') as f:
+        with open(comparison_output_file, 'r') as f:
             data = json.load(f)
 
         app_summaries[app_name] = {
@@ -460,8 +646,19 @@ if __name__ == "__main__":
         all_results.extend(sorted_results)
 
     # Plot graphs
-    release_notes_plots.plot_mttr_comparison(app_summaries)
+    release_notes_plots.plot_mttr_comparison(
+        app_summaries,
+        output_file=os.path.join(results_dir, "mttr_comparison.png"),
+    )
 
-    release_notes_plots.plot_resolution_time_distribution(app_summaries)
+    release_notes_plots.plot_resolution_time_distribution(
+        app_summaries,
+        output_file=os.path.join(results_dir, "resolution_time_distribution.png"),
+    )
 
-    release_notes_plots.plot_specificity_comparison(all_results)
+    release_notes_plots.plot_specificity_comparison(
+        all_results,
+        output_file=os.path.join(results_dir, "similarity_vs_resolution_time.png"),
+    )
+
+    # sbert_comparison()

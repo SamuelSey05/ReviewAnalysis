@@ -1,0 +1,17 @@
+{
+  "0": {
+    "fulfillments": 7,
+    "total": 3920,
+    "time_diffs": [
+      118,
+      247,
+      360,
+      154,
+      314,
+      49,
+      15
+    ],
+    "match_density": 0.0017857142857142857,
+    "mean_time_to_resolution_days": 179.57142857142858
+  }
+}

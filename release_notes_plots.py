@@ -9,8 +9,16 @@ from comparison_models import RankedResult
 logger = logging.getLogger(__name__)
 
 
-def plot_mttr_comparison(app_summaries: dict) -> None:
-    """Plot MTTR comparison across apps as a bar chart."""
+def plot_mttr_comparison(app_summaries: dict, output_file: str = "results/mttr_comparison.png") -> None:
+    """Plot MTTR comparison across apps as a bar chart with 95% CI error bars.
+
+    Args:
+        app_summaries (dict): Mapping of app name to summary dict containing
+            a `times_to_resolutions` list.
+        output_file (str, optional): Output image path. Defaults to
+            "results/mttr_comparison.png".
+    """
+    
     fig, ax = plt.subplots(figsize=(10, 6))
     app_names = [name.upper() for name in app_summaries.keys()]
     mttrs = []
@@ -48,14 +56,22 @@ def plot_mttr_comparison(app_summaries: dict) -> None:
         ax.text(i, v + err + 2, f"{v:.1f} ± {err:.1f}", ha='center', va='bottom', fontsize=11)
 
     plt.tight_layout()
-    output_path = "results/mttr_comparison.png"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    plt.savefig(output_path, dpi=300)
-    logger.info(f"MTTR comparison plot saved to {output_path}")
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    plt.savefig(output_file, dpi=300)
+    logger.info(f"MTTR comparison plot saved to {output_file}")
     plt.close()
 
 
-def plot_resolution_time_distribution(app_summaries: dict) -> None:
+def plot_resolution_time_distribution(app_summaries: dict, output_file: str = "results/resolution_time_distribution.png") -> None:
+    """Plot a boxplot distribution of resolution times for each app.
+
+    Args:
+        app_summaries (dict): Mapping of app name to summary dict containing
+            a `times_to_resolutions` list.
+        output_file (str, optional): Output image path. Defaults to
+            "results/resolution_time_distribution.png".
+    """
+
     fig, ax = plt.subplots(figsize=(10, 6))
 
     bp = ax.boxplot(
@@ -75,14 +91,21 @@ def plot_resolution_time_distribution(app_summaries: dict) -> None:
     ax.grid(axis='y', alpha=0.3)
 
     plt.tight_layout()
-    output_path = "results/resolution_time_distribution.png"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    plt.savefig(output_path, dpi=300)
-    logger.info(f"Resolution time distribution plot saved to {output_path}")
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    plt.savefig(output_file, dpi=300)
+    logger.info(f"Resolution time distribution plot saved to {output_file}")
     plt.close()
 
 
-def plot_specificity_comparison(all_results: list[RankedResult]) -> None:
+def plot_specificity_comparison(all_results: list[RankedResult], output_file: str = "results/similarity_vs_resolution_time.png") -> None:
+    """Plot similarity score versus time-to-resolution for ranked results.
+
+    Args:
+        all_results (list[RankedResult]): Ranked comparison results.
+        output_file (str, optional): Output image path. Defaults to
+            "results/similarity_vs_resolution_time.png".
+    """
+
     fig, ax = plt.subplots(figsize=(10, 6))
 
     similarities = [result.similarity for _, result in all_results]
@@ -95,14 +118,22 @@ def plot_specificity_comparison(all_results: list[RankedResult]) -> None:
     ax.grid(alpha=0.3)
 
     plt.tight_layout()
-    output_path = "results/similarity_vs_resolution_time.png"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    plt.savefig(output_path, dpi=300)
-    logger.info(f"Similarity vs Time to Resolution plot saved to {output_path}")
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    plt.savefig(output_file, dpi=300)
+    logger.info(f"Similarity vs Time to Resolution plot saved to {output_file}")
     plt.close()
 
 
 def plot_aspect_density_comparison(aspect_metrics: dict, aspect_labels: list[str], output_file: str = "results/aspect_density_comparison.png") -> None:
+    """Plot match density by aspect as a bar chart.
+
+    Args:
+        aspect_metrics (dict): Per-aspect metrics including `match_density`.
+        aspect_labels (list[str]): Aspect label names indexed by aspect id.
+        output_file (str, optional): Output image path. Defaults to
+            "results/aspect_density_comparison.png".
+    """
+
     fig, ax = plt.subplots(figsize=(10, 6))
 
     aspects = [aspect_labels[aspect] for aspect in aspect_metrics.keys()]

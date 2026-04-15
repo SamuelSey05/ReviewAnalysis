@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class TrainingReivew:
+class TrainingReview:
     domain: str
     app: str
     review_id: str
@@ -12,7 +12,7 @@ class TrainingReivew:
     is_opinion: bool
 
     @classmethod
-    def from_dict(cls, data: dict[str, str]) -> "TrainingReivew":
+    def from_dict(cls, data: dict[str, str]) -> "TrainingReview":
         """Extract a review from a CSV row dictionary."""
 
         rating = data.get("rating")
@@ -30,7 +30,7 @@ class TrainingReivew:
 
 @dataclass
 class Sentence:
-    review: TrainingReivew
+    review: TrainingReview
     sentence_id: str
     category: str
     term: str
@@ -39,7 +39,7 @@ class Sentence:
     sentiment: str
 
     @classmethod
-    def from_review_and_dict(cls, review: TrainingReivew, data: dict[str, str]) -> "Sentence":
+    def from_review_and_dict(cls, review: TrainingReview, data: dict[str, str]) -> "Sentence":
         """Extract a sentence from a CSV row dictionary and its parent review."""
 
         from_value = data.get("from", "")

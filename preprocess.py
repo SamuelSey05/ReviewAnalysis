@@ -2,21 +2,20 @@ import csv
 import json
 import logging
 from pathlib import Path
-from typing import Tuple
 
-from training_review import TrainingReivew, Sentence
+from training_review import TrainingReview, Sentence
 
 logger = logging.getLogger(__name__)
 
-def load_csv(file_path) -> Tuple[dict[str, TrainingReivew], list[Sentence]]:
+def load_csv(file_path: str) -> tuple[dict[str, TrainingReview], list[Sentence]]:
     """Load a csv file and return its contents as a list of dictionaries.
     
     Args:
         file_path (str): Path to the csv file.
         
     Returns:
-        Tuple[dict[str, Review], list[Sentence]]: A tuple containing:
-            - A dictionary mapping review IDs to Review objects.
+        tuple[dict[str, TrainingReview], list[Sentence]]: A tuple containing:
+            - A dictionary mapping review IDs to TrainingReview objects.
             - A list of Sentence objects for rows marked as opinions.
     """
     
@@ -27,7 +26,7 @@ def load_csv(file_path) -> Tuple[dict[str, TrainingReivew], list[Sentence]]:
         data = dict()
         review_parts = []
         for row in csv_reader:
-            review = TrainingReivew.from_dict(row)
+            review = TrainingReview.from_dict(row)
             if review.review_id not in data:
                 data[review.review_id] = review
             if review.is_opinion:

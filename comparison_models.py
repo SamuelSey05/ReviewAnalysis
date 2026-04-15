@@ -26,3 +26,17 @@ class EncodedReview:
     aspect: int
     tokens: list[str]
     sentiment: int
+
+
+@dataclass(slots=True)
+class PairResult:
+    similarity: float
+    release_note: EncodedReleaseNote
+    review: EncodedReview
+    lcs_length: int
+    time_diff_days: int
+
+
+PairKey = tuple[str, str]
+NoteReviewPair = tuple[EncodedReleaseNote, EncodedReview]
+RankedResult = tuple[PairKey, PairResult]

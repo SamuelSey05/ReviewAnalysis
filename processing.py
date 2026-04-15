@@ -9,7 +9,7 @@ from transformers import AutoModel, AutoTokenizer, PreTrainedModel
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from config import DEVICE
-from training_review import TrainingReivew
+from training_review import TrainingReview
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +99,7 @@ def sentiment_inference(embeddings: torch.Tensor, model: PreTrainedModel, batch_
 
     return torch.cat(predictions, dim=0)
 
-def wordwise_sentiment_analysis(review: TrainingReivew):
+def wordwise_sentiment_analysis(review: TrainingReview):
     analyser = SentimentIntensityAnalyzer()
 
     wordwise_sentiment_scores = [analyser.polarity_scores(word)["compound"] for word in review.review.split()]

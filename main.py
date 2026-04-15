@@ -156,7 +156,7 @@ def main() -> None:
 
     tokenised_sentence_dataset, aspects, aspect_weights, review_id_to_idx = prepare_aspect_dataset(sentences=sentences, review_ids=review_ids, review_inputs=review_inputs, true_sentiments=true_sentiments)
 
-    with open("./models/aspect_labels.json", "w", encoding="utf-8") as f:
+    with open("./resources/aspect_labels.json", "w", encoding="utf-8") as f:
         json.dump(aspects, f, ensure_ascii=False, indent=2)
     
     # Index of the sentence's review embedding in the word embeddings

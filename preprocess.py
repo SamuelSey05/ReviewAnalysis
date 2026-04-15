@@ -35,11 +35,11 @@ def load_csv(file_path: str) -> tuple[dict[str, TrainingReview], list[Sentence]]
 
     return data, review_parts
 
-def load_aspect_labels(path: str = "./models/aspect_labels.json") -> list[str]:
+def load_aspect_labels(path: str = "./resources/aspect_labels.json") -> list[str]:
     """Load aspect category labels from a JSON file.
 
     Args:
-        path (str): Path to the JSON file containing aspect labels. Defaults to "./models/aspect_labels.json".
+        path (str): Path to the JSON file containing aspect labels. Defaults to "./resources/aspect_labels.json".
 
     Returns:
         list[str]: List of aspect category labels.

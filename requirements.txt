@@ -1,6 +1,8 @@
 torch
 transformers
+accelerate
 datasets
+sentence-transformers
 scikit-learn
 optuna
 tqdm

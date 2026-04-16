@@ -76,8 +76,8 @@ def _collect_encoded_rows(
                 attention_mask = inputs['attention_mask'].to(DEVICE)
 
                 outputs = model.encoder(input_ids=input_ids, attention_mask=attention_mask)
-                embeddings = outputs.last_hidden_state
-                mean_pooled = pool_embeddings(embeddings, attention_mask)
+                mean_pooled = pool_embeddings(outputs.last_hidden_state, attention_mask)
+                embeddings = mean_pooled.detach().cpu().numpy()
 
                 aspects, sentiments = model.aspect_sentiment_inference(
                     input_ids=input_ids,

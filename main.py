@@ -158,9 +158,6 @@ def main() -> None:
 
     with open("./resources/aspect_labels.json", "w", encoding="utf-8") as f:
         json.dump(aspects, f, ensure_ascii=False, indent=2)
-    
-    # Index of the sentence's review embedding in the word embeddings
-    sentence_indices = [review_id_to_idx[sentence.review.review_id] for sentence in sentences]
 
     aspect_sentiment_extractor = AspectSentimentExtractor(model_name, num_aspects=len(aspects)).to(DEVICE)
 

@@ -1,14 +1,13 @@
 import torch
 from datasets import Dataset
 
-from config import DEVICE
 from tests.helpers import use_deterministic_dataloader, weighted_dataset_loss
 from trainer import train_aspect_sentiment_extractor
 
 class DummyExtractor(torch.nn.Module):
     """
     A dummy aspect sentiment extractor model for testing the training loop.
-    
+
     """
 
     def __init__(self):

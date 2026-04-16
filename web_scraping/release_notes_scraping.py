@@ -22,10 +22,7 @@ def normalise_text(text: str) -> str:
         str: Normalized text.
     """
     
-    try:
-        text = text.encode().decode('unicode-escape')
-    except:
-        pass
+    text = text.encode().decode('unicode-escape')
 
     text = fix_text(text)
     return unidecode(text)

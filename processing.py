@@ -1,17 +1,32 @@
 import logging
+from functools import lru_cache
 from typing import cast
 
 import numpy as np
 import torch
 import torch.nn as nn
 from tqdm import tqdm
-from transformers import AutoModel, AutoTokenizer, PreTrainedModel
+from transformers import AutoModel, AutoTokenizer, PreTrainedModel, PreTrainedTokenizerBase
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from config import DEVICE
 from training_review import TrainingReview
 
 logger = logging.getLogger(__name__)
+
+
+@lru_cache(maxsize=None)
+def _get_tokenizer(model_name: str) -> PreTrainedTokenizerBase:
+    """Load and cache a tokenizer for repeated reuse."""
+
+    return AutoTokenizer.from_pretrained(model_name)
+
+
+@lru_cache(maxsize=None)
+def _get_encoder(model_name: str) -> nn.Module:
+    """Load and cache an encoder model for repeated reuse."""
+
+    return AutoModel.from_pretrained(model_name)
 
 
 def tokenize(reviews: list[str], model_name: str) -> dict[str, torch.Tensor]:
@@ -25,7 +40,7 @@ def tokenize(reviews: list[str], model_name: str) -> dict[str, torch.Tensor]:
         dict[str, torch.Tensor]: Dictionary containing input IDs and attention masks for the tokenized reviews.
     """
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = _get_tokenizer(model_name)
     tokens = tokenizer(
         reviews,
         truncation=True,
@@ -35,8 +50,8 @@ def tokenize(reviews: list[str], model_name: str) -> dict[str, torch.Tensor]:
     )
 
     return {
-        "input_ids": tokens["input_ids"],
-        "attention_mask": tokens["attention_mask"],
+        "input_ids": cast(torch.Tensor, tokens["input_ids"]),
+        "attention_mask": cast(torch.Tensor, tokens["attention_mask"]),
     }
 
 def get_word_embeddings(inputs: dict[str, torch.Tensor], model_name: str, batch_size: int = 32) -> torch.Tensor:
@@ -51,7 +66,7 @@ def get_word_embeddings(inputs: dict[str, torch.Tensor], model_name: str, batch_
         torch.Tensor: Tensor containing the generated word embeddings.
     """
 
-    model = AutoModel.from_pretrained(model_name)
+    model = _get_encoder(model_name)
     model.to(DEVICE)
     model.eval()
     embeddings = []
@@ -68,39 +83,6 @@ def get_word_embeddings(inputs: dict[str, torch.Tensor], model_name: str, batch_
 
     # Concatenate across the batch dimension
     return torch.cat(embeddings, dim=0)
-    
-    
-def sentiment_inference(embeddings: torch.Tensor, model: PreTrainedModel, batch_size: int = 64) -> torch.Tensor:
-    """Do inference to get sentiment predictions from given embeddings
-
-    Args:
-        embeddings (torch.Tensor): Tensor containing the word embeddings for the reviews
-        model (PreTrainedModel): Pre-trained model to use for sentiment analysis
-        batch_size (int, optional): Batch size. Defaults to 64
-
-    Returns:
-        torch.Tensor: Tensor of predicted sentiment classes (0: Negative, 1: Neutral, 2: Positive)
-    """
-
-    predictions = []
-
-    pre_classifier = cast(nn.Module, model.pre_classifier)
-    dropout = cast(nn.Module, model.dropout)
-    classifier = cast(nn.Module, model.classifier)
-
-    with torch.no_grad():
-        for i in tqdm(range(0, len(embeddings), batch_size), desc="Running inference"):
-            batch_embeddings: torch.Tensor = embeddings[i:i+batch_size].to(DEVICE)
-            # These steps replicate the process done when classifying with DistilBERT from embedding to prediction
-            cls_embeddings = batch_embeddings[:, 0, :]
-            x = pre_classifier(cls_embeddings)
-            x = torch.relu(x)
-            x = dropout(x)
-            logits = classifier(x)
-
-            predictions.append(torch.argmax(logits, dim=-1))
-
-    return torch.cat(predictions, dim=0)
 
 def wordwise_sentiment_analysis(review: TrainingReview):
     """Analyze sentiment at word-level using VADER sentiment analyzer and aggregate to review-level rating.

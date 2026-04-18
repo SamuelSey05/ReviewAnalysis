@@ -149,7 +149,7 @@ def main() -> None:
 
     if not sentences:
         logger.error("No sentences found in dataset for aspect-based analysis.")
-        exit(1)
+        raise ValueError("Dataset must contain sentences with aspect annotations for aspect-based analysis.")
 
     # Performing aspect extraction and sentiment analysis at sentence level
     logger.info("Performing aspect extraction...")

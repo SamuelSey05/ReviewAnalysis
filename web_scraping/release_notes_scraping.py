@@ -5,7 +5,7 @@ import re
 import logging
 from datetime import datetime
 from ftfy import fix_text
-from unidecode import unidecode
+from text_unidecode import unidecode
 from playwright.sync_api import sync_playwright, Locator
 from bs4 import BeautifulSoup
 

@@ -130,10 +130,10 @@ def main() -> None:
         model_name = DISTILBERT_BASE
 
     # Load dataset
-    reviews, sentences = load_csv(DATASET_PATH)
+    reviews, opinions = load_csv(DATASET_PATH)
 
     logger.info(f"Loaded {len(reviews)} reviews from the dataset.")
-    logger.info(f"Loaded {len(sentences)} sentences from the dataset.")
+    logger.info(f"Loaded {len(opinions)} sentences from the dataset.")
 
     # Prepare true sentiments using combination of ratings and word-wise sentiment analysis
     combined_ratings = [review.rating + wordwise_sentiment_analysis(review) for review in reviews.values()]
@@ -147,14 +147,14 @@ def main() -> None:
     review_inputs = tokenize([x.review for x in list(reviews.values())], DISTILBERT_BASE)
     logger.info(f"Tokenised {len(review_inputs['input_ids'])} texts.")
 
-    if not sentences:
-        logger.error("No sentences found in dataset for aspect-based analysis.")
-        raise ValueError("Dataset must contain sentences with aspect annotations for aspect-based analysis.")
+    if not opinions:
+        logger.error("No opinions found in dataset for aspect-based analysis.")
+        raise ValueError("Dataset must contain opinions with aspect annotations for aspect-based analysis.")
 
     # Performing aspect extraction and sentiment analysis at sentence level
     logger.info("Performing aspect extraction...")
 
-    tokenised_sentence_dataset, aspects, aspect_weights, review_id_to_idx = prepare_aspect_dataset(sentences=sentences, review_ids=review_ids, review_inputs=review_inputs, true_sentiments=true_sentiments)
+    tokenised_sentence_dataset, aspects, aspect_weights, review_id_to_idx = prepare_aspect_dataset(opinions=opinions, review_ids=review_ids, review_inputs=review_inputs, true_sentiments=true_sentiments)
 
     with open("./resources/aspect_labels.json", "w", encoding="utf-8") as f:
         json.dump(aspects, f, ensure_ascii=False, indent=2)

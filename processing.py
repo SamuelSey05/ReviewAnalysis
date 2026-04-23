@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from tqdm import tqdm
-from transformers import AutoModel, AutoTokenizer, PreTrainedModel, PreTrainedTokenizerBase
+from transformers import AutoModel, AutoTokenizer, PreTrainedTokenizerBase
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from config import DEVICE
@@ -85,7 +85,7 @@ def get_word_embeddings(inputs: dict[str, torch.Tensor], model_name: str, batch_
     return torch.cat(embeddings, dim=0)
 
 def wordwise_sentiment_analysis(review: TrainingReview):
-    """Analyze sentiment at word-level using VADER sentiment analyzer and aggregate to review-level rating.
+    """Analyze sentiment at word-level using VADER sentiment analyser and aggregate to review-level rating.
 
     Args:
         review (TrainingReview): Training review object containing review text.

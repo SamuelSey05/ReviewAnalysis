@@ -372,18 +372,18 @@ def write_aspect_based_metrics(sorted_results: list[RankedResult], aspect_counts
         aspect = review.aspect
         if aspect not in aspect_metrics:
             aspect_metrics[aspect] = {
-                "fulfillments": 0,
+                "fulfilments": 0,
                 "total": aspect_counts.get(aspect, 0),
                 "time_diffs": [],
             }
 
         if result.similarity > 0.5:
-            aspect_metrics[aspect]["fulfillments"] += 1
+            aspect_metrics[aspect]["fulfilments"] += 1
             aspect_metrics[aspect]["time_diffs"].append(result.time_diff_days)
             
 
     for aspect, metrics in aspect_metrics.items():
-        metrics["match_density"] = metrics["fulfillments"] / metrics["total"] if metrics["total"] > 0 else 0
+        metrics["match_density"] = metrics["fulfilments"] / metrics["total"] if metrics["total"] > 0 else 0
         metrics["mean_time_to_resolution_days"] = sum(metrics["time_diffs"]) / len(metrics["time_diffs"]) if metrics["time_diffs"] else None
 
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
@@ -425,20 +425,20 @@ def calculate_reactivity(sorted_results: list[RankedResult], no_of_negative_revi
     Args:
         sorted_results (list[RankedResult]): Ranked pair results.
         no_of_negative_reviews (int): Number of negative reviews considered.
-        threshold (float, optional): Similarity threshold for counting fulfillments. Defaults to 0.5.
+        threshold (float, optional): Similarity threshold for counting fulfilments. Defaults to 0.5.
 
     Returns:
         tuple[float, float | None]: (match_density, mean_time_to_resolution_days).
     """
 
-    fulfillments = [pair_result for _, pair_result in sorted_results if pair_result.similarity > threshold]
+    fulfilments = [pair_result for _, pair_result in sorted_results if pair_result.similarity > threshold]
 
-    if not fulfillments:
+    if not fulfilments:
         return 0, None
 
-    density = len(fulfillments) / no_of_negative_reviews
+    density = len(fulfilments) / no_of_negative_reviews
 
-    mttr = sum(result.time_diff_days for result in fulfillments) / len(fulfillments)
+    mttr = sum(result.time_diff_days for result in fulfilments) / len(fulfilments)
 
     return density, mttr
 

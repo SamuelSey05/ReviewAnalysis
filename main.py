@@ -40,15 +40,15 @@ def write_to_results_file(
         f.write(f"{label} Classification report:\n {classification_report(true_tags, predicted_tags)}\n\n")
 
 def prepare_aspect_dataset(
-        sentences: list, 
+        opinions: list, 
         review_ids: list[str], 
         review_inputs: dict[str, torch.Tensor], 
         true_sentiments: list[int]
         ) -> tuple[Dataset, list[str], torch.Tensor, dict[str, int]]:
-    """Prepare a dataset for aspect classification from sentence-level aspect annotations.
+    """Prepare a dataset for aspect classification from opinion-level aspect annotations.
 
     Args:
-        sentences (list): List of sentence objects with category and review attributes.
+        opinions (list): List of TrainingOpinion objects with category and review attributes.
         review_ids (list[str]): List of review IDs.
         review_inputs (dict[str, torch.Tensor]): Dictionary containing tokenized review inputs (input_ids and attention_mask).
         true_sentiments (list[int]): List of true sentiment labels for reviews.
@@ -62,30 +62,30 @@ def prepare_aspect_dataset(
     """
 
     # Sort aspects to have consistent indexing
-    aspects = sorted(set([sentence.category for sentence in sentences]))
+    aspects = sorted(set([opinion.category for opinion in opinions]))
     aspect_to_idx = {aspect: idx for idx, aspect in enumerate(aspects)}
 
     review_id_to_idx = {review_id: idx for idx, review_id in enumerate(review_ids)}
 
     # Calculate aspect weights to handle class imbalance
-    aspects_counter = Counter([sentence.category for sentence in sentences])
-    total_sentences = len(sentences)
-    aspect_weights = torch.tensor([total_sentences / (len(aspects) * aspects_counter[aspect]) for aspect in aspects], dtype=torch.float).to(DEVICE)
+    aspects_counter = Counter([opinion.category for opinion in opinions])
+    total_opinions = len(opinions)
+    aspect_weights = torch.tensor([total_opinions / (len(aspects) * aspects_counter[aspect]) for aspect in aspects], dtype=torch.float).to(DEVICE)
     
-    # Make dataset on sentence by sentence basis
-    tokenised_sentence_dataset = Dataset.from_dict({
-        "input_ids": [review_inputs["input_ids"][review_id_to_idx[sentence.review.review_id]] for sentence in sentences],
-        "attention_mask": [review_inputs["attention_mask"][review_id_to_idx[sentence.review.review_id]] for sentence in sentences],
-        "aspect": [aspect_to_idx[sentence.category] for sentence in sentences],
-        "sentiment": [true_sentiments[review_id_to_idx[sentence.review.review_id]] for sentence in sentences]
+    # Make dataset on opinion by opinion basis
+    tokenised_opinion_dataset = Dataset.from_dict({
+        "input_ids": [review_inputs["input_ids"][review_id_to_idx[opinion.review.review_id]] for opinion in opinions],
+        "attention_mask": [review_inputs["attention_mask"][review_id_to_idx[opinion.review.review_id]] for opinion in opinions],
+        "aspect": [aspect_to_idx[opinion.category] for opinion in opinions],
+        "sentiment": [true_sentiments[review_id_to_idx[opinion.review.review_id]] for opinion in opinions]
         })
     
-    tokenised_sentence_dataset.set_format(
+    tokenised_opinion_dataset.set_format(
         type="torch",
         columns=["input_ids", "attention_mask", "aspect", "sentiment"],
     )
     
-    return tokenised_sentence_dataset, aspects, aspect_weights, review_id_to_idx
+    return tokenised_opinion_dataset, aspects, aspect_weights, review_id_to_idx
 
 def map_rating_to_sentiment(rating: float) -> int:
     """maps from rating to sentiment class

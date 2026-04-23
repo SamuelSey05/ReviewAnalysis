@@ -21,9 +21,9 @@ def test_full_integration(monkeypatch, tmp_path):
         writer.writeheader()
         writer.writerows([OPINION_REVIEW_ROW, NON_OPINION_REVIEW_ROW])
 
-    reviews, sentences = load_csv(str(csv_path))
+    reviews, opinions = load_csv(str(csv_path))
     assert len(reviews) == 2
-    assert len(sentences) == 1
+    assert len(opinions) == 1
 
     review_list = list(reviews.values())
     review_inputs = tokenize([x.review for x in review_list], DISTILBERT_BASE)
@@ -34,7 +34,7 @@ def test_full_integration(monkeypatch, tmp_path):
     review_ids = [review.review_id for review in review_list]
 
     dataset, aspects, _, _ = prepare_aspect_dataset(
-        sentences=sentences,
+        opinions=opinions,
         review_ids=review_ids,
         review_inputs=review_inputs,
         true_sentiments=true_sentiments,

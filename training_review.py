@@ -31,7 +31,7 @@ class TrainingReview:
 
 
 @dataclass
-class Sentence:
+class TrainingOpinion:
     """Container for one sentence-level aspect annotation linked to a review."""
 
     review: TrainingReview
@@ -43,7 +43,7 @@ class Sentence:
     sentiment: str
 
     @classmethod
-    def from_review_and_dict(cls, review: TrainingReview, data: dict[str, str]) -> "Sentence":
+    def from_review_and_dict(cls, review: TrainingReview, data: dict[str, str]) -> "TrainingOpinion":
         """Extract a sentence from a CSV row dictionary and its parent review."""
 
         from_value = data.get("from", "")

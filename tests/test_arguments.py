@@ -1,6 +1,6 @@
 import sys
 
-from arguements import get_args
+from arguments import get_args
 
 def test_get_args_parses_no_training_flag(monkeypatch):
     monkeypatch.setattr(

@@ -5,7 +5,7 @@ from typing import Counter
 import torch
 from sklearn.metrics import accuracy_score, classification_report
 
-from arguements import get_args
+from arguments import get_args
 from aspect_based import AspectSentimentExtractor
 from config import DEVICE, DISTILBERT_BASE, NUM_EPOCHS, DATASET_PATH, BATCH_SIZE, POSITIVE_SENTIMENT_THRESHOLD, NEUTRAL_SENTIMENT_THRESHOLD
 from datasets import Dataset

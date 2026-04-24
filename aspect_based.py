@@ -47,7 +47,7 @@ class AspectSentimentExtractor(torch.nn.Module):
         for param in self.encoder.parameters():
             param.requires_grad = False
 
-        # Unfreeze the last 2 layers of encoder parmaeters to be fine tuned
+        # Unfreeze the last 2 layers of encoder parameters to be fine tuned
         for layer in self.encoder.transformer.layer[-2:]:
             for param in layer.parameters():
                 param.requires_grad = True

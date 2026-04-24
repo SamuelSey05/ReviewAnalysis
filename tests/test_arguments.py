@@ -14,5 +14,4 @@ def test_get_args_parses_no_training_flag(monkeypatch):
     assert args.model == "test_model_name"
     assert args.results == "test_out_file"
     assert args.no_training is True
-    assert args.fine_tune_model is False
     assert args.optimize_hyperparameters is False

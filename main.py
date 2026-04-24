@@ -122,11 +122,8 @@ def main() -> None:
     if args.model == "pre_fine_tuned_distilBERT":
         # Use pre-fine-tuned model from Hugging Face
         model_name = "distilbert-base-uncased-finetuned-sst-2-english"
-    elif args.model == "custom_fine_tuned_distilBERT":
-        # Use model that has already been fine-tuned and saved
-        model_name = "./models/fine_tuned_model"
     else:
-        # Fine tune the base model
+        # Use the base model
         model_name = DISTILBERT_BASE
 
     # Load dataset

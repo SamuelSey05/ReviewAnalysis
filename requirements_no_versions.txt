@@ -1,0 +1,16 @@
+beautifulsoup4
+datasets
+ftfy
+google-play-scraper
+matplotlib
+numpy
+pandas
+playwright
+pytest
+scikit-learn
+sentence-transformers
+text-unidecode
+torch
+tqdm
+transformers
+vaderSentiment

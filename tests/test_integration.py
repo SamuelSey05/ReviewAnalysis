@@ -7,8 +7,8 @@ from config import DISTILBERT_BASE, DEVICE
 from main import map_rating_to_sentiment, prepare_aspect_dataset
 from preprocess import load_csv
 from processing import tokenize
-from tests.helpers import use_deterministic_dataloader, weighted_dataset_loss
-from trainer import train_aspect_sentiment_extractor
+from tests.helpers import use_deterministic_dataloader
+from trainer import train_aspect_sentiment_extractor, weighted_aspect_sentiment_loss
 from tests.constants import CSV_FIELDNAMES, NON_OPINION_REVIEW_ROW, OPINION_REVIEW_ROW
 
 def test_full_integration(monkeypatch, tmp_path):
@@ -52,9 +52,11 @@ def test_full_integration(monkeypatch, tmp_path):
     aspect_criterion = torch.nn.CrossEntropyLoss()
     sentiment_criterion = torch.nn.CrossEntropyLoss()
 
+    batch = dataset.with_format("torch")[:]
+
     before_aspect_weights = model.state_dict()["aspect_head.0.weight"].detach().clone()
     before_sentiment_weights = model.sentiment_head.weight.detach().clone()
-    before_loss = weighted_dataset_loss(model, dataset, aspect_criterion, sentiment_criterion)
+    before_loss = weighted_aspect_sentiment_loss(model, batch, aspect_criterion, sentiment_criterion, DEVICE)
 
     train_aspect_sentiment_extractor(
         model=model,
@@ -66,7 +68,7 @@ def test_full_integration(monkeypatch, tmp_path):
 
     after_aspect_weights = model.state_dict()["aspect_head.0.weight"].detach().clone()
     after_sentiment_weights = model.sentiment_head.weight.detach().clone()
-    after_loss = weighted_dataset_loss(model, dataset, aspect_criterion, sentiment_criterion)
+    after_loss = weighted_aspect_sentiment_loss(model, batch, aspect_criterion, sentiment_criterion, DEVICE)
 
     assert not torch.equal(before_aspect_weights, after_aspect_weights)
     assert not torch.equal(before_sentiment_weights, after_sentiment_weights)

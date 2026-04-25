@@ -5,6 +5,34 @@ from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
+def weighted_aspect_sentiment_loss(model: torch.nn.Module, batch: dict[str, torch.Tensor], aspect_criterion: torch.nn.Module, sentiment_criterion: torch.nn.Module,  device: torch.device, aspect_weight: float = 0.8) -> torch.Tensor:
+    """Calculate loss for both aspect and sentiment heads and combine with provided weight
+
+    Args:
+        model (torch.nn.Module): Model to calculate loss for
+        batch (dict[str, torch.Tensor]): Batch to calculate loss on
+        aspect_criterion (torch.nn.Module): Loss function to use for aspect classification
+        sentiment_criterion (torch.nn.Module): Loss function to use for sentiment classification
+        device (torch.device): Device being used
+        aspect_weight (float, optional): Weighting towards aspect classification loss. Defaults to 0.8.
+
+    Returns:
+        torch.Tensor: _description_
+    """
+
+    input_ids = batch["input_ids"].to(device=device, dtype=torch.long)
+    attention_mask = batch["attention_mask"].to(device=device, dtype=torch.long)
+    aspects = batch["aspect"].to(device=device, dtype=torch.long)
+    sentiments = batch["sentiment"].to(device=device, dtype=torch.long)
+
+    aspect_logits, sentiment_logits = model.forward(input_ids, attention_mask)
+
+    # Apply loss functions and backpropagate
+    aspect_loss = aspect_criterion(aspect_logits, aspects)
+    sentiment_loss = sentiment_criterion(sentiment_logits, sentiments)
+
+    return (aspect_loss * aspect_weight) + (sentiment_loss * (1 - aspect_weight)) # Weighted sum of aspect and sentiment losses
+
 
 def train_aspect_sentiment_extractor(
     model: torch.nn.Module,
@@ -38,19 +66,16 @@ def train_aspect_sentiment_extractor(
     for _ in tqdm(range(num_epochs), desc="Training Aspect Sentiment Extractor"):
         total_loss = 0.0
         for batch in tqdm(data_loader, desc="Batches", leave=False):
-            input_ids = batch["input_ids"].to(device=device, dtype=torch.long)
-            attention_mask = batch["attention_mask"].to(device=device, dtype=torch.long)
-            aspects = batch["aspect"].to(device=device, dtype=torch.long)
-            sentiments = batch["sentiment"].to(device=device, dtype=torch.long)
-
             # Reset gradients
             optimiser.zero_grad()
-            aspect_logits, sentiment_logits = model.forward(input_ids, attention_mask)
 
-            # Apply loss functions and backpropagate
-            aspect_loss = aspect_criterion(aspect_logits, aspects)
-            sentiment_loss = sentiment_criterion(sentiment_logits, sentiments)
-            loss = (aspect_loss * 0.8) + (sentiment_loss * 0.2)  # Weighted sum of aspect and sentiment losses
+            loss = weighted_aspect_sentiment_loss(
+                model=model,
+                batch=batch,
+                device=device,
+                aspect_criterion=aspect_criterion,
+                sentiment_criterion=sentiment_criterion,
+            )
 
             loss.backward()
             optimiser.step()

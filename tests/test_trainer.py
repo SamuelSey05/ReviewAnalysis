@@ -1,8 +1,8 @@
 import torch
 from datasets import Dataset
 
-from tests.helpers import use_deterministic_dataloader, weighted_dataset_loss
-from trainer import train_aspect_sentiment_extractor
+from tests.helpers import use_deterministic_dataloader
+from trainer import train_aspect_sentiment_extractor, weighted_aspect_sentiment_loss
 
 class DummyExtractor(torch.nn.Module):
     """
@@ -51,8 +51,12 @@ def test_train_aspect_sentiment_extractor_updates_weights_and_improves_loss(monk
     aspect_loss = torch.nn.CrossEntropyLoss()
     sentiment_loss = torch.nn.CrossEntropyLoss()
 
+    # Device for unit test is CPU as we have smaller tensors and want to avoid overhead of GPU transfer 
+    device = next(model.parameters()).device
+    batch = dataset.with_format("torch")[:]
+
     before = model.aspect_head.weight.detach().clone()
-    before_loss = weighted_dataset_loss(model, dataset, aspect_loss, sentiment_loss)
+    before_loss = weighted_aspect_sentiment_loss(model, batch, aspect_loss, sentiment_loss, device)
 
     train_aspect_sentiment_extractor(
         model=model,
@@ -63,7 +67,7 @@ def test_train_aspect_sentiment_extractor_updates_weights_and_improves_loss(monk
     )  
 
     after = model.aspect_head.weight.detach().clone()
-    after_loss = weighted_dataset_loss(model, dataset, aspect_loss, sentiment_loss)
+    after_loss = weighted_aspect_sentiment_loss(model, batch, aspect_loss, sentiment_loss, device)
 
     assert not torch.equal(before, after)
     assert after_loss.item() < before_loss.item()

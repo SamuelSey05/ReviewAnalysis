@@ -4,7 +4,6 @@ import torch
 logging.basicConfig(level=logging.INFO)
 logging.getLogger().setLevel(logging.INFO)
 
-FINE_TUNED_MODEL_PATH = "./models/fine_tuned_model"
 DISTILBERT_BASE = "distilbert-base-uncased"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 BATCH_SIZE = 64

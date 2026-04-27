@@ -2,13 +2,12 @@ import csv
 
 import torch
 
-from aspect_based import AspectSentimentExtractor
-from config import DISTILBERT_BASE, DEVICE
-from main import map_rating_to_sentiment, prepare_aspect_dataset
-from preprocess import load_csv
-from processing import tokenize
+from src.model_architecture import AspectSentimentExtractor
+from src.config import DISTILBERT_BASE, DEVICE
+from src.processing import load_dataset_csv, map_rating_to_sentiment, prepare_aspect_dataset
+from src.processing import tokenize
 from tests.helpers import use_deterministic_dataloader
-from trainer import train_aspect_sentiment_extractor, weighted_aspect_sentiment_loss
+from src.trainer import train_aspect_sentiment_extractor, weighted_aspect_sentiment_loss
 from tests.constants import CSV_FIELDNAMES, NON_OPINION_REVIEW_ROW, OPINION_REVIEW_ROW
 
 def test_full_integration(monkeypatch, tmp_path):
@@ -21,7 +20,7 @@ def test_full_integration(monkeypatch, tmp_path):
         writer.writeheader()
         writer.writerows([OPINION_REVIEW_ROW, NON_OPINION_REVIEW_ROW])
 
-    reviews, opinions = load_csv(str(csv_path))
+    reviews, opinions = load_dataset_csv(str(csv_path))
     assert len(reviews) == 2
     assert len(opinions) == 1
 

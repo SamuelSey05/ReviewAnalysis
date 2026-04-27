@@ -1,4 +1,4 @@
-from training_review import TrainingReview, TrainingOpinion
+from src.data_models import TrainingReview, TrainingOpinion
 from tests.constants import OPINION_REVIEW_ROW, SENTENCE_ROW
 
 def test_review_from_dict_parses_values_and_types():

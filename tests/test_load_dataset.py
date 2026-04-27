@@ -1,6 +1,6 @@
 import csv
 
-from preprocess import load_csv
+from src.processing import load_dataset_csv
 from tests.constants import CSV_FIELDNAMES, NON_OPINION_REVIEW_ROW, OPINION_REVIEW_ROW
 
 
@@ -14,7 +14,7 @@ def test_load_csv_collects_reviews_and_opinion_sentences(tmp_path):
         writer.writeheader()
         writer.writerows(rows)
 
-    reviews, sentences = load_csv(str(csv_path))
+    reviews, sentences = load_dataset_csv(str(csv_path))
 
     assert len(reviews) == 2
     assert len(sentences) == 1

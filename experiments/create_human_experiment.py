@@ -1,14 +1,27 @@
 import pandas as pd
 import os
 
+from src.config import DEVICE, DISTILBERT_BASE
+from src.model_architecture import AspectSentimentExtractor
+from src.release_notes_comparison_utils import release_notes_vs_reviews_comparison
+
 def generate_experiment_csvs():
-    # 1. Load Datasets
+    # Load Datasets
     reviews_df = pd.read_csv('datasets/slack_reviews.csv')
     notes_df = pd.read_csv('datasets/slack_release_notes.csv')
 
-    # 2. Convert dates for filtering logic
+    model = AspectSentimentExtractor(DISTILBERT_BASE, num_aspects=12).to(DEVICE)
+
+    sorted_results, _, _ = release_notes_vs_reviews_comparison(model=model, app_name="slack")
+
+
+    reviewID_to_matched_noteID = {}
+    for _, result in sorted_results:
+        if result.similarity >= 0.5 and result.review.review_id not in reviewID_to_matched_noteID:
+            reviewID_to_matched_noteID[result.review.review_id] = result.release_note.release_note_id
+
+    # Slack dates
     reviews_df['at'] = pd.to_datetime(reviews_df['at'])
-    # Release note dates in Slack CSV use format like '11 March 2026'
     notes_df['date_dt'] = pd.to_datetime(notes_df['date'], format='%d %B %Y', errors='coerce')
 
     review_start, review_end = '2022-03-01', '2022-03-31'
@@ -36,6 +49,10 @@ def generate_experiment_csvs():
     manual_eval = experiment_reviews[['reviewId', 'at', 'content']].copy()
     manual_eval['Human_Matched_Note_ID'] = ""
     manual_eval['Reasoning_Comments'] = ""
+
+    for row in manual_eval.itertuples():
+        manual_eval['Model_Matched_Note_ID'] = reviewID_to_matched_noteID.get(row.reviewId, "N/A")
+
     manual_eval.to_csv('experiment/manual_evaluation_experiment.csv', index=False)
 
     # 6. Create Release Note Reference Sheet

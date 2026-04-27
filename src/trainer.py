@@ -3,6 +3,8 @@ import torch
 from datasets import Dataset as HFDataset
 from tqdm import tqdm
 
+from src.config import DEVICE
+
 logger = logging.getLogger(__name__)
 
 def weighted_aspect_sentiment_loss(model: torch.nn.Module, batch: dict[str, torch.Tensor], aspect_criterion: torch.nn.Module, sentiment_criterion: torch.nn.Module,  device: torch.device, aspect_weight: float = 0.8) -> torch.Tensor:
@@ -39,7 +41,8 @@ def train_aspect_sentiment_extractor(
     dataset: HFDataset, 
     aspect_criterion: torch.nn.Module, 
     sentiment_criterion: torch.nn.Module, 
-    num_epochs: int = 3
+    num_epochs: int = 3,
+    device: torch.device = DEVICE,
     ) -> None:
     """Train the AspectSentimentExtractor model on the given dataset using combined aspect and sentiment losses.
 
@@ -49,15 +52,13 @@ def train_aspect_sentiment_extractor(
         aspect_criterion (torch.nn.Module): Loss function to use for aspect classification
         sentiment_criterion (torch.nn.Module): Loss function to use for sentiment classification
         num_epochs (int, optional): Number of epochs to train for. Defaults to 3.
+        device (torch.device, optional): Device to train on. Defaults to DEVICE.
     """
 
     optimiser = torch.optim.AdamW(model.parameters(), lr=5e-5)
     
     # Set model to training mode
     model.train()
-
-    # Device in unit tests is CPU but is GPU in main training loop
-    device = next(model.parameters()).device
 
     # Use DataLoader for batching and shuffling
     data_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4, pin_memory=True)

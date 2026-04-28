@@ -8,6 +8,7 @@ import torch
 from src.config import BATCH_SIZE, DATASET_PATH, DEFAULT_MODEL_WEIGHTS_PATH, DEVICE, DISTILBERT_BASE, NUM_EPOCHS
 from src.model_architecture import AspectSentimentExtractor
 from src.processing import load_aspect_labels, load_dataset_csv, map_rating_to_sentiment, prepare_aspect_dataset, tokenize, wordwise_sentiment_analysis
+from src.setup_dataset import verify_aware_dataset_is_present
 from src.trainer import train_aspect_sentiment_extractor
 
 logger = logging.getLogger(__name__)
@@ -105,6 +106,9 @@ def main():
     model_weights_path = get_correct_model_weights_path(args.model, args.load_weights_from)
 
     model = AspectSentimentExtractor(args.model, num_aspects=len(load_aspect_labels())).to(DEVICE)
+
+    verify_aware_dataset_is_present(DATASET_PATH)
+
     reviews, opinions = load_dataset_csv(DATASET_PATH)
 
     # Prepare true sentiments using combination of ratings and word-wise sentiment analysis

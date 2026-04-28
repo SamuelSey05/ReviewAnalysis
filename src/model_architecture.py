@@ -5,7 +5,7 @@ import torch
 from tqdm import tqdm
 from transformers import AutoModel, AutoTokenizer
 
-from config import DEVICE
+from src.config import DEVICE
 from src.processing import pool_embeddings
 
 class AspectSentimentModel(ABC):

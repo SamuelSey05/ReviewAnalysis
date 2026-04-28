@@ -1,6 +1,6 @@
 import logging
 import torch
-from datasets import Dataset as HFDataset
+from datasets import Dataset
 from tqdm import tqdm
 
 from src.config import DEVICE
@@ -38,7 +38,7 @@ def weighted_aspect_sentiment_loss(model: torch.nn.Module, batch: dict[str, torc
 
 def train_aspect_sentiment_extractor(
     model: torch.nn.Module,
-    dataset: HFDataset, 
+    dataset: Dataset, 
     aspect_criterion: torch.nn.Module, 
     sentiment_criterion: torch.nn.Module, 
     num_epochs: int = 3,
@@ -48,7 +48,7 @@ def train_aspect_sentiment_extractor(
 
     Args:
         model (torch.nn.Module): Model to train
-        dataset (HFDataset): Dataset to train the model on
+        dataset (Dataset): Dataset to train the model on
         aspect_criterion (torch.nn.Module): Loss function to use for aspect classification
         sentiment_criterion (torch.nn.Module): Loss function to use for sentiment classification
         num_epochs (int, optional): Number of epochs to train for. Defaults to 3.

@@ -9,6 +9,7 @@ This repository implements Aspect Based Sentiment Analysis, and uses it to map u
 - `tests/`: Unit and integration tests.
 - `datasets/`: Directory holding training and review/release note datasets.
 - `resources/`: Directory holding list of aspect labels.
+- `web_scraping/`: Holds config and scripts for scraping of reviews and release notes
 - `model_entry.py`: Entrypoint for interaction with the model, including training and inference.
 - `release_notes_comparison_entry.py`: Main script for comparing release reviews and release notes across apps.
 
@@ -69,6 +70,25 @@ pip install -r requirements.txt
 ## Usage
 
 Currently using Hugging Face without authentication, which works when only using public models, to set an auth token, use the `HF_TOKEN` environment variable.
+
+## Data Collection
+
+The AWARE dataset is ensured when training the model.
+
+Reviews and release notes used in the comparison analysis are collected using scrapers in `web_scraping/`. The directory is laid out as follows:
+
+- `apps.csv`: Holds config for app names and their IDs on the Google Play Store
+- `google_play_scraping.py`: Uses the `google-play-scraper` library to collect reviews.
+- `release_notes_scraping.py`: Uses `playwright` to render content and collect release notes.
+
+To carry out the scraping:
+
+```bash
+playwright install chromium
+
+python web_scraping/google_play_scraping.py
+python web_scraping/release_notes_scraping.py
+```
 
 ## Testing
 

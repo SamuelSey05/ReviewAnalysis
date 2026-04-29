@@ -61,7 +61,7 @@ def train_aspect_sentiment_extractor(
     model.train()
 
     # Use DataLoader for batching and shuffling
-    data_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4, pin_memory=True)
+    data_loader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4)
 
     total_loss = 0.0
     for _ in tqdm(range(num_epochs), desc="Training Aspect Sentiment Extractor"):

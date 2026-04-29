@@ -36,7 +36,7 @@ pip install -r requirements.txt
     To train the aspect and sentiment heads using the AWARE dataset:
 
     ```bash
-    python model_entry.py --mode train
+    python model_entry.py --train
     ```
 
     - Run inference on the AWARE dataset

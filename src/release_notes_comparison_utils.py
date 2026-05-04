@@ -63,19 +63,19 @@ def _collect_encoded_rows(
 
     return encoded_rows
 
-def encode_release_notes(model: AspectSentimentModel, app_name: str) -> dict[int, EncodedReleaseNote]:
+def encode_release_notes(model: AspectSentimentModel, release_notes_path: str) -> dict[int, EncodedReleaseNote]:
     """Encode release-note rows into typed release-note objects.
 
     Args:
         model (AspectSentimentModel): Encoder model used to build embeddings and optional predictions.
-        app_name (str): Name of the app to load release notes for, used to find the correct CSV file in web_scraping/.
+        release_notes_path (str): Path to release notes CSV file to encode.
 
     Returns:
         dict[int, EncodedReleaseNote]: Mapping from row index to encoded release-note object.
     """
     data: dict[int, EncodedReleaseNote] = {}
 
-    rows = load_csv_rows(f"./web_scraping/{app_name}_release_notes.csv")
+    rows = load_csv_rows(release_notes_path)
 
     for idx, row, embedding, aspect, _ in _collect_encoded_rows(model, rows):
         data[idx] = EncodedReleaseNote(
@@ -91,12 +91,12 @@ def encode_release_notes(model: AspectSentimentModel, app_name: str) -> dict[int
     return data
 
 
-def encode_reviews(model: AspectSentimentModel, app_name: str) -> dict[int, EncodedReview]:
+def encode_reviews(model: AspectSentimentModel, reviews_path: str) -> dict[int, EncodedReview]:
     """Encode reviews into the EncodedReview object with embeddings and aspect/sentiment predictions from the model.
 
     Args:
         model (AspectSentimentModel): Model to use to generate embeddings and aspect/sentiment predictions for the reviews, should be the same model used to encode release notes for consistency
-        app_name (str): Name of the app to load reviews for, used to find the correct CSV file in web_scraping/.
+        reviews_path (str): Path to reviews CSV file to encode.
 
     Returns:
         dict[int, EncodedReview]: Dictionary mapping from row index to EncodedReview object containing the review data, embedding, aspect prediction, and sentiment prediction.
@@ -104,7 +104,7 @@ def encode_reviews(model: AspectSentimentModel, app_name: str) -> dict[int, Enco
 
     data: dict[int, EncodedReview] = {}
 
-    rows = load_csv_rows(f"./web_scraping/{app_name}_reviews.csv")
+    rows = load_csv_rows(reviews_path)
 
     for idx, row, embedding, aspect, sentiment in _collect_encoded_rows(model, rows):
         raw_score = row.get("score", "")
@@ -322,10 +322,12 @@ def calculate_reactivity(sorted_results: list[RankedResult], no_of_negative_revi
 
     fulfilments = [pair_result for _, pair_result in sorted_results if pair_result.similarity > threshold]
 
+    fulfilled_review_ids = set(pair_result.review.review_id for pair_result in fulfilments)
+
     if not fulfilments:
         return 0, []
 
-    density = len(fulfilments) / no_of_negative_reviews
+    density = len(fulfilled_review_ids) / no_of_negative_reviews
 
     times_to_resolutions = [pair_result.time_diff_days for pair_result in fulfilments]
 

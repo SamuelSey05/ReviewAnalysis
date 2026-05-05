@@ -3,11 +3,12 @@ from datasets import Dataset
 
 from tests.helpers import use_deterministic_dataloader
 from src.trainer import train_aspect_sentiment_extractor, weighted_aspect_sentiment_loss
+from src.model_architecture import AspectSentimentModel
 
-class DummyExtractor(torch.nn.Module):
+class DummyExtractor(AspectSentimentModel, torch.nn.Module):
+
     """
     A dummy aspect sentiment extractor model for testing the training loop.
-
     """
 
     def __init__(self):
@@ -15,6 +16,12 @@ class DummyExtractor(torch.nn.Module):
         self.embed = torch.nn.Embedding(32, 8)
         self.aspect_head = torch.nn.Linear(8, 3)
         self.sentiment_head = torch.nn.Linear(8, 3)
+
+    def aspect_sentiment_inference(self, texts: list[str], batch_size: int = 64) -> tuple[list[int], list[int]]:
+        return [0] * len(texts), [0] * len(texts)
+    
+    def get_embeddings(self, texts: list[str], batch_size: int = 1) -> torch.Tensor:
+        return torch.zeros((len(texts), 8))
     
     def forward(self, input_ids, attention_mask):
         embeddings = self.embed(input_ids)

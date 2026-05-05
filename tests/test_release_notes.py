@@ -133,7 +133,7 @@ def test_encode_release_notes_builds_typed_objects(monkeypatch):
         ],
     )
 
-    encoded = release_notes_comparison_utils.encode_release_notes(model=DummyAspectSentimentModel(), app_name="dummy_app")
+    encoded = release_notes_comparison_utils.encode_release_notes(model=DummyAspectSentimentModel(), release_notes_path="dummy_path")
 
     assert 0 in encoded
     assert encoded[0].release_note_id == "n10"
@@ -165,7 +165,7 @@ def test_encode_reviews_builds_typed_objects(monkeypatch):
         ],
     )
 
-    encoded = release_notes_comparison_utils.encode_reviews(model=DummyAspectSentimentModel(), app_name="dummy_app")
+    encoded = release_notes_comparison_utils.encode_reviews(model=DummyAspectSentimentModel(), reviews_path="dummy_path")
 
     assert 0 in encoded
     assert encoded[0].review_id == "r9"

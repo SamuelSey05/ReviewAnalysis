@@ -46,7 +46,7 @@ def load_dataset_csv(file_path: str) -> tuple[dict[str, TrainingReview], list[Tr
     
     logger.info(f"Loading dataset from {file_path}...")
 
-    with open(file_path, mode='r', encoding='utf-8') as file:
+    with open(file_path, mode='r', encoding='utf-8-sig') as file:
         csv_reader = csv.DictReader(file)
         reviews = {}
         opinions = []

@@ -331,7 +331,6 @@ def calculate_reactivity(sorted_results: list[RankedResult], no_of_negative_revi
 
     times_to_resolutions = [pair_result.time_diff_days for pair_result in fulfilments]
 
-
     return density, times_to_resolutions
 
 def dedup_results_by_release_note(sorted_results: list[RankedResult]) -> list[RankedResult]:

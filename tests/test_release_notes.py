@@ -75,7 +75,7 @@ def sample_release_note_sorted_results() -> list[tuple[tuple[str, str], PairResu
             time_diff_days=10,
         )),
     ]
-class DummyAspectSentimentModel(AspectSentimentExtractor):
+class FakeAspectSentimentModel(AspectSentimentExtractor):
     def __init__(self):
         pass
 
@@ -102,7 +102,7 @@ def test_collect_encoded_rows_returns_indexed_model_outputs(monkeypatch):
         {"content": "first"},
         {"content": "second"},
     ]
-    collected = release_notes_comparison_utils._collect_encoded_rows(DummyAspectSentimentModel(), rows)
+    collected = release_notes_comparison_utils._collect_encoded_rows(FakeAspectSentimentModel(), rows)
 
     assert len(collected) == 2
     assert collected[0][0] == 0
@@ -133,7 +133,7 @@ def test_encode_release_notes_builds_typed_objects(monkeypatch):
         ],
     )
 
-    encoded = release_notes_comparison_utils.encode_release_notes(model=DummyAspectSentimentModel(), release_notes_path="dummy_path")
+    encoded = release_notes_comparison_utils.encode_release_notes(model=FakeAspectSentimentModel(), release_notes_path="dummy_path")
 
     assert 0 in encoded
     assert encoded[0].release_note_id == "n10"
@@ -165,7 +165,7 @@ def test_encode_reviews_builds_typed_objects(monkeypatch):
         ],
     )
 
-    encoded = release_notes_comparison_utils.encode_reviews(model=DummyAspectSentimentModel(), reviews_path="dummy_path")
+    encoded = release_notes_comparison_utils.encode_reviews(model=FakeAspectSentimentModel(), reviews_path="dummy_path")
 
     assert 0 in encoded
     assert encoded[0].review_id == "r9"

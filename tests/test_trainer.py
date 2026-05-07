@@ -5,10 +5,10 @@ from tests.helpers import use_deterministic_dataloader
 from src.trainer import train_aspect_sentiment_extractor, weighted_aspect_sentiment_loss
 from src.model_architecture import AspectSentimentModel
 
-class DummyExtractor(AspectSentimentModel, torch.nn.Module):
+class FakeExtractor(AspectSentimentModel, torch.nn.Module):
 
     """
-    A dummy aspect sentiment extractor model for testing the training loop.
+    A fake aspect sentiment extractor model for testing the training loop.
     """
 
     def __init__(self):
@@ -34,7 +34,7 @@ def test_train_aspect_sentiment_extractor_updates_weights_and_improves_loss(monk
     torch.manual_seed(0)
     use_deterministic_dataloader(monkeypatch)
 
-    model = DummyExtractor()
+    model = FakeExtractor()
     device = next(model.parameters()).device
 
     dataset = Dataset.from_dict({

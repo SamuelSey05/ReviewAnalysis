@@ -9,7 +9,6 @@ from typing import cast
 from pathlib import Path
 import numpy as np
 import torch
-import torch.nn as nn
 from tqdm import tqdm
 from transformers import AutoModel, AutoTokenizer, PreTrainedTokenizerBase
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -82,7 +81,7 @@ def _get_tokenizer(model_name: str) -> PreTrainedTokenizerBase:
 
 
 @lru_cache(maxsize=None)
-def _get_encoder(model_name: str) -> nn.Module:
+def _get_encoder(model_name: str) -> torch.nn.Module:
     """Load and cache an encoder model for repeated reuse."""
 
     return AutoModel.from_pretrained(model_name)

@@ -11,7 +11,7 @@ import torch
 
 from src.config import OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING
 from src.data_models import EncodedReleaseNote, EncodedReview, PairKey, PairResult, RankedResult, ReviewNotePair
-from src.model_architecture import AspectSentimentModel
+from src.model_architecture import AspectSentimentModel, SBERTWrapper
 from src.processing import extract_keyword_tokens, load_aspect_labels, load_csv_rows
 from src.release_notes_comparison_plots import plot_aspect_density_comparison
 
@@ -201,10 +201,11 @@ def get_longest_match(a: list[str], b: list[str]) -> list[str]:
     match = matcher.find_longest_match(0, len(a), 0, len(b))
     return a[match.a: match.a + match.size]
 
-def score_pairs(filtered_pairs: list[ReviewNotePair]) -> dict[PairKey, PairResult]:
+def score_pairs(model: AspectSentimentModel, filtered_pairs: list[ReviewNotePair]) -> dict[PairKey, PairResult]:
     """Use cosine similarity to score and rank the filtered (release note, review) pairs based on their embeddings
 
     Args:
+        model (AspectSentimentModel): Model used to generate embeddings for the release notes and reviews, should be the same model used in the encoding step for consistency
         filtered_pairs (list[NoteReviewPair]): (release note, review) pairs that have been filtered to match the criteria of the note coming after a negative review about the same aspect
 
     Returns:
@@ -213,18 +214,22 @@ def score_pairs(filtered_pairs: list[ReviewNotePair]) -> dict[PairKey, PairResul
 
     scored_results: dict[PairKey, PairResult] = {}
 
+    # TODO: Maybe do a selection on model type so SBERT is only cosine similarity
+
     for review, note in filtered_pairs:
         cosine_similarity = pair_cosine_similarity(review, note)
 
         longest_match = get_longest_match(note.tokens, review.tokens)
         longest_match_length = len(longest_match)
 
-        # Normlise to shortest of review and note to avoid bias to longer texts
-        longest_match_score = longest_match_length / max(1, min(len(note.tokens), len(review.tokens)))
+        if isinstance(model, SBERTWrapper):
+            similarity_score = cosine_similarity
+        else:
+            # Normlise to shortest of review and note to avoid bias to longer texts
+            longest_match_score = longest_match_length / max(1, min(len(note.tokens), len(review.tokens)))
 
-        # Similarity score calculation
-        # TODO: Maybe loosen up here and allow intersection anywhere in text
-        similarity_score = 0.4 * cosine_similarity + 0.4 * longest_match_score + (0.2 if set(longest_match).intersection(OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING) else 0)
+            # Similarity score calculation
+            similarity_score = 0.4 * cosine_similarity + 0.4 * longest_match_score + (0.2 if set(longest_match).intersection(OVERLAP_KEYWORDS_FOR_RELEASE_FILTERING) else 0)
 
         review_date, note_date = pair_dates(review, note)
 
@@ -253,8 +258,8 @@ def release_notes_vs_reviews_comparison(model: AspectSentimentModel, app_name: s
 
     """
 
-    release_notes = encode_release_notes(model, app_name)
-    reviews = encode_reviews(model, app_name)
+    release_notes = encode_release_notes(model, f"./datasets/{app_name}_release_notes.csv")
+    reviews = encode_reviews(model, f"./datasets/{app_name}_reviews.csv")
 
     # Number of possible combinations before filtering
     total_candidate_pairs = len(release_notes) * len(reviews)
@@ -268,7 +273,7 @@ def release_notes_vs_reviews_comparison(model: AspectSentimentModel, app_name: s
     logger.info(f"Total release note-review pairs: {total_candidate_pairs}")
     logger.info(f"Filtered release note-review pairs (matching aspects): {len(filtered_pairs)}")
 
-    scored_results = score_pairs(filtered_pairs)
+    scored_results = score_pairs(model, filtered_pairs)
 
     sorted_results = sorted(scored_results.items(), key=lambda x: x[1].similarity, reverse=True)
 

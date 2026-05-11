@@ -1,0 +1,121 @@
+{
+  "8": {
+    "fulfilments": 33,
+    "total": 9308,
+    "time_diffs": [
+      49,
+      247,
+      219,
+      154,
+      284,
+      349,
+      29,
+      283,
+      304,
+      65,
+      328,
+      15,
+      203,
+      112,
+      108,
+      83,
+      113,
+      283,
+      52,
+      154,
+      49,
+      303,
+      53,
+      203,
+      129,
+      7,
+      113,
+      113,
+      284,
+      182,
+      112,
+      321,
+      256
+    ],
+    "match_density": 0.0035453373442200257,
+    "mean_time_to_resolution_days": 168.45454545454547
+  },
+  "1": {
+    "fulfilments": 7,
+    "total": 1612,
+    "time_diffs": [
+      68,
+      218,
+      65,
+      6,
+      196,
+      6,
+      196
+    ],
+    "match_density": 0.004342431761786601,
+    "mean_time_to_resolution_days": 107.85714285714286
+  },
+  "11": {
+    "fulfilments": 12,
+    "total": 2062,
+    "time_diffs": [
+      65,
+      220,
+      218,
+      154,
+      342,
+      343,
+      327,
+      342,
+      329,
+      123,
+      219,
+      294
+    ],
+    "match_density": 0.005819592628516004,
+    "mean_time_to_resolution_days": 248.0
+  },
+  "4": {
+    "fulfilments": 8,
+    "total": 1260,
+    "time_diffs": [
+      268,
+      155,
+      354,
+      114,
+      261,
+      220,
+      68,
+      8
+    ],
+    "match_density": 0.006349206349206349,
+    "mean_time_to_resolution_days": 181.0
+  },
+  "9": {
+    "fulfilments": 1,
+    "total": 1274,
+    "time_diffs": [
+      29
+    ],
+    "match_density": 0.0007849293563579278,
+    "mean_time_to_resolution_days": 29.0
+  },
+  "10": {
+    "fulfilments": 3,
+    "total": 1058,
+    "time_diffs": [
+      166,
+      84,
+      201
+    ],
+    "match_density": 0.002835538752362949,
+    "mean_time_to_resolution_days": 150.33333333333334
+  },
+  "2": {
+    "fulfilments": 0,
+    "total": 253,
+    "time_diffs": [],
+    "match_density": 0.0,
+    "mean_time_to_resolution_days": null
+  }
+}

@@ -9,6 +9,7 @@ This repository implements Aspect Based Sentiment Analysis, and uses it to map u
 - `tests/`: Unit and integration tests.
 - `datasets/`: Directory holding training and review/release note datasets.
 - `resources/`: Directory holding list of aspect labels.
+- `results/`: Directory holding results from the experiments in my source code as well as incremental evaluations that dictated my decision making through my developmental Spiral approach. There are metric outputs from multiple iterations of the AspectSentimentExtractor, with the final output being in `aspect_sentiment_results.txt`.
 - `web_scraping/`: Holds config and scripts for scraping of reviews and release notes
 - `model_entry.py`: Entrypoint for interaction with the model, including training and inference.
 - `release_notes_comparison_entry.py`: Main script for comparing release reviews and release notes across apps.
@@ -38,6 +39,8 @@ pip install -r requirements.txt
     ```bash
     python model_entry.py --train
     ```
+
+    Note the full training loop over 5 epochs lasts just under an hour.
 
     - Run inference on the AWARE dataset
 

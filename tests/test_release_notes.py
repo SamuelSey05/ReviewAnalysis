@@ -223,7 +223,7 @@ def test_score_pairs_contains_expected_fields(monkeypatch):
 
     monkeypatch.setattr(release_notes_comparison_utils, "pair_cosine_similarity", lambda n, r: 0.5)
 
-    scored = release_notes_comparison_utils.score_pairs([(review, note)])
+    scored = release_notes_comparison_utils.score_pairs(FakeAspectSentimentModel(), [(review, note)])
     key = ("r1", "n1")
 
     assert key in scored

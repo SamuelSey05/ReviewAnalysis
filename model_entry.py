@@ -2,7 +2,8 @@ import argparse
 import logging
 import os
 from datasets import Dataset
-from sklearn.metrics import accuracy_score, classification_report
+from matplotlib import pyplot as plt
+from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, classification_report, confusion_matrix
 import torch
 
 from src.config import BATCH_SIZE, DATASET_PATH, DEFAULT_MODEL_WEIGHTS_PATH, DEVICE, DISTILBERT_BASE, NUM_EPOCHS
@@ -69,8 +70,8 @@ def write_accuracy_and_classification_to_results_file(
         f.write(f"Aspect (Sentence-level) Accuracy: {accuracy_score(dataset['aspect'], aspect_predicted_tags)}\n")
         f.write(f"Aspect (Sentence-level) Classification report:\n {classification_report(dataset['aspect'], aspect_predicted_tags)}\n\n")
 
-        f.write(f"Sentiment (Sentence-level) Accuracy: {accuracy_score(dataset['sentiment'], aspect_predicted_tags)}\n")
-        f.write(f"Sentiment (Sentence-level) Classification report:\n {classification_report(dataset['sentiment'], aspect_predicted_tags)}\n\n")
+        f.write(f"Sentiment (Sentence-level) Accuracy: {accuracy_score(dataset['sentiment'], sentiment_predicted_tags)}\n")
+        f.write(f"Sentiment (Sentence-level) Classification report:\n {classification_report(dataset['sentiment'], sentiment_predicted_tags)}\n\n")
 
 def main():
     """Main entrypoint for interaction with the AspectSentimentExtractor model
@@ -104,8 +105,10 @@ def main():
     args = argparser.parse_args()
 
     model_weights_path = get_correct_model_weights_path(args.model, args.load_weights_from)
+    
+    aspect_labels = load_aspect_labels()
 
-    model = AspectSentimentExtractor(args.model, num_aspects=len(load_aspect_labels())).to(DEVICE)
+    model = AspectSentimentExtractor(args.model, num_aspects=len(aspect_labels)).to(DEVICE)
 
     verify_aware_dataset_is_present(DATASET_PATH)
 
@@ -134,6 +137,8 @@ def main():
             aspect_criterion=torch.nn.CrossEntropyLoss(weight=aspect_weights),
             sentiment_criterion=torch.nn.CrossEntropyLoss(),
             num_epochs=NUM_EPOCHS,
+            opinions=opinions,
+            plot_progress=True,
         )
         
         logger.info("Saving aspect sentiment extractor model...")
@@ -166,6 +171,20 @@ def main():
             aspect_predicted_tags=aspect_predictions,
             sentiment_predicted_tags=sentiment_predictions,
         )
+
+        cm = confusion_matrix(dataset['aspect'], aspect_predictions, normalize='true')
+
+        # Plotting the matrix
+        fig, ax = plt.subplots(figsize=(10, 10))
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=aspect_labels)
+
+        # Use a colormap like 'Blues' or 'Greys' to match academic standards
+        disp.plot(cmap=plt.get_cmap('Greys'), ax=ax, xticks_rotation=45)
+
+        plt.title("Confusion Matrix for Aspect Classification (DistilBERT)")
+        plt.tight_layout()
+        plt.savefig("./results/aspect_classification_confusion_matrix.png")
+
         logger.info(f"Results written to {results_path}")
     else:
         # Inference on single review text file
@@ -179,10 +198,9 @@ def main():
         aspect_predictions, sentiment_predictions = model.aspect_sentiment_inference([single_review], batch_size=1)
 
         sentiment_labels = ["negative", "neutral", "positive"]
-        aspect_labels = load_aspect_labels()
 
-        print(f"Predicted aspect: {aspect_labels[int(aspect_predictions[0])]}")
-        print(f"Predicted sentiment: {sentiment_labels[int(sentiment_predictions[0])]}")
+        print(f"Predicted aspect: {aspect_labels[int(aspect_predictions[0])]} (Class {int(aspect_predictions[0])})")
+        print(f"Predicted sentiment: {sentiment_labels[int(sentiment_predictions[0])]} (Class {int(sentiment_predictions[0])})")
 
 
 if __name__ == "__main__":

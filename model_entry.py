@@ -91,7 +91,7 @@ def main():
     argparser.add_argument("--results", 
         type=str, 
         default="aspect_sentiment_results", 
-        help="Filename (without extension) to write results to in the results/ directory (default: aspect_sentiment_results)"
+        help="Filename (without extension) to write results to in the results/model_eval/ directory (default: aspect_sentiment_results)"
     )
     argparser.add_argument("--load_weights_from", 
         type=str, 
@@ -163,7 +163,7 @@ def main():
         aspect_predictions, sentiment_predictions = model.aspect_sentiment_inference(list(map(lambda x: x.review.review, opinions)), batch_size=BATCH_SIZE)
 
         # Write results with accuracy and classification reports to file
-        results_path = f"./results/{args.results}.txt" if args.results else "./results/aspect_sentiment_results.txt"
+        results_path = f"./results/model_eval/{args.results}.txt" if args.results else "./results/model_eval/aspect_sentiment_results.txt"
 
         write_accuracy_and_classification_to_results_file(
             results_path,
@@ -183,7 +183,7 @@ def main():
 
         plt.title("Confusion Matrix for Aspect Classification (DistilBERT)")
         plt.tight_layout()
-        plt.savefig("./results/aspect_classification_confusion_matrix.png")
+        plt.savefig("./results/model_eval/aspect_classification_confusion_matrix.png")
 
         logger.info(f"Results written to {results_path}")
     else:

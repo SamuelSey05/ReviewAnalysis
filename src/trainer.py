@@ -153,6 +153,6 @@ def train_aspect_sentiment_extractor(
     logger.info("Training completed. Final loss: %.4f", total_loss)
 
     if plot_progress:
-        plot_losses(losses, output_path="./results/aspect_sentiment_training_loss_5_epochs.png")
-        plot_accuracies(aspect_accuracies, sentiment_accuracies, output_path="./results/aspect_sentiment_training_accuracies_5_epochs.png")
+        plot_losses(losses, output_path="./results/model_eval/aspect_sentiment_training_loss_5_epochs.png")
+        plot_accuracies(aspect_accuracies, sentiment_accuracies, output_path="./results/model_eval/aspect_sentiment_training_accuracies_5_epochs.png")
     

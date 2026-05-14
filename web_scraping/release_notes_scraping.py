@@ -266,10 +266,7 @@ def scrape_zoom():
 
     write_release_note_rows("datasets/zoom_release_notes.csv", "zoom", rows)
 
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
-
+def scrape_release_notes():
     scrape_slack()
     logger.info("Release notes scraped and saved to slack_release_notes.csv")
 
@@ -278,3 +275,7 @@ if __name__ == "__main__":
 
     scrape_zoom()
     logger.info("Release notes scraped and saved to zoom_release_notes.csv")
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
+    scrape_release_notes()

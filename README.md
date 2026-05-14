@@ -9,10 +9,10 @@ This repository implements Aspect Based Sentiment Analysis, and uses it to map u
 - `tests/`: Unit and integration tests.
 - `datasets/`: Directory holding training and review/release note datasets.
 - `resources/`: Directory holding list of aspect labels.
-- `results/`: Directory holding results from the experiments in my source code as well as incremental evaluations that dictated my decision making through my developmental Spiral approach. There are metric outputs from multiple iterations of the AspectSentimentExtractor, with the final output being in `aspect_sentiment_results.txt`.
+- `results/`: Directory holding results from the experiments in my source code as well as incremental evaluations that dictated my decision making through my developmental Spiral approach. There are metric outputs from multiple iterations of the AspectSentimentExtractor in `results/model_eval/`, with the final output being in `aspect_sentiment_results.txt`.
 - `web_scraping/`: Holds config and scripts for scraping of reviews and release notes
 - `model_entry.py`: Entrypoint for interaction with the model, including training and inference.
-- `release_notes_comparison_entry.py`: Main script for comparing release reviews and release notes across apps.
+- `release_notes_comparison.py`: Main script for comparing release reviews and release notes across apps.
 
 ## Setup
 
@@ -65,7 +65,7 @@ pip install -r requirements.txt
     To run the comparison script:
 
     ```bash
-    python release_notes_comparison_entry.py
+    python release_notes_comparison.py
     ```
 
     The same `--load_weights_from` flag can be used as with the model entry point. `--results_dir` can be set to point results at a particular directory. `--deduplicate_results` limits to 1 match per release note in results. `--use_sbert` switches the model to use SentenceBERT, which is used for model comparison in my extension.
@@ -76,7 +76,7 @@ Currently using Hugging Face without authentication, which works when only using
 
 ## Data Collection
 
-The AWARE dataset is ensured when training the model.
+The AWARE dataset is downloaded if needed when training the model.
 
 Reviews and release notes used in the comparison analysis are collected using scrapers in `web_scraping/`. The directory is laid out as follows:
 
@@ -84,7 +84,7 @@ Reviews and release notes used in the comparison analysis are collected using sc
 - `google_play_scraping.py`: Uses the `google-play-scraper` library to collect reviews.
 - `release_notes_scraping.py`: Uses `playwright` to render content and collect release notes.
 
-To carry out the scraping:
+To carry out the scraping (must be done before carrying out release note comparison):
 
 ```bash
 playwright install chromium
@@ -95,7 +95,7 @@ python web_scraping/release_notes_scraping.py
 
 ## Testing
 
-The suite uses `pytest` using the command:
+The suite uses `pytest` using the command from the project root:
 
 ```bash
 pytest

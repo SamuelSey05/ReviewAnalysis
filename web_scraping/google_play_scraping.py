@@ -77,9 +77,7 @@ def get_reviews(app_id: str, num_reviews: int = 10000, page_size: int = 1000, pe
     df["content"] = df["content"].fillna("").map(normalise_text)
     return df
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
-
+def scrape_reviews():
     apps_df = pd.read_csv("web_scraping/apps.csv")
 
     for _, app_row in apps_df.iterrows():
@@ -94,3 +92,7 @@ if __name__ == "__main__":
         output_file = Path("datasets") / f"{app_name.lower()}_reviews.csv"
         df.to_csv(output_file, columns=REVIEW_COLUMNS, index=False)
         logger.info("Saved %d reviews to %s", len(df), output_file)
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
+    scrape_reviews()

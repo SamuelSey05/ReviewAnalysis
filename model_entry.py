@@ -142,6 +142,7 @@ def main():
         )
         
         logger.info("Saving aspect sentiment extractor model...")
+        os.makedirs("./models", exist_ok=True)
         torch.save(model.state_dict(), "./models/aspect_sentiment_extractor.pth")
         logger.info("Model saved to ./models/aspect_sentiment_extractor.pth")
     else:
